@@ -1,25 +1,26 @@
 "use client";
-import { StatementType, StatementTypes } from "@/types/Statement";
+import {
+  StatementType,
+  StatementTypes,
+  UploadStatementPayload,
+  UploadStatementResponse,
+} from "@/types/Statement";
 import { useForm } from "react-hook-form";
 import FormError from "../Form/FormError";
 import { useState } from "react";
+import StatementService from "@/services/StatementService";
+import { AxiosError } from "axios";
+import Alert from "../Control/Alert";
 
 type UploadFormState = {
   file?: FileList | null;
   type: StatementType;
 };
 
-type UploadFormPayload = {
-  type: StatementType;
-  file: File;
-};
-type SuccessPayload = {
-  message: string;
-};
 type UploadFormProps = {
   initialState?: Partial<UploadFormState>;
-  onSubmit?: (data: UploadFormPayload) => Promise<void>;
-  onSuccess?: (data: SuccessPayload) => void;
+  onSubmit?: (data: UploadStatementPayload) => Promise<UploadStatementResponse>;
+  onSuccess?: (data: UploadStatementResponse) => void;
 };
 
 const uploadTypes = Object.values(StatementTypes) as StatementType[];
@@ -46,11 +47,50 @@ export default function UploadForm(props: UploadFormProps) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formAlert, setFormAlert] = useState({
+    success: false,
+    message: "",
+  });
+
+  const clearFormAlert = () => {
+    setFormAlert({ success: false, message: "" });
+  };
 
   const onSubmitForm = () => {
     return handleSubmit(async (data) => {
+      const submitMethod = props.onSubmit
+        ? props.onSubmit
+        : StatementService.uploadStatement;
+      const successMethod = props.onSuccess
+        ? props.onSuccess
+        : (response: UploadStatementResponse) => {
+            setFormAlert(response);
+          };
+
       setIsSubmitting(true);
-      console.log("got data", data);
+
+      clearFormAlert();
+
+      try {
+        const response = await submitMethod({
+          type: data.type!,
+          file: data.file?.[0]!,
+        });
+
+        successMethod(response);
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setFormAlert({
+            success: false,
+            message: err.response?.data?.message || err.message,
+          });
+        } else if (err instanceof Error) {
+          setFormAlert({
+            success: false,
+            message: err.message,
+          });
+        }
+      }
 
       setIsSubmitting(false);
     });
@@ -111,6 +151,14 @@ export default function UploadForm(props: UploadFormProps) {
             {isSubmitting ? "Uploading..." : "Upload"}
           </button>
         </div>
+
+        {formAlert.message.length && (
+          <div className="mt-4">
+            <Alert style={formAlert.success ? "success" : "error"}>
+              {formAlert.message}
+            </Alert>
+          </div>
+        )}
       </form>
     </div>
   );

@@ -3,3 +3,13 @@ export enum StatementTypes {
   venmo = "venmo",
 }
 export type StatementType = keyof typeof StatementTypes;
+
+export type UploadStatementPayload = {
+  type: StatementType;
+  file: File;
+};
+
+export type UploadStatementResponse = {
+  message: string;
+  success: boolean;
+};

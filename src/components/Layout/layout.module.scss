@@ -1,0 +1,16 @@
+.layout {
+    color: #eee;
+
+    &--account {
+        color: #333;
+    }
+}
+
+.navLink {
+    border-bottom: solid 1px transparent;
+
+    &[data-active="true"] {
+        border-bottom: solid 1px #2587b7;
+        color: #2587b7;
+    }
+}

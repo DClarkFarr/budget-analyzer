@@ -7,7 +7,6 @@ export default async function AccountLayoutWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  console.log("account layout wants session");
   const user = await getSessionUser();
 
   if (!user?.id) {

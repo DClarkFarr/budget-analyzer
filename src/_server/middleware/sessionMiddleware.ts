@@ -6,15 +6,14 @@ import {
 } from "@/server/methods/session";
 import { User } from "@/types/User";
 
-export const hasSessionMiddleware: MiddlewareCallback<
-  IronSessionRequest
-> = async (req, res, next) => {
-  const session = await getIronSessionInstance();
+export const hasSessionMiddleware: () => MiddlewareCallback<IronSessionRequest> =
+  () => async (req, res, next) => {
+    const session = await getIronSessionInstance();
 
-  Object.assign(req, { session });
+    Object.assign(req, { session });
 
-  next();
-};
+    next();
+  };
 
 export const hasUserMiddleware: (
   role?: User["role"]

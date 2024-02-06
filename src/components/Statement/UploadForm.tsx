@@ -152,7 +152,7 @@ export default function UploadForm(props: UploadFormProps) {
           </button>
         </div>
 
-        {formAlert.message.length && (
+        {formAlert.message.length > 0 && (
           <div className="mt-4">
             <Alert style={formAlert.success ? "success" : "error"}>
               {formAlert.message}

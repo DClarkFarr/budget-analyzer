@@ -1,76 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export type MiddlewareCallback<A extends NextRequest = NextRequest> = <
-    B extends object
+  B extends object
 >(
-    req: A,
-    res: B,
-    next: (data?: any) => void
+  req: A,
+  res: B,
+  next: (data?: any) => void
 ) => void;
 
 export type FinalCallback<A extends NextRequest = NextRequest> = (
-    req: A,
-    res: any
+  req: A,
+  res: any
 ) => Promise<NextResponse>;
 
 type ConvertHandlerArray<HS extends Array<MiddlewareCallback<any>>> = {
-    [K in keyof HS]: HS[K] extends MiddlewareCallback<infer A> ? A : never;
+  [K in keyof HS]: HS[K] extends MiddlewareCallback<infer A> ? A : never;
 };
 
 export default function chainMiddleware<
-    FS extends Array<MiddlewareCallback<any>>,
-    FCR extends ConvertHandlerArray<FS>[number]
+  FS extends Array<MiddlewareCallback<any>>,
+  FCR extends ConvertHandlerArray<FS>[number]
 >(callbacks: FS, finalCallback: FinalCallback<FCR>) {
-    let responseData: any;
+  let responseData: any;
 
-    const cycleCallback = async <A extends NextRequest, B extends object>(
-        creq: A,
-        cres: B,
-        handler: MiddlewareCallback<A>
-    ) => {
-        await new Promise((resolve) => {
-            const next = (data?: any) => {
-                if (responseData !== undefined) {
-                    responseData = data;
-                }
-                resolve(1);
-            };
-
-            handler(creq, cres, next);
-        });
-
-        return [creq, cres] as const;
-    };
-
-    return async (req: NextRequest, res: NextResponse) => {
-        let activeReq = req,
-            activeRes = res;
-
-        if (callbacks.length) {
-            for (let callback of callbacks) {
-                if (responseData !== undefined) {
-                    break;
-                }
-                [activeReq, activeRes] = await cycleCallback(
-                    activeReq,
-                    activeRes,
-                    callback
-                );
-            }
-        }
-
+  const cycleCallback = async <A extends NextRequest, B extends object>(
+    creq: A,
+    cres: B,
+    handler: MiddlewareCallback<A>
+  ) => {
+    await new Promise((resolve) => {
+      const next = (data?: any) => {
         if (responseData !== undefined) {
-            if (responseData instanceof Error) {
-                return NextResponse.json(
-                    { message: responseData.message },
-                    { status: 410 }
-                );
-            }
-            return NextResponse.json(responseData, { status: 410 });
+          responseData = data;
         }
+        resolve(1);
+      };
 
-        return finalCallback(activeReq as FCR, activeRes);
-    };
+      handler(creq, cres, next);
+    });
+
+    return [creq, cres] as const;
+  };
+
+  return async (req: NextRequest, res: NextResponse) => {
+    let activeReq = req,
+      activeRes = res;
+
+    if (callbacks.length) {
+      for (let callback of callbacks) {
+        if (responseData !== undefined) {
+          break;
+        }
+        [activeReq, activeRes] = await cycleCallback(
+          activeReq,
+          activeRes,
+          callback
+        );
+      }
+    }
+
+    if (responseData !== undefined) {
+      if (responseData instanceof Error) {
+        return NextResponse.json(
+          { message: responseData.message },
+          { status: 410 }
+        );
+      }
+      return NextResponse.json(responseData, { status: 410 });
+    }
+
+    return finalCallback(activeReq as FCR, activeRes);
+  };
 }
 
 /*

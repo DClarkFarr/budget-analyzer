@@ -1,7 +1,12 @@
+"use client";
+import useAccountsQuery from "@/hooks/useAccountsQuery";
 import { User } from "@/types/User";
 import Link from "next/link";
 
-export default async function AccountList({ user }: { user: User }) {
+export default function AccountList({ user }: { user: User }) {
+  const accountQuery = useAccountsQuery(user.id);
+  console.log("accounts was", accountQuery.accounts);
+
   return (
     <div className="account__list">
       <div className="flex w-full items-center mb-4">

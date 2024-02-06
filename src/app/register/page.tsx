@@ -21,7 +21,9 @@ export default async function RegisterPage() {
   return (
     <LoginLayout>
       <div className="register-page">
-        <h1 className="mb-3 text-lg font-bold">Create a "free" account</h1>
+        <h1 className="mb-3 text-lg font-bold">
+          Create a &quote;free&quote; account
+        </h1>
         <RegisterForm redirect={"/dashboard"} />
       </div>
     </LoginLayout>

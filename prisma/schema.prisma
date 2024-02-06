@@ -16,10 +16,22 @@ model User {
     role     ROLES     @default(user)
     name     String
     password String
+
+    accounts Account[]
 }
 
 
 enum ROLES {
     admin
     user
+}
+
+model Account {
+    id          Int      @id @default(autoincrement())
+    userId      Int
+    name        String
+    color       String
+    createdAt   DateTime @default(now())
+    
+    user   User     @relation(fields: [userId], references: [id])
 }

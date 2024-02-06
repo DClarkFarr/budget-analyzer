@@ -30,7 +30,7 @@ export default function chainMiddleware<
   ) => {
     await new Promise((resolve) => {
       const next = (data?: any) => {
-        if (responseData !== undefined) {
+        if (responseData === undefined) {
           responseData = data;
         }
         resolve(1);

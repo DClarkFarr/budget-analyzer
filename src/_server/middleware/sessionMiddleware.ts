@@ -6,7 +6,7 @@ import {
 } from "@/server/methods/session";
 import { User } from "@/types/User";
 
-export const hasSessionMiddleware: () => MiddlewareCallback<IronSessionRequest> =
+export const startSessionMiddleware: () => MiddlewareCallback<IronSessionRequest> =
   () => async (req, res, next) => {
     const session = await getIronSessionInstance();
 
@@ -20,10 +20,12 @@ export const hasUserMiddleware: (
 ) => MiddlewareCallback<IronSessionRequestUser> =
   (role) => async (req, res, next) => {
     if (!req.session) {
+      console.log("throwing no session");
       return next(new Error("No session"));
     }
 
     if (!req.session.user) {
+      console.log("throwing no user");
       return next(new Error("No user"));
     }
 

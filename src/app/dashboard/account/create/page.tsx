@@ -1,3 +1,4 @@
+import AccountFormCreate from "@/components/Account/AccountFormCreate";
 import { getSessionUser } from "@/server/actions/sessionActions";
 
 export default async function CreateAccountPage() {
@@ -10,6 +11,8 @@ export default async function CreateAccountPage() {
         You can put all your banks into a single account. Or you can create an
         account for each bank account. Up to you.
       </p>
+
+      <AccountFormCreate />
     </div>
   );
 }

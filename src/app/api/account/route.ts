@@ -4,8 +4,33 @@ import {
   startSessionMiddleware,
   hasUserMiddleware,
 } from "@/server/middleware/sessionMiddleware";
-import { createAccount } from "@/server/prisma/methods/account";
+import {
+  createAccount,
+  getUserAccounts,
+} from "@/server/prisma/methods/account";
 import { NextResponse } from "next/server";
+
+export const GET = chainMiddleware(
+  [startSessionMiddleware(), hasUserMiddleware()],
+  async (req, res) => {
+    try {
+      const accounts = await getUserAccounts(req.session.user.id);
+
+      return NextResponse.json(accounts);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log("caught error creating account", err);
+
+        return NextResponse.json(
+          { message: "An error occurred", error: err?.message },
+          { status: 500 }
+        );
+      }
+    }
+
+    return NextResponse.json({ message: "Unknown error" }, { status: 500 });
+  }
+);
 
 export const POST = chainMiddleware(
   [startSessionMiddleware(), hasUserMiddleware()],

@@ -3,6 +3,13 @@ import { AccountFormState } from "@/types/Account";
 import { prisma } from "../index";
 import { Account } from "@prisma/client";
 
+export async function getUserAccounts(userId: number) {
+  return prisma.account.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+  });
+}
+
 export async function createAccount(userId: number, data: AccountFormState) {
   if (!data.name || data.name.length < 3) {
     throw new UserError("Name is required");

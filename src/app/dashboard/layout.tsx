@@ -1,8 +1,8 @@
 import { getSessionUser } from "@/server/actions/sessionActions";
-import AccountLayout from "@/components/Layout/AccountLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { redirect } from "next/navigation";
 
-export default async function AccountLayoutWrapper({
+export default async function DashboardLayoutWrapper({
   children,
 }: {
   children: React.ReactNode;
@@ -13,5 +13,5 @@ export default async function AccountLayoutWrapper({
     return redirect("/login?not=authorized");
   }
 
-  return <AccountLayout user={user}>{children}</AccountLayout>;
+  return <DashboardLayout user={user}>{children}</DashboardLayout>;
 }

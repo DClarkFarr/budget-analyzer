@@ -16,8 +16,8 @@ export default function HomeHeader({ user }: { user?: User }) {
       {!!user?.id && (
         <>
           <div className="ml-auto">
-            <Link href="/account" className="btn bg-sky-700">
-              My Account
+            <Link href="/dashboard" className="btn bg-sky-700">
+              Dashboard
             </Link>
           </div>
           <div onClick={onClickLogout}>

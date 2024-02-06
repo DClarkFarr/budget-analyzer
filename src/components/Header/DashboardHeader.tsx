@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import styles from "@/components/Layout/layout.module.scss";
 import { destroySession } from "@/_server/actions/sessionActions";
 
-export default function AccountHeader({ user }: { user: User }) {
+export default function DashboardHeader({ user }: { user: User }) {
   const onClickLogout = async () => {
     destroySession();
   };
@@ -34,7 +34,7 @@ export default function AccountHeader({ user }: { user: User }) {
 
         <div className="ml-auto">Welcome, {user.name}</div>
         <div className="">
-          <Link {...bindLink("/account")}>Dashboard</Link>
+          <Link {...bindLink("/dashboard")}>Dashboard</Link>
         </div>
         <div onClick={onClickLogout}>
           <button className="btn-link text-sky-700">Logout</button>

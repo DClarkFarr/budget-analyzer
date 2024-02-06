@@ -29,8 +29,8 @@ export default async function Home() {
         <div>
           {!!user?.id && (
             <>
-              <Link href="/account" className="btn bg-sky-700">
-                My Account
+              <Link href="/dashboard" className="btn bg-sky-700">
+                Dashboard
               </Link>
             </>
           )}

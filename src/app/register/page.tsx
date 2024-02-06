@@ -15,14 +15,14 @@ export default async function RegisterPage() {
   const session = await getIronSessionInstance();
 
   if (session.user?.id) {
-    return redirect("/account");
+    return redirect("/dashboard");
   }
 
   return (
     <LoginLayout>
       <div className="register-page">
         <h1 className="mb-3 text-lg font-bold">Create a "free" account</h1>
-        <RegisterForm redirect={"/account"} />
+        <RegisterForm redirect={"/dashboard"} />
       </div>
     </LoginLayout>
   );

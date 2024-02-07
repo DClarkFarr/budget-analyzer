@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef, useState, useTransition } from "react";
 
 import "./TabsView.scss";
 
@@ -17,11 +17,11 @@ export default function TabsView({
   activeTab?: string;
   onTabChange?: (tab: string) => void;
 }) {
-  const internalActiveTab = useRef(activeTab || tabs[0].key);
+  const [internalActiveTab, setActiveTab] = useState(activeTab || tabs[0].key);
 
   useEffect(() => {
     if (activeTab) {
-      internalActiveTab.current = activeTab;
+      setActiveTab(activeTab);
     }
   }, [activeTab]);
 
@@ -29,9 +29,23 @@ export default function TabsView({
     if (typeof onTabChange === "function") {
       onTabChange(tab);
     } else {
-      internalActiveTab.current = tab;
+      setActiveTab(tab);
     }
   };
+
+  const activeTabContent = useRef<React.ReactNode>(
+    tabs.find((tab) => tab.key === internalActiveTab)?.pane
+  );
+
+  const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    startTransition(() => {
+      activeTabContent.current = tabs.find(
+        (tab) => tab.key === internalActiveTab
+      )?.pane;
+    });
+  }, [internalActiveTab, tabs]);
 
   return (
     <div className="tabs-view">
@@ -40,7 +54,7 @@ export default function TabsView({
           <div
             key={tab.key}
             className={`tabs-view__tab p-2 pb-1 rounded-t-lg cursor-pointer ${
-              internalActiveTab.current === tab.key ? "active" : ""
+              internalActiveTab === tab.key ? "active" : ""
             }`}
             onClick={() => handleTabChange(tab.key)}
           >
@@ -48,9 +62,7 @@ export default function TabsView({
           </div>
         ))}
       </div>
-      <div className="tabs-view__content p-4">
-        {tabs.find((tab) => tab.key === internalActiveTab.current)?.pane}
-      </div>
+      <div className="tabs-view__content p-4">{activeTabContent.current}</div>
     </div>
   );
 }

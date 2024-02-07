@@ -4,6 +4,7 @@ import useAccountQuery from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
 import TransactionsTable from "../Statement/TransactionsTable";
 import TabsView, { Tab } from "../Control/TabsView";
+import StatementTransactionRange from "../Statement/StatementTransactionRange";
 
 export default function AccountDashboard({
   user,
@@ -15,6 +16,11 @@ export default function AccountDashboard({
   const { account, transactions, isLoading } = useAccountQuery(accountId);
 
   const tabs: Tab[] = [
+    {
+      label: "Range",
+      key: "statement",
+      pane: <StatementTransactionRange transactions={transactions} />,
+    },
     {
       label: "Transactions",
       key: "transactions",

@@ -1,11 +1,12 @@
 import { ProcessedTransaction } from "@/types/Account/Transaction";
 import { prisma } from "../index";
-import { StatementType } from "@/types/Statement";
 
-export async function getAccountStatements({}: {
-  accountId: number;
-  userId: number;
-}) {}
+export async function getAccountTransactions(accountId: number) {
+  return prisma.accountTransaction.findMany({
+    where: { accountId },
+    orderBy: { date: "desc" },
+  });
+}
 
 export async function insertTransaction(
   userId: number,

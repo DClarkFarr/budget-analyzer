@@ -45,6 +45,17 @@
     }
   }
 
+  .table--sm {
+    th,
+    td {
+      @apply p-3 pl-5;
+    }
+  }
+
+  .table--striped tr:nth-child(odd) td {
+    @apply bg-slate-100;
+  }
+
   .btn-primary {
     @apply text-white bg-sky-700 hover:bg-sky-900 disabled:bg-gray-500;
   }

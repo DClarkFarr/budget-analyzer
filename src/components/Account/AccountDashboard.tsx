@@ -2,6 +2,7 @@
 
 import useAccountQuery from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
+import TransactionsTable from "../Statement/TransactionsTable";
 
 export default function AccountDashboard({
   user,
@@ -10,7 +11,7 @@ export default function AccountDashboard({
   user: User;
   accountId: number;
 }) {
-  const { accountData, isLoading } = useAccountQuery(accountId);
+  const { account, transactions, isLoading } = useAccountQuery(accountId);
 
   return (
     <div className="account-dashboard">
@@ -20,11 +21,13 @@ export default function AccountDashboard({
           Loading...
         </div>
       )}
-      {!isLoading && accountData && (
+      {!isLoading && account && (
         <>
           <p className="lead text-lg mb-4 text-gray-600">
-            Account Name: {accountData.name}
+            Account Name: {account.name}
           </p>
+
+          <TransactionsTable transactions={transactions} />
         </>
       )}
     </div>

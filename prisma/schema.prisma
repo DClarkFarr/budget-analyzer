@@ -48,6 +48,7 @@ model AccountTransaction {
     bankType        BANK_TYPE
     amount          Decimal @db.Decimal(10, 2)
     description     String
+    date            DateTime
     createdAt       DateTime @default(now())
     hash            String   @unique
 

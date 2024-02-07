@@ -69,7 +69,14 @@ export default function UploadForm(props: UploadFormProps) {
       const successMethod = props.onSuccess
         ? props.onSuccess
         : (response: UploadStatementResponse) => {
-            setFormAlert(response);
+            setFormAlert({
+              success: true,
+              message:
+                response.message +
+                ` Created rows: ${response.created || 0}, skipped rows: ${
+                  response.skipped || 0
+                }`,
+            });
           };
 
       setIsSubmitting(true);

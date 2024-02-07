@@ -11,5 +11,6 @@ export type UploadStatementPayload = {
 
 export type UploadStatementResponse = {
   message: string;
-  success: boolean;
+  created: number;
+  skipped: number;
 };

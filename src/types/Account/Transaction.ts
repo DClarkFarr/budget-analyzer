@@ -1,3 +1,5 @@
+import { StatementType } from "../Statement";
+
 export enum EXPENSE_TYPES {
   "incoming" = "incoming",
   "outgoing" = "outgoing",
@@ -9,6 +11,7 @@ export type Transaction = {
   id: number;
   accountId: number;
   userId: number;
+  bankType: StatementType;
   expenseType: ExpenseType;
   amount: number;
   description: string;
@@ -16,3 +19,7 @@ export type Transaction = {
   createdAt: string;
   hash: string;
 };
+export type ProcessedTransaction = Omit<
+  Transaction,
+  "id" | "accountId" | "userId" | "createdAt"
+>;

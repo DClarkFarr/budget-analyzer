@@ -8,4 +8,7 @@ export default class AccountService {
   static list() {
     return webApi.get<Account[]>("/account").then((res) => res.data);
   }
+  static get(accountId: number) {
+    return webApi.get<Account>(`/account/${accountId}`).then((res) => res.data);
+  }
 }

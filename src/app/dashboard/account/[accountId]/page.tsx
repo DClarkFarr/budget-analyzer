@@ -1,4 +1,5 @@
 import AccountDashboard from "@/components/Account/AccountDashboard";
+import DashboardNavTabs from "@/components/Dashboard/DashboardNavTabs";
 import { getSessionUser } from "@/server/actions/sessionActions";
 
 export default async function CreateAccountPage({
@@ -10,6 +11,7 @@ export default async function CreateAccountPage({
 
   return (
     <div className="account-dashboard__page">
+      <DashboardNavTabs />
       <AccountDashboard user={user} accountId={parseInt(params.accountId)} />
     </div>
   );

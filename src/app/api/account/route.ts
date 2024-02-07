@@ -10,9 +10,14 @@ import {
 } from "@/server/prisma/account.methods";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * Get all accounts for the user
+ */
 export const GET = chainMiddleware(
   [startSessionMiddleware(), hasUserMiddleware()],
-  async (req, res) => {
+  async (req) => {
     try {
       const accounts = await getUserAccounts(req.session.user.id);
 
@@ -32,9 +37,12 @@ export const GET = chainMiddleware(
   }
 );
 
+/**
+ * Create a new account for the user
+ */
 export const POST = chainMiddleware(
   [startSessionMiddleware(), hasUserMiddleware()],
-  async (req, res) => {
+  async (req) => {
     try {
       const { name, color } = await req.json();
 

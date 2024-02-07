@@ -4,14 +4,13 @@ export type MiddlewareCallback<A extends NextRequest = NextRequest> = <
   B extends object
 >(
   req: A,
-  res: B,
+  extra: B,
   next: (data?: any) => void
 ) => void;
 
 export type FinalCallback<A extends NextRequest = NextRequest> = (
   req: A,
-  res: any,
-  extra?: any
+  extra: any
 ) => Promise<NextResponse>;
 
 type ConvertHandlerArray<HS extends Array<MiddlewareCallback<any>>> = {
@@ -26,8 +25,8 @@ export default function chainMiddleware<
   let responseData: any;
 
   const cycleCallback = async <A extends NextRequest, B extends object>(
-    creq: A,
-    cres: B,
+    cRes: A,
+    cExtra: B,
     handler: MiddlewareCallback<A>
   ) => {
     await new Promise((resolve) => {
@@ -38,24 +37,24 @@ export default function chainMiddleware<
         resolve(1);
       };
 
-      handler(creq, cres, next);
+      handler(cRes, cExtra, next);
     });
 
-    return [creq, cres] as const;
+    return [cRes, cExtra] as const;
   };
 
-  return async (req: NextRequest, res: NextResponse, extra: O) => {
+  return async (req: NextRequest, extra: O) => {
     let activeReq = req,
-      activeRes = res;
+      activeExtra = extra;
 
     if (callbacks.length) {
       for (let callback of callbacks) {
         if (responseData !== undefined) {
           break;
         }
-        [activeReq, activeRes] = await cycleCallback(
+        [activeReq, activeExtra] = await cycleCallback(
           activeReq,
-          activeRes,
+          activeExtra,
           callback
         );
       }
@@ -71,7 +70,7 @@ export default function chainMiddleware<
       return NextResponse.json(responseData, { status: 410 });
     }
 
-    return finalCallback(activeReq as FCR, activeRes, extra);
+    return finalCallback(activeReq as FCR, activeExtra);
   };
 }
 
@@ -93,8 +92,6 @@ const testChain1 = [
 ];
 
 const chained1 = chainMiddleware(testChain1, (req, res) => {
-    console.log("got req", req);
-
     return NextResponse.json({ message: "ok" });
 });
 
@@ -117,8 +114,6 @@ const chained2 = chainMiddleware(
         >,
     ],
     (req, res) => {
-        console.log("got req", req);
-
         return NextResponse.json({ message: "ok" });
     }
 );

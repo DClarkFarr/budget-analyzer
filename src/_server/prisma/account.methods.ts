@@ -11,7 +11,7 @@ export async function getUserAccounts(userId: number) {
 }
 
 export async function getUserAccount(userId: number, accountId: number) {
-  return prisma.account.findUnique({ where: { id: accountId, userId } });
+  return prisma.account.findFirst({ where: { id: accountId, userId } });
 }
 
 export async function createAccount(userId: number, data: AccountFormState) {

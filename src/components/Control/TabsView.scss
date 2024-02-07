@@ -1,0 +1,20 @@
+.tabs-view {
+  &__tab {
+    background: #fefefe;
+    border: 1px solid #e0e0e0;
+    border-bottom: transparent;
+    color: #999;
+
+    &:hover {
+      background: #f0f0f0;
+      color: #555;
+      background-color: #aaa;
+    }
+
+    &.active {
+      background: #fff;
+      border-color: #13579c;
+      color: #13579c;
+    }
+  }
+}

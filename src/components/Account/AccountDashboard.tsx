@@ -3,6 +3,7 @@
 import useAccountQuery from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
 import TransactionsTable from "../Statement/TransactionsTable";
+import TabsView, { Tab } from "../Control/TabsView";
 
 export default function AccountDashboard({
   user,
@@ -12,6 +13,14 @@ export default function AccountDashboard({
   accountId: number;
 }) {
   const { account, transactions, isLoading } = useAccountQuery(accountId);
+
+  const tabs: Tab[] = [
+    {
+      label: "Transactions",
+      key: "transactions",
+      pane: <TransactionsTable transactions={transactions} />,
+    },
+  ];
 
   return (
     <div className="account-dashboard">
@@ -27,7 +36,7 @@ export default function AccountDashboard({
             Account Name: {account.name}
           </p>
 
-          <TransactionsTable transactions={transactions} />
+          <TabsView tabs={tabs} />
         </>
       )}
     </div>

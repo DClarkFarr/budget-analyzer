@@ -17,7 +17,8 @@ model User {
     name     String
     password String
 
-    accounts Account[]
+    accounts        Account[]
+    transactions    AccountTransaction[]
 }
 
 
@@ -32,6 +33,38 @@ model Account {
     name        String
     color       String
     createdAt   DateTime @default(now())
+
+    @@index([userId])
     
-    user   User     @relation(fields: [userId], references: [id])
+    user            User     @relation(fields: [userId], references: [id])
+    transactions    AccountTransaction[]
+}
+
+model AccountTransaction {
+    id              Int      @id @default(autoincrement())
+    accountId       Int
+    userId          Int
+    expenseType     TRANSACTION_TYPE
+    bankType        BANK_TYPE
+    amount          Decimal @db.Decimal(10, 2)
+    description     String
+    createdAt       DateTime @default(now())
+    hash            String   @unique
+
+    @@index([accountId])
+    @@index([userId])
+    @@index([accountId, userId])
+
+    account         Account @relation(fields: [accountId], references: [id])
+    user            User    @relation(fields: [userId], references: [id])
+}
+
+enum TRANSACTION_TYPE {
+    incoming
+    outgoing
+}
+
+enum BANK_TYPE {
+    wells_fargo
+    venmo
 }

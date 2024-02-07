@@ -1,6 +1,6 @@
 import UserError from "@/server/exceptions/UserException";
 import { AccountFormState } from "@/types/Account";
-import { prisma } from "../index";
+import { prisma } from "./index";
 import { Account } from "@prisma/client";
 
 export async function getUserAccounts(userId: number) {
@@ -8,6 +8,10 @@ export async function getUserAccounts(userId: number) {
     where: { userId },
     orderBy: { name: "asc" },
   });
+}
+
+export async function getUserAccount(userId: number, accountId: number) {
+  return prisma.account.findUnique({ where: { id: accountId, userId } });
 }
 
 export async function createAccount(userId: number, data: AccountFormState) {

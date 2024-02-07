@@ -2,7 +2,7 @@
 
 import { User } from ".prisma/client";
 import { getIronSessionInstance } from "@/server/methods/session";
-import { findUserById } from "@/server/prisma/methods/user";
+import { findUserById } from "@/server/prisma/user.methods";
 
 export const initializeSession = async (user: User) => {
   const session = await getIronSessionInstance();

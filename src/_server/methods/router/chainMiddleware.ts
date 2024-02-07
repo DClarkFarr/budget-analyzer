@@ -10,7 +10,8 @@ export type MiddlewareCallback<A extends NextRequest = NextRequest> = <
 
 export type FinalCallback<A extends NextRequest = NextRequest> = (
   req: A,
-  res: any
+  res: any,
+  extra?: any
 ) => Promise<NextResponse>;
 
 type ConvertHandlerArray<HS extends Array<MiddlewareCallback<any>>> = {
@@ -19,7 +20,8 @@ type ConvertHandlerArray<HS extends Array<MiddlewareCallback<any>>> = {
 
 export default function chainMiddleware<
   FS extends Array<MiddlewareCallback<any>>,
-  FCR extends ConvertHandlerArray<FS>[number]
+  FCR extends ConvertHandlerArray<FS>[number],
+  O extends object
 >(callbacks: FS, finalCallback: FinalCallback<FCR>) {
   let responseData: any;
 
@@ -42,7 +44,7 @@ export default function chainMiddleware<
     return [creq, cres] as const;
   };
 
-  return async (req: NextRequest, res: NextResponse) => {
+  return async (req: NextRequest, res: NextResponse, extra: O) => {
     let activeReq = req,
       activeRes = res;
 
@@ -69,7 +71,7 @@ export default function chainMiddleware<
       return NextResponse.json(responseData, { status: 410 });
     }
 
-    return finalCallback(activeReq as FCR, activeRes);
+    return finalCallback(activeReq as FCR, activeRes, extra);
   };
 }
 

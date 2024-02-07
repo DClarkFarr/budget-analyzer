@@ -7,7 +7,7 @@ import {
 import {
   createAccount,
   getUserAccounts,
-} from "@/server/prisma/methods/account";
+} from "@/server/prisma/account.methods";
 import { NextResponse } from "next/server";
 
 export const GET = chainMiddleware(

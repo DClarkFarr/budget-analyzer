@@ -1,4 +1,4 @@
-import { loginUser, registerUser } from "@/server/prisma/methods/user";
+import { loginUser, registerUser } from "@/server/prisma/user.methods";
 import { NextRequest, NextResponse } from "next/server";
 import {
   getSessionUser,

@@ -7,6 +7,12 @@ export const dynamic = "force-dynamic";
 /**
  * Upload a statement csv file
  */
-export const POST = chainMiddleware([hasUserMiddleware()], async (req, res) => {
-  return NextResponse.json({ message: "What upload?" }, { status: 200 });
-});
+export const POST = chainMiddleware(
+  [hasUserMiddleware()],
+  async (req, res, { params }: { params: { accountId: string } }) => {
+    return NextResponse.json(
+      { message: "What upload?", accountId: params.accountId },
+      { status: 200 }
+    );
+  }
+);

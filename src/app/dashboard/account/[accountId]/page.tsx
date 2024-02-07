@@ -11,7 +11,7 @@ export default async function CreateAccountPage({
 
   return (
     <div className="account-dashboard__page">
-      <DashboardNavTabs />
+      <DashboardNavTabs accountId={parseInt(params.accountId)} />
       <AccountDashboard user={user} accountId={parseInt(params.accountId)} />
     </div>
   );

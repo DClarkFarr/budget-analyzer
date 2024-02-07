@@ -28,11 +28,18 @@ function Tab({
   );
 }
 
-export default function DashboardNavTabs() {
+export default function DashboardNavTabs({ accountId }: { accountId: number }) {
   return (
     <div className="dashboard__tabs flex gap-x-2 justify-end w-full mb-4">
-      <Tab href="/dashboard" text="Accounts" strict />
-      <Tab href="/dashboard/upload" text="Upload Bank Statement" />
+      <Tab
+        href={`/dashboard/account/${accountId}`}
+        text="Account Dashboard"
+        strict
+      />
+      <Tab
+        href={`/dashboard/account/${accountId}/upload`}
+        text="Upload Bank Statement"
+      />
     </div>
   );
 }

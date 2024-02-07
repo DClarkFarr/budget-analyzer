@@ -18,12 +18,17 @@ type UploadFormState = {
 };
 
 type UploadFormProps = {
+  accountId: number;
   initialState?: Partial<UploadFormState>;
-  onSubmit?: (data: UploadStatementPayload) => Promise<UploadStatementResponse>;
+  onSubmit?: (
+    accountId: number,
+    data: UploadStatementPayload
+  ) => Promise<UploadStatementResponse>;
   onSuccess?: (data: UploadStatementResponse) => void;
 };
 
 const uploadTypes = Object.values(StatementTypes) as StatementType[];
+
 const uploadOptions = uploadTypes.map((type) => {
   const map = {
     wells_fargo: "Wells Fargo",
@@ -35,11 +40,11 @@ const uploadOptions = uploadTypes.map((type) => {
     value: type,
   };
 });
+
 export default function UploadForm(props: UploadFormProps) {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isValid },
   } = useForm({
     mode: "onChange",
@@ -72,7 +77,7 @@ export default function UploadForm(props: UploadFormProps) {
       clearFormAlert();
 
       try {
-        const response = await submitMethod({
+        const response = await submitMethod(props.accountId, {
           type: data.type!,
           file: data.file?.[0]!,
         });

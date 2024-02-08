@@ -102,6 +102,17 @@ export default function TransactionsTable({
     });
   }, [filterTransactions, searchText, hideIncoming, hideOutgoing]);
 
+  const totals = useMemo(() => {
+    return filteredTransactions.current.reduce(
+      (acc, t) => {
+        acc[t.expenseType] += t.amount;
+        acc.net += t.expenseType === "incoming" ? t.amount : -t.amount;
+        return acc;
+      },
+      { incoming: 0, outgoing: 0, net: 0 }
+    );
+  }, [filteredTransactions.current]);
+
   const toggleHideIncoming = () => {
     setHideIncoming(!hideIncoming);
   };
@@ -149,8 +160,23 @@ export default function TransactionsTable({
           </div>
         </div>
         <div>
-          Showing {filteredTransactions.current.length} of{" "}
-          {formattedTransactions.length} transactions
+          <div>
+            Showing {filteredTransactions.current.length} of{" "}
+            {formattedTransactions.length} transactions
+          </div>
+          <div>
+            <span className="text-green-600">
+              {formatCurrency(totals.incoming)} Incoming
+            </span>
+            ,{" "}
+            <span className="text-red-600">
+              {formatCurrency(totals.outgoing)} Outgoing
+            </span>
+            ,{" "}
+            <span className={`text-${totals.net >= 0 ? "green" : "red"}-600`}>
+              {formatCurrency(totals.net)} Net
+            </span>
+          </div>
         </div>
       </div>
       <div className="transactions">

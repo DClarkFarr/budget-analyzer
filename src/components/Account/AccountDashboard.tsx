@@ -5,6 +5,7 @@ import { User } from "@/types/User";
 import TransactionsTable from "../Statement/TransactionsTable";
 import TabsView, { Tab } from "../Control/TabsView";
 import StatementTransactionRange from "../Statement/StatementTransactionRange";
+import CategoryList from "./CategoryList";
 
 export default function AccountDashboard({
   user,
@@ -14,6 +15,9 @@ export default function AccountDashboard({
   accountId: number;
 }) {
   const { account, transactions, isLoading } = useAccountQuery(accountId);
+
+  // to do: put in account query
+  const categories = [];
 
   const tabs: Tab[] = [
     {
@@ -25,6 +29,11 @@ export default function AccountDashboard({
       label: "Transactions",
       key: "transactions",
       pane: <TransactionsTable transactions={transactions} />,
+    },
+    {
+      label: "Categories",
+      key: "categories",
+      pane: <CategoryList categories={categories} />,
     },
   ];
 

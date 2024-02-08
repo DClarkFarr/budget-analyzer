@@ -6,6 +6,8 @@ import TransactionsTable from "../Statement/TransactionsTable";
 import TabsView, { Tab } from "../Control/TabsView";
 import StatementTransactionRange from "../Statement/StatementTransactionRange";
 import CategoryList from "./CategoryList";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AccountDashboard({
   user,
@@ -14,10 +16,8 @@ export default function AccountDashboard({
   user: User;
   accountId: number;
 }) {
-  const { account, transactions, isLoading } = useAccountQuery(accountId);
-
-  // to do: put in account query
-  const categories = [];
+  const { account, transactions, isLoading, categories } =
+    useAccountQuery(accountId);
 
   const tabs: Tab[] = [
     {
@@ -37,6 +37,25 @@ export default function AccountDashboard({
     },
   ];
 
+  const router = useRouter();
+  const [view, setView] = useState(
+    "statement" as "statement" | "transactions" | "categories"
+  );
+
+  const search = useSearchParams();
+
+  useEffect(() => {
+    const initialView = search.get("view");
+    if (initialView) {
+      setView(initialView as "statement" | "transactions" | "categories");
+    }
+  }, []);
+
+  const onChangeTab = (view: string) => {
+    setView(view as "statement" | "transactions" | "categories");
+    router.push(`?view=${view}`);
+  };
+
   return (
     <div className="account-dashboard">
       <h1 className="text-2xl mb-2">Account Dashboard</h1>
@@ -51,7 +70,7 @@ export default function AccountDashboard({
             Account Name: {account.name}
           </p>
 
-          <TabsView tabs={tabs} />
+          <TabsView tabs={tabs} onTabChange={onChangeTab} activeTab={view} />
         </>
       )}
     </div>

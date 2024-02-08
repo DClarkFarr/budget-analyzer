@@ -14,3 +14,31 @@ export type UploadStatementResponse = {
   created: number;
   skipped: number;
 };
+
+export enum CategoryTypes {
+  income = "income",
+  expense = "expense",
+  ignore = "ignore",
+}
+
+export type CategoryType = keyof typeof CategoryTypes;
+
+export type Category = {
+  id: number;
+  accountId: number;
+  userId: number;
+  name: string;
+  type: CategoryType;
+  startAt: string | null;
+  endAt: string | null;
+  createdAt: string;
+};
+
+export type CategoryRule = {
+  id: number;
+  categoryId: number;
+  userId: number;
+  name: string;
+  rule: string;
+  createdAt: string;
+};

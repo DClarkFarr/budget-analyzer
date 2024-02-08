@@ -85,6 +85,8 @@ model Category {
     userId      Int
     name        String
     type        CATEGORY_TYPE
+    startAt         DateTime?
+    endAt           DateTime?
     createdAt   DateTime @default(now())
 
     @@index([userId])

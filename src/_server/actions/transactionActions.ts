@@ -1,5 +1,5 @@
 import { ProcessedTransaction } from "@/types/Account/Transaction";
-import { insertTransaction } from "../prisma/statement/statement.methods";
+import { insertTransaction } from "../prisma/account/statement.methods";
 import { StatementType } from "@/types/Statement";
 
 export default async function importProcessedTransactions(

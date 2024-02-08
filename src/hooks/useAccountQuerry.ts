@@ -11,6 +11,11 @@ export default function useAccountQuery(accountId: number) {
       isLoading: transactionsLoading,
       isError: transactionsError,
     },
+    {
+      data: categories,
+      isLoading: categoriesLoading,
+      isError: categoriesError,
+    },
   ] = useQueries({
     queries: [
       {
@@ -23,20 +28,28 @@ export default function useAccountQuery(accountId: number) {
         queryFn: () => AccountService.getTransactions(accountId),
         staleTime: Infinity,
       },
+      {
+        queryKey: ["categories", accountId],
+        queryFn: () => AccountService.getCategories(accountId),
+        staleTime: Infinity,
+      },
     ],
   });
 
   const isLoading = useMemo(() => {
-    return accountLoading;
-  }, [accountLoading]);
+    return accountLoading || transactionsLoading || categoriesLoading;
+  }, [accountLoading, transactionsLoading, categoriesLoading]);
 
   return {
     isLoading,
     account,
     accountLoading,
     accountError,
-    transactions: transactions || ([] as Transaction[]),
+    transactions: transactions || [],
     transactionsLoading,
     transactionsError,
+    categories: categories || [],
+    categoriesLoading,
+    categoriesError,
   };
 }

@@ -4,7 +4,7 @@ import {
   startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
 import { getUserAccount } from "@/server/prisma/account.methods";
-import { getAccountTransactions } from "@/server/prisma/statement/statement.methods";
+import { getAccountTransactions } from "@/server/prisma/account/statement.methods";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

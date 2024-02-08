@@ -1,6 +1,7 @@
 import { Account, AccountFormState } from "@/types/Account";
 import webApi from "./webApi";
 import { Transaction } from "@/types/Account/Transaction";
+import { Category } from "@/types/Statement";
 
 export default class AccountService {
   static create(data: AccountFormState) {
@@ -23,5 +24,11 @@ export default class AccountService {
           (t) => ({ ...t, amount: parseFloat(t.amount) } as Transaction)
         )
       );
+  }
+
+  static getCategories(accountId: number) {
+    return webApi
+      .get<Category[]>(`/account/${accountId}/category`)
+      .then((res) => res.data);
   }
 }

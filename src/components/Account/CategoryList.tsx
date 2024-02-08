@@ -15,7 +15,7 @@ export default function CategoryList({
             create.
           </p>
         </div>
-        <div>
+        <div className="ml-auto">
           <button className="btn btn-primary">Add Category</button>
         </div>
       </div>

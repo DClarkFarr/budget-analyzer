@@ -19,6 +19,8 @@ model User {
 
     accounts        Account[]
     transactions    AccountTransaction[]
+    categories      Category[]
+    categoryRules   CategoryRule[]
 }
 
 
@@ -38,8 +40,18 @@ model Account {
     
     user            User     @relation(fields: [userId], references: [id])
     transactions    AccountTransaction[]
+    categories      Category[]
 }
 
+enum TRANSACTION_TYPE {
+    incoming
+    outgoing
+}
+
+enum BANK_TYPE {
+    wells_fargo
+    venmo
+}
 model AccountTransaction {
     id              Int      @id @default(autoincrement())
     accountId       Int
@@ -58,14 +70,58 @@ model AccountTransaction {
 
     account         Account @relation(fields: [accountId], references: [id])
     user            User    @relation(fields: [userId], references: [id])
+    categories      CategoryTransactions[]
 }
 
-enum TRANSACTION_TYPE {
-    incoming
-    outgoing
+enum CATEGORY_TYPE {
+    income
+    expense
+    ignore
 }
 
-enum BANK_TYPE {
-    wells_fargo
-    venmo
+model Category {
+    id          Int      @id @default(autoincrement())
+    accountId   Int
+    userId      Int
+    name        String
+    type        CATEGORY_TYPE
+    createdAt   DateTime @default(now())
+
+    @@index([userId])
+    @@index([accountId])
+
+    user            User     @relation(fields: [userId], references: [id])
+    account         Account     @relation(fields: [accountId], references: [id])
+    transactions    CategoryTransactions[]
+    rules           CategoryRule[]
+}
+
+model CategoryTransactions {
+    id             Int      @id @default(autoincrement())
+    categoryId     Int
+    transactionId  Int
+    createdAt      DateTime @default(now())
+    ignoredAt      DateTime?
+
+    @@index([categoryId])
+    @@index([transactionId])
+    @@index([categoryId, transactionId])
+
+    category      Category @relation(fields: [categoryId], references: [id])
+    transaction   AccountTransaction @relation(fields: [transactionId], references: [id])
+}
+
+model CategoryRule {
+    id              Int      @id @default(autoincrement())
+    categoryId      Int
+    userId          Int
+    name            String
+    rule            String
+    createdAt       DateTime @default(now())
+
+    @@index([userId])
+    @@index([categoryId])
+
+    user            User        @relation(fields: [userId], references: [id])
+    category        Category    @relation(fields: [categoryId], references: [id])
 }

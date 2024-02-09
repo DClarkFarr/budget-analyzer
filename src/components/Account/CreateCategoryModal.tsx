@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormError from "../Form/FormError";
-import { Category, CategoryFormState, CategoryType } from "@/types/Statement";
+import { CategoryFormState, CategoryType } from "@/types/Statement";
 import { FaCircleNotch } from "react-icons/fa";
 import Alert from "../Control/Alert";
 
@@ -77,7 +77,7 @@ export default function CreateCategoryModal({
 
   return (
     <>
-      <Modal dismissible show={show} onClose={onClose}>
+      <Modal show={show} onClose={onClose}>
         <Modal.Header>Create Category</Modal.Header>
         <Modal.Body>
           <div className="">
@@ -119,7 +119,10 @@ export default function CreateCategoryModal({
                       className="form-control"
                       min="2020-01-01"
                       {...register("startAt", {
+                        required: false,
                         validate: (value) => {
+                          if (!value) return true;
+
                           const isValid = DateTime.fromISO(value).isValid;
                           if (!isValid) {
                             return "Invalid date";
@@ -151,7 +154,10 @@ export default function CreateCategoryModal({
                       className="form-control"
                       max={endOfYear}
                       {...register("endAt", {
+                        required: false,
                         validate: (value) => {
+                          if (!value) return true;
+
                           const isValid = DateTime.fromISO(value).isValid;
                           if (!isValid) {
                             return "Invalid date";

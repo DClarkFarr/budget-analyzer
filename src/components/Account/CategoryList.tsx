@@ -1,7 +1,10 @@
+"use client";
+
 import { Category, CategoryFormState } from "@/types/Statement";
 import { useState } from "react";
 import CreateCategoryModal from "./CreateCategoryModal";
-import AccountService from "@/services/AccountService";
+import { DateTime } from "luxon";
+import { FaRegListAlt, FaPencilAlt, FaTrash } from "react-icons/fa";
 
 export default function CategoryList({
   accountId,
@@ -30,7 +33,7 @@ export default function CategoryList({
         onClose={onHideCategoryModal}
         onSubmit={onCreateCategoryWrapped}
       />
-      <div className="lg:flex items-center gap-x-4">
+      <div className="lg:flex items-center gap-x-4 mb-4">
         <div>
           <h2 className="text-xl">Account Categories</h2>
           <p className="lead mb-4">
@@ -46,6 +49,63 @@ export default function CategoryList({
             Add Category
           </button>
         </div>
+      </div>
+      <div className="categories flex flex-col w-full gap-y-2">
+        {categories.map((category) => (
+          <div
+            key={category.id}
+            className="category flex w-full items-center p-3 bg-slate-50"
+          >
+            <div className="shrink w-1/2">
+              <div className="category__name text-lg">{category.name}</div>
+              <div>
+                {!category.startAt && !category.endAt && (
+                  <span>No Time Range</span>
+                )}
+                {(category.startAt || category.endAt) && (
+                  <>
+                    <span className="pr-2">
+                      Start:{" "}
+                      <b>
+                        {category.startAt
+                          ? DateTime.fromISO(category.startAt).toFormat("DD")
+                          : "-"}
+                      </b>
+                    </span>
+                    <span className="pl-2">
+                      End:{" "}
+                      <b>
+                        {category.endAt
+                          ? DateTime.fromISO(category.endAt).toFormat("DD")
+                          : "-"}
+                      </b>
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="shrink">{category.type}</div>
+            <div className="ml-auto">
+              <div className="flex gap-x-2">
+                <div>
+                  <button className="btn btn-sm bg-slate-200 text-slate-800 flex items-center gap-x-1">
+                    <FaRegListAlt /> <span>View</span>
+                  </button>
+                </div>
+                <div>
+                  <button className="btn btn-icon text-sky-600">
+                    <FaPencilAlt />
+                  </button>
+                </div>
+                <div>
+                  <button className="btn btn-icon text-red-600">
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

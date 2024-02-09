@@ -1,6 +1,8 @@
 "use client";
 
-import useAccountQuery from "@/hooks/useAccountQuerry";
+import useAccountQuery, {
+  useCreateCategoryMutation,
+} from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
 import TransactionsTable from "../Statement/TransactionsTable";
 import TabsView, { Tab } from "../Control/TabsView";
@@ -8,6 +10,7 @@ import StatementTransactionRange from "../Statement/StatementTransactionRange";
 import CategoryList from "./CategoryList";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CategoryFormState } from "@/types/Statement";
 
 export default function AccountDashboard({
   user,
@@ -18,6 +21,13 @@ export default function AccountDashboard({
 }) {
   const { account, transactions, isLoading, categories } =
     useAccountQuery(accountId);
+
+  const { createCategory } = useCreateCategoryMutation(accountId);
+
+  const onCreateCategory = async (data: CategoryFormState) => {
+    const category = await createCategory(data);
+    console.log("created category", category);
+  };
 
   const tabs: Tab[] = [
     {
@@ -33,7 +43,13 @@ export default function AccountDashboard({
     {
       label: "Categories",
       key: "categories",
-      pane: <CategoryList categories={categories} />,
+      pane: (
+        <CategoryList
+          accountId={accountId}
+          categories={categories}
+          onCreateCategory={onCreateCategory}
+        />
+      ),
     },
   ];
 

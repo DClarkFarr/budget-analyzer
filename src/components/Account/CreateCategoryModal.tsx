@@ -1,16 +1,22 @@
 "use client";
+
 import { Button, Modal } from "flowbite-react";
 import { DateTime } from "luxon";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormError from "../Form/FormError";
+import { Category, CategoryFormState, CategoryType } from "@/types/Statement";
+import { FaCircleNotch } from "react-icons/fa";
+import Alert from "../Control/Alert";
 
 export default function CreateCategoryModal({
   show,
   onClose,
+  onSubmit,
 }: {
   show: boolean;
   onClose: () => void;
+  onSubmit: (data: CategoryFormState) => Promise<void>;
 }) {
   const options = [
     { label: "Income", value: "income" },
@@ -20,10 +26,14 @@ export default function CreateCategoryModal({
 
   const [formState, setFormState] = useState({
     name: "",
-    type: "expense",
+    type: "expense" as CategoryType,
     startAt: "",
     endAt: "",
   });
+
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const resetForm = () => {
     setFormState({
@@ -37,7 +47,7 @@ export default function CreateCategoryModal({
   const {
     handleSubmit,
     register,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isLoading },
   } = useForm({
     mode: "onChange",
     defaultValues: formState,
@@ -45,13 +55,33 @@ export default function CreateCategoryModal({
 
   const endOfYear = DateTime.local().endOf("year").toSQLDate();
 
+  const submitHandler = () => {
+    return handleSubmit(async (data) => {
+      setErrorMessage("");
+      try {
+        await onSubmit(data);
+        resetForm();
+      } catch (err) {
+        if (err instanceof Error) {
+          setErrorMessage(err.message);
+        }
+      }
+    });
+  };
+
+  const onClickSubmit = () => {
+    if (isValid) {
+      buttonRef.current?.click();
+    }
+  };
+
   return (
     <>
       <Modal dismissible show={show} onClose={onClose}>
         <Modal.Header>Create Category</Modal.Header>
         <Modal.Body>
           <div className="">
-            <form className="w-full">
+            <form className="w-full" onSubmit={submitHandler()}>
               <div className="form-group">
                 <label>Category Name</label>
                 <input
@@ -146,11 +176,19 @@ export default function CreateCategoryModal({
                   </div>
                 </div>
               </div>
+              {errorMessage && <Alert style="error">{errorMessage}</Alert>}
+
+              <div className="hidden">
+                <button ref={buttonRef} type="submit"></button>
+              </div>
             </form>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={onClose}>Create Category</Button>
+          <Button onClick={onClickSubmit} disabled={!isValid || isLoading}>
+            {isLoading && <FaCircleNotch className="animate-spin mr-2" />}
+            {!isLoading && "Create Category"}
+          </Button>
           <Button color="gray" onClick={onClose}>
             Cancel
           </Button>

@@ -42,3 +42,8 @@ export type CategoryRule = {
   rule: string;
   createdAt: string;
 };
+
+export type CategoryFormState = Omit<
+  Category,
+  "id" | "accountId" | "userId" | "createdAt"
+>;

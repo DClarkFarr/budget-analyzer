@@ -1,10 +1,15 @@
+import UserError from "@/server/exceptions/UserException";
 import chainMiddleware from "@/server/methods/router/chainMiddleware";
 import {
   hasUserMiddleware,
   startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
 import { getUserAccount } from "@/server/prisma/account.methods";
-import { getCategories } from "@/server/prisma/account/category.methods";
+import {
+  createCategory,
+  getCategories,
+} from "@/server/prisma/account/category.methods";
+import { CategoryFormState } from "@/types/Statement";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -28,5 +33,34 @@ export const GET = chainMiddleware(
     const categories = await getCategories(accountId);
 
     return NextResponse.json(categories);
+  }
+);
+
+/**
+ * Create category
+ */
+export const POST = chainMiddleware(
+  [startSessionMiddleware(), hasUserMiddleware()],
+  async (req, { params }: { params: { accountId: string } }) => {
+    const userId = req.session.user.id;
+    const accountId = parseInt(params.accountId);
+
+    try {
+      const body = (await req.json()) as CategoryFormState;
+      const category = await createCategory(userId, accountId, body);
+
+      return NextResponse.json(category);
+    } catch (err) {
+      if (err instanceof UserError) {
+        return NextResponse.json({ message: err.message }, { status: 400 });
+      }
+
+      console.warn("Error creating category", err);
+    }
+
+    return NextResponse.json(
+      { message: "Error creating category" },
+      { status: 500 }
+    );
   }
 );

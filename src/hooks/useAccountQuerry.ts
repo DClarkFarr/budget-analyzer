@@ -1,6 +1,7 @@
 import AccountService from "@/services/AccountService";
 import { Transaction } from "@/types/Account/Transaction";
-import { useQueries } from "@tanstack/react-query";
+import { Category, CategoryFormState } from "@/types/Statement";
+import { QueryClient, useMutation, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export default function useAccountQuery(accountId: number) {
@@ -53,3 +54,29 @@ export default function useAccountQuery(accountId: number) {
     categoriesError,
   };
 }
+
+export const useCreateCategoryMutation = (accountId: number) => {
+  const queryClient = new QueryClient();
+
+  const { mutateAsync, isSuccess, isIdle } = useMutation({
+    mutationKey: ["categories", accountId],
+    mutationFn: async (data: CategoryFormState) => {
+      return AccountService.createCategory(accountId, data);
+    },
+    onSuccess: (category) => {
+      queryClient.setQueryData(["categories", accountId], (oldCats) => {
+        const categories = (oldCats || []) as Category[];
+        categories.push(category);
+        categories.sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+      });
+    },
+  });
+
+  return {
+    createCategory: mutateAsync,
+    isCreating: !isIdle,
+    isCreated: isSuccess,
+  };
+};

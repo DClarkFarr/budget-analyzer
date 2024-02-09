@@ -1,15 +1,25 @@
-import { Category } from "@/types/Statement";
+import { Category, CategoryFormState } from "@/types/Statement";
 import { useState } from "react";
 import CreateCategoryModal from "./CreateCategoryModal";
+import AccountService from "@/services/AccountService";
 
 export default function CategoryList({
+  accountId,
   categories,
+  onCreateCategory,
 }: {
+  accountId: number;
   categories: Category[];
+  onCreateCategory: (data: CategoryFormState) => Promise<void>;
 }) {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const onHideCategoryModal = () => {
+    setShowCategoryModal(false);
+  };
+
+  const onCreateCategoryWrapped = async (data: CategoryFormState) => {
+    await onCreateCategory(data);
     setShowCategoryModal(false);
   };
 
@@ -18,6 +28,7 @@ export default function CategoryList({
       <CreateCategoryModal
         show={showCategoryModal}
         onClose={onHideCategoryModal}
+        onSubmit={onCreateCategoryWrapped}
       />
       <div className="lg:flex items-center gap-x-4">
         <div>

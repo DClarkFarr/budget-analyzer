@@ -16,6 +16,7 @@
     "cookie": "^0.6.0",
     "crypto": "^1.0.1",
     "csv-parse": "^5.5.3",
+    "flowbite-react": "^0.7.2",
     "iron-session": "^6.3.1",
     "luxon": "^3.4.4",
     "next": "^14.1.0",

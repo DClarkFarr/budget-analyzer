@@ -38,6 +38,7 @@
       @apply bg-gray-100 text-gray-500;
     }
   }
+
   .table {
     @apply table-auto text-slate-600;
 
@@ -87,4 +88,8 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+[data-testid="modal-overlay"] {
+  @apply text-black;
 }

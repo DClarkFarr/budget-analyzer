@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 
 export async function getCategories(accountId: number) {
   return prisma.category.findMany({
-    where: { accountId },
+    where: { accountId, deletedAt: null },
     orderBy: { name: "asc" },
   });
 }
@@ -45,5 +45,23 @@ export async function createCategory(
       startAt: data.startAt ? startAt.toISO() : null,
       endAt: data.endAt ? endAt.toISO() : null,
     },
+  });
+}
+
+/**
+ * Delete category
+ */
+export async function deleteCategory(accountId: number, categoryId: number) {
+  const category = await prisma.category.findFirst({
+    where: { id: categoryId, accountId },
+  });
+
+  if (!category) {
+    throw new UserError("Category not found");
+  }
+
+  return prisma.category.update({
+    where: { id: categoryId },
+    data: { deletedAt: new Date() },
   });
 }

@@ -57,6 +57,26 @@ export default function useAccountQuery(accountId: number) {
   };
 }
 
+export const useDeleteCategoryMutation = (accountId: number) => {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isSuccess } = useMutation({
+    mutationKey: ["categories", accountId],
+    mutationFn: async (categoryId: number) => {
+      return AccountService.deleteCategory(accountId, categoryId);
+    },
+    onSuccess: async (data, categoryId) => {
+      queryClient.setQueryData(["categories", accountId], (oldCats) => {
+        const categories = (oldCats || []) as Category[];
+        return categories.filter((c) => c.id !== categoryId);
+      });
+    },
+  });
+
+  return {
+    isSuccess,
+    deleteCategory: (categoryId: number) => mutateAsync(categoryId),
+  };
+};
 export const useCreateCategoryMutation = (accountId: number) => {
   const queryClient = useQueryClient();
 

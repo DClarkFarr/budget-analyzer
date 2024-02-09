@@ -2,6 +2,7 @@
 
 import useAccountQuery, {
   useCreateCategoryMutation,
+  useDeleteCategoryMutation,
 } from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
 import TransactionsTable from "../Statement/TransactionsTable";
@@ -23,10 +24,14 @@ export default function AccountDashboard({
     useAccountQuery(accountId);
 
   const { createCategory } = useCreateCategoryMutation(accountId);
+  const { deleteCategory } = useDeleteCategoryMutation(accountId);
 
   const onCreateCategory = async (data: CategoryFormState) => {
-    const category = await createCategory(data);
-    console.log("created category", category);
+    await createCategory(data);
+  };
+
+  const onDeleteCategory = async (categoryId: number) => {
+    deleteCategory(categoryId);
   };
 
   const tabs: Tab[] = [
@@ -45,9 +50,9 @@ export default function AccountDashboard({
       key: "categories",
       pane: (
         <CategoryList
-          accountId={accountId}
           categories={categories}
           onCreateCategory={onCreateCategory}
+          onDeleteCategory={onDeleteCategory}
         />
       ),
     },

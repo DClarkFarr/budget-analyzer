@@ -2,10 +2,10 @@
 
 import { Button, Modal } from "flowbite-react";
 import { DateTime } from "luxon";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormError from "../Form/FormError";
-import { CategoryFormState, CategoryType } from "@/types/Statement";
+import { Category, CategoryFormState, CategoryType } from "@/types/Statement";
 import { FaCircleNotch } from "react-icons/fa";
 import Alert from "../Control/Alert";
 
@@ -13,8 +13,10 @@ export default function CreateCategoryModal({
   show,
   onClose,
   onSubmit,
+  category = null,
 }: {
   show: boolean;
+  category: Category | null;
   onClose: () => void;
   onSubmit: (data: CategoryFormState) => Promise<void>;
 }) {
@@ -24,34 +26,43 @@ export default function CreateCategoryModal({
     { label: "Ignore", value: "ignore" },
   ];
 
-  const [formState, setFormState] = useState({
-    name: "",
-    type: "expense" as CategoryType,
-    startAt: "",
-    endAt: "",
-  });
-
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const resetForm = () => {
-    setFormState({
-      name: "",
-      type: "expense",
-      startAt: "",
-      endAt: "",
-    });
-  };
-
   const {
     handleSubmit,
     register,
+    reset,
+    setValue,
+    getValues,
     formState: { errors, isValid, isLoading },
   } = useForm({
     mode: "onChange",
-    defaultValues: formState,
+    defaultValues: {
+      name: "",
+      type: "expense" as CategoryType,
+      startAt: "",
+      endAt: "",
+    },
   });
+
+  useEffect(() => {
+    if (category) {
+      setValue("name", category.name);
+      setValue("type", category.type);
+      setValue(
+        "startAt",
+        category.startAt
+          ? DateTime.fromISO(category.startAt).toSQLDate() || ""
+          : ""
+      );
+      setValue(
+        "endAt",
+        category.endAt ? DateTime.fromISO(category.endAt).toSQLDate() || "" : ""
+      );
+    }
+  }, [category, setValue]);
 
   const endOfYear = DateTime.local().endOf("year").toSQLDate();
 
@@ -60,7 +71,7 @@ export default function CreateCategoryModal({
       setErrorMessage("");
       try {
         await onSubmit(data);
-        resetForm();
+        reset();
       } catch (err) {
         if (err instanceof Error) {
           setErrorMessage(err.message);
@@ -75,9 +86,14 @@ export default function CreateCategoryModal({
     }
   };
 
+  const onCloseWrapper = () => {
+    onClose();
+    reset();
+  };
+
   return (
     <>
-      <Modal show={show} onClose={onClose}>
+      <Modal show={show} onClose={onCloseWrapper}>
         <Modal.Header>Create Category</Modal.Header>
         <Modal.Body>
           <div className="">
@@ -128,10 +144,11 @@ export default function CreateCategoryModal({
                             return "Invalid date";
                           }
 
+                          const endAt = getValues("endAt");
+
                           if (
-                            formState.endAt &&
-                            DateTime.fromISO(formState.endAt) <
-                              DateTime.fromISO(value)
+                            endAt &&
+                            DateTime.fromISO(endAt) < DateTime.fromISO(value)
                           ) {
                             return "Start date must be before end date";
                           }
@@ -163,10 +180,11 @@ export default function CreateCategoryModal({
                             return "Invalid date";
                           }
 
+                          const startAt = getValues("startAt");
+
                           if (
-                            formState.startAt &&
-                            DateTime.fromISO(formState.startAt) >
-                              DateTime.fromISO(value)
+                            startAt &&
+                            DateTime.fromISO(startAt) > DateTime.fromISO(value)
                           ) {
                             return "End date must be after start date";
                           }
@@ -193,9 +211,9 @@ export default function CreateCategoryModal({
         <Modal.Footer>
           <Button onClick={onClickSubmit} disabled={!isValid || isLoading}>
             {isLoading && <FaCircleNotch className="animate-spin mr-2" />}
-            {!isLoading && "Create Category"}
+            {!isLoading && (category ? "Update" : "Create") + " Category"}
           </Button>
-          <Button color="gray" onClick={onClose}>
+          <Button color="gray" onClick={onCloseWrapper}>
             Cancel
           </Button>
         </Modal.Footer>

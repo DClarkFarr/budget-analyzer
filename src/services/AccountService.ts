@@ -37,4 +37,10 @@ export default class AccountService {
       .post<Category>(`/account/${accountId}/category`, data)
       .then((res) => res.data);
   }
+
+  static deleteCategory(accountId: number, categoryId: number) {
+    return webApi
+      .delete(`/account/${accountId}/category/${categoryId}`)
+      .then((res) => res.data);
+  }
 }

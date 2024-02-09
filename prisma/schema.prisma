@@ -88,6 +88,7 @@ model Category {
     startAt         DateTime?
     endAt           DateTime?
     createdAt   DateTime @default(now())
+    deletedAt       DateTime?
 
     @@index([userId])
     @@index([accountId])

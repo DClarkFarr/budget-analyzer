@@ -96,9 +96,16 @@ export default function RuleForm({
         });
     }, [transactions, ruleText, transactionType]);
 
+    const resetForm = () => {
+        reset();
+        setRuleText("");
+        setTransactionType("");
+        setShowMatches(false);
+    };
+
     const onSubmitForm = () => {
         return handleSubmit(async (data: CategoryRuleFormState) => {
-            await onSubmit(data, { reset });
+            await onSubmit(data, { reset: resetForm });
         });
     };
 

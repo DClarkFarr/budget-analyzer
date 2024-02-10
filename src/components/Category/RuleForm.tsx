@@ -24,16 +24,22 @@ export default function RuleForm({
     rule,
     buttons,
     transactions,
+    onSubmit,
 }: {
     rule?: CategoryRule;
     transactions: Transaction[];
     buttons: (props: { busy: boolean; disabled: boolean }) => React.ReactNode;
+    onSubmit: (
+        data: CategoryRuleFormState,
+        extras: { reset: () => void }
+    ) => Promise<void>;
 }) {
     const {
         handleSubmit,
         register,
         setValue,
         getValues,
+        reset,
         formState: { errors, isLoading, isValid },
     } = useForm({
         mode: "onChange",
@@ -52,9 +58,10 @@ export default function RuleForm({
         }
     }, [rule]);
 
-    const [ruleText, setRuleText] = useState("");
-    const [transactionType, setTransactionType] =
-        useState<CategoryRuleFormState["transactionType"]>("");
+    const [ruleText, setRuleText] = useState(rule?.rule || "");
+    const [transactionType, setTransactionType] = useState<
+        CategoryRuleFormState["transactionType"]
+    >(rule?.transactionType || "");
     const [showMatches, setShowMatches] = useState(false);
 
     const [matchedTransactions, setMatchedTransactions] = useState<number[]>(
@@ -69,6 +76,7 @@ export default function RuleForm({
         }
 
         startTransition(() => {
+            console.log("parsing rules for", ruleText, "and", transactionType);
             setMatchedTransactions(
                 transactions.reduce((acc, transaction) => {
                     var regExp = new RegExp(ruleText, "i");
@@ -88,15 +96,24 @@ export default function RuleForm({
         });
     }, [transactions, ruleText, transactionType]);
 
+    const onSubmitForm = () => {
+        return handleSubmit(async (data: CategoryRuleFormState) => {
+            await onSubmit(data, { reset });
+        });
+    };
+
     useEffect(() => {
         if (ruleText) {
             parseRulesDebounced();
         }
-    }, [ruleText, parseRulesDebounced]);
+    }, [transactions, ruleText, parseRulesDebounced]);
 
     return (
         <div className="rule-form">
-            <form action="" className="w-full flex gap-x-4 items-end mb-2">
+            <form
+                onSubmit={onSubmitForm()}
+                className="w-full flex gap-x-4 items-end mb-2"
+            >
                 <div className="w-1/4">
                     <label>Name</label>
                     <input
@@ -142,13 +159,13 @@ export default function RuleForm({
             <div className="flex mb-2">
                 <div>
                     {ruleText.length > 0 && (
-                        <p className="text-sky-600">
+                        <p className="text-gray-600">
                             Matches {matchedTransactions.length} transactions.
                         </p>
                     )}
 
                     {ruleText.length === 0 && (
-                        <p className="text-sky-600">Type Rule to match.</p>
+                        <p className="text-gray-600">Type Rule to match.</p>
                     )}
                 </div>
                 <div className="ml-auto">

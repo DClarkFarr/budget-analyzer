@@ -1,7 +1,12 @@
 import { Account, AccountFormState } from "@/types/Account";
 import webApi from "./webApi";
 import { Transaction } from "@/types/Account/Transaction";
-import { Category, CategoryFormState } from "@/types/Statement";
+import {
+    Category,
+    CategoryFormState,
+    CategoryRule,
+    CategoryRuleFormState,
+} from "@/types/Statement";
 
 export default class AccountService {
     static create(data: AccountFormState) {
@@ -50,6 +55,18 @@ export default class AccountService {
     static getCategoryTransactions(categoryId: number) {
         return webApi
             .get<Transaction[]>(`/category/${categoryId}/transaction`)
+            .then((res) => res.data);
+    }
+
+    static getCategoryRules(categoryId: number) {
+        return webApi
+            .get<CategoryRule[]>(`/category/${categoryId}/rule`)
+            .then((res) => res.data);
+    }
+
+    static createCategoryRule(categoryId: number, data: CategoryRuleFormState) {
+        return webApi
+            .post<CategoryRule>(`/category/${categoryId}/rule`, data)
             .then((res) => res.data);
     }
 }

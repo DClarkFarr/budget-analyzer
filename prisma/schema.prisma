@@ -109,9 +109,9 @@ model CategoryTransactions {
   category    Category           @relation(fields: [categoryId], references: [id])
   transaction AccountTransaction @relation(fields: [transactionId], references: [id])
 
+  @@unique([categoryId, transactionId], name: "category_transaction")
   @@index([categoryId])
   @@index([transactionId])
-  @@index([categoryId, transactionId])
 }
 
 model CategoryRule {

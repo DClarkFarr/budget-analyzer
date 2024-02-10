@@ -1,0 +1,16 @@
+.table {
+    tr td {
+        background: #fff;
+    }
+    tr:nth-child(even) td {
+        background: #ebebeb;
+    }
+
+    tr.matched td {
+        background: #d4edda;
+    }
+
+    tr.matched:nth-child(even) td {
+        background: #b5d9bd;
+    }
+}

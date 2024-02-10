@@ -13,6 +13,8 @@ import { formatCurrency } from "@/methods/currency";
 import SearchInput from "../Control/SearchInput";
 import { debounce } from "lodash-es";
 
+import "./TransactionsTableReadonly.scss";
+
 const bankMap = {
     wells_fargo: "Wells Fargo",
     venmo: "Venmo",
@@ -161,7 +163,9 @@ export default function TransactionsTableReadonly({
                     style={{ height: `${height}px` }}
                 >
                     <div className="transactions__scroller">
-                        <table className="transactions__table table w-full table--sm">
+                        <table
+                            className={`transactions__table table w-full table--sm`}
+                        >
                             <tbody>
                                 <tr>
                                     <th>Date</th>

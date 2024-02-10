@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 export const GET = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware(), isUserCategoryMiddleware()],
     async (req, { params }: { params: { categoryId: string } }) => {
-        return NextResponse.json(req.category);
+        console.log("hook up category transactions!");
+        return NextResponse.json([]);
     }
 );

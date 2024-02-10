@@ -2,6 +2,8 @@ import CategoryDashboard from "@/components/Category/CategoryDashboard";
 import { getSessionUser } from "@/server/actions/sessionActions";
 import { getUserAccount } from "@/server/prisma/account.methods";
 import { getCategory } from "@/server/prisma/account/category.methods";
+import { getAccountTransactions } from "@/server/prisma/account/statement.methods";
+import { Transaction } from "@/types/Account/Transaction";
 import { Category } from "@/types/Statement";
 import Link from "next/link";
 
@@ -20,6 +22,11 @@ export default async function CategoryManagePage({
         parseInt(params.accountId),
         parseInt(params.categoryId)
     ))! as unknown as Category;
+
+    const accountTransactions =
+        ((await getAccountTransactions(
+            account.id
+        )) as unknown as Transaction[]) || [];
 
     return (
         <div className="category-single">
@@ -42,7 +49,11 @@ export default async function CategoryManagePage({
                     <b>{category.name}</b>
                 </div>
             </div>
-            <CategoryDashboard category={category} account={account} />
+            <CategoryDashboard
+                category={category}
+                account={account}
+                accountTransactions={accountTransactions}
+            />
         </div>
     );
 }

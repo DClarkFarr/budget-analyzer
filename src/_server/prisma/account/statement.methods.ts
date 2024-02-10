@@ -2,36 +2,40 @@ import { ProcessedTransaction } from "@/types/Account/Transaction";
 import { prisma } from "../index";
 
 export async function getAccountTransactions(accountId: number) {
-  return prisma.accountTransaction.findMany({
-    where: { accountId },
-    orderBy: { date: "desc" },
-  });
+    return (
+        (
+            await prisma.accountTransaction.findMany({
+                where: { accountId },
+                orderBy: { date: "desc" },
+            })
+        )?.map((t) => ({ ...t, amount: parseFloat(t.amount.toString()) })) || []
+    );
 }
 
 export async function insertTransaction(
-  userId: number,
-  accountId: number,
-  transaction: ProcessedTransaction
+    userId: number,
+    accountId: number,
+    transaction: ProcessedTransaction
 ) {
-  const existing = await prisma.accountTransaction.findFirst({
-    where: {
-      accountId,
-      userId,
-      hash: transaction.hash,
-    },
-  });
+    const existing = await prisma.accountTransaction.findFirst({
+        where: {
+            accountId,
+            userId,
+            hash: transaction.hash,
+        },
+    });
 
-  if (existing) {
-    return false;
-  }
+    if (existing) {
+        return false;
+    }
 
-  const created = await prisma.accountTransaction.create({
-    data: {
-      accountId,
-      userId,
-      ...transaction,
-    },
-  });
+    const created = await prisma.accountTransaction.create({
+        data: {
+            accountId,
+            userId,
+            ...transaction,
+        },
+    });
 
-  return created;
+    return created;
 }

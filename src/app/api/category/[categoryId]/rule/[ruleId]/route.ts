@@ -6,26 +6,26 @@ import {
     startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
 import {
-    createCategoryRule,
-    getCategoryRules,
+    deleteCategoryRule,
     syncCategoryRuleTransactions,
+    updateCategoryRule,
 } from "@/server/prisma/account/categoryRule.methods";
 import { CategoryRuleFormState } from "@/types/Statement";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const POST = chainMiddleware(
+export const PUT = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware(), isUserCategoryMiddleware()],
-    async (req, { params }: { params: { categoryId: string } }) => {
-        const category = req.category;
-
+    async (req, res: { params: { categoryId: string; ruleId: string } }) => {
+        const ruleId = parseInt(res.params.ruleId);
         try {
             const body = (await req.json()) as CategoryRuleFormState;
+            const category = req.category;
 
-            const rule = await createCategoryRule(category, body);
+            const rule = await updateCategoryRule(category.id, ruleId, body);
 
-            syncCategoryRuleTransactions(category);
+            await syncCategoryRuleTransactions(category);
 
             return NextResponse.json(rule);
         } catch (err) {
@@ -36,23 +36,32 @@ export const POST = chainMiddleware(
                 );
             }
 
-            console.warn("error creating category rule", err);
-            return NextResponse.json("Error Creating", { status: 500 });
+            console.warn("error updating category rule", err);
+            return NextResponse.json(
+                { message: "Error Updating" },
+                { status: 500 }
+            );
         }
     }
 );
 
-export const GET = chainMiddleware(
+export const DELETE = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware(), isUserCategoryMiddleware()],
-    async (req) => {
+    async (req, res: { params: { categoryId: string; ruleId: string } }) => {
+        const ruleId = parseInt(res.params.ruleId);
         try {
-            const rules = await getCategoryRules(req.category.id);
-            return NextResponse.json(rules);
+            const category = req.category;
+
+            await deleteCategoryRule(category.id, ruleId);
+
+            await syncCategoryRuleTransactions(category);
+
+            return NextResponse.json({ message: "Rule Deleted" });
         } catch (err) {
-            console.warn("error creating category rule", err);
+            console.warn("error deleting category rule", err);
             return NextResponse.json(
-                { message: "Error creating category rule" },
-                { status: 405 }
+                { message: "Error Deleting" },
+                { status: 500 }
             );
         }
     }

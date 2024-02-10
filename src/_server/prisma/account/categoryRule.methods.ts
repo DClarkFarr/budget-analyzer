@@ -38,26 +38,37 @@ export async function getCategoryTransactionPivots(categoryId: number) {
     });
 }
 
-export async function syncCategoryRuleTransactions(
-    category: Category,
-    rule: CategoryRule
-) {
+export async function syncCategoryRuleTransactions(category: Category) {
     const pivots = keyBy(
         await getCategoryTransactionPivots(category.id),
         "transactionId"
     );
 
+    const rules = await getCategoryRules(category.id);
+
     const toAdd: number[] = [];
     const toRemove: number[] = [];
 
     (await getAccountTransactions(category.accountId)).forEach((t) => {
-        const regExp = new RegExp(rule.rule, "i");
         const wasMatched = pivots[t.id] ? true : false;
         const wasIgnored = !pivots[t.id]?.ignoredAt;
-        let isMatched = regExp.test(t.description);
 
-        if (rule.transactionType && rule.transactionType !== t.expenseType) {
-            isMatched = false;
+        let isMatched = false;
+        for (let i = 0; i < rules.length; i++) {
+            const rule = rules[i];
+            if (
+                rule.transactionType &&
+                rule.transactionType !== t.expenseType
+            ) {
+                isMatched = false;
+            } else {
+                const regExp = new RegExp(rule.rule, "i");
+
+                if (regExp.test(t.description)) {
+                    isMatched = true;
+                    break;
+                }
+            }
         }
 
         if (wasMatched !== isMatched || (isMatched && wasIgnored)) {
@@ -99,8 +110,6 @@ export async function syncCategoryRuleTransactions(
         })
     );
 
-    console.log("removed", toRemove, "added", toAdd);
-
     return [toAdd, toRemove];
 }
 
@@ -129,6 +138,46 @@ export async function createCategoryRule(
     return toApiResponse<CategoryRule>(rule, {
         intKeys: ["id", "userId", "categoryId"],
         dateKeys: ["createdAt"],
+    });
+}
+
+export async function updateCategoryRule(
+    categoryId: number,
+    id: number,
+    data: CategoryRuleFormState
+) {
+    if (!data.name || data.name.length < 2) {
+        throw new UserError("Category rule name must be at least 2 chars");
+    }
+
+    if (!data.rule || data.rule.length < 2) {
+        throw new UserError("Category rule must be at least 2 chars");
+    }
+
+    const rule = await prisma.categoryRule.update({
+        where: {
+            id,
+            categoryId,
+        },
+        data: {
+            name: data.name,
+            transactionType: data.transactionType || null,
+            rule: data.rule,
+        },
+    });
+
+    return toApiResponse<CategoryRule>(rule, {
+        intKeys: ["id", "userId", "categoryId"],
+        dateKeys: ["createdAt"],
+    });
+}
+
+export async function deleteCategoryRule(categoryId: number, id: number) {
+    await prisma.categoryRule.delete({
+        where: {
+            id,
+            categoryId,
+        },
     });
 }
 

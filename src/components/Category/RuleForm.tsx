@@ -38,7 +38,6 @@ export default function RuleForm({
         handleSubmit,
         register,
         setValue,
-        getValues,
         reset,
         formState: { errors, isLoading, isValid },
     } = useForm({
@@ -76,7 +75,6 @@ export default function RuleForm({
         }
 
         startTransition(() => {
-            console.log("parsing rules for", ruleText, "and", transactionType);
             setMatchedTransactions(
                 transactions.reduce((acc, transaction) => {
                     var regExp = new RegExp(ruleText, "i");

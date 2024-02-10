@@ -7,6 +7,7 @@ import RuleForm from "./RuleForm";
 import { Transaction } from "@/types/Account/Transaction";
 import AccountService from "@/services/AccountService";
 import useCategoryRules from "@/hooks/useCategoryRules";
+import { useState } from "react";
 
 export default function CategoryDashboard({
     category,
@@ -17,14 +18,20 @@ export default function CategoryDashboard({
     account: Account;
     accountTransactions: Transaction[];
 }) {
-    const { transactions, isLoading, revalidate } = useCategoryTransactions(
-        category.id
-    );
+    const {
+        transactions,
+        isLoading,
+        revalidate: revalidateTransactions,
+    } = useCategoryTransactions(category.id);
+
+    const [deletingRuleId, setDeletingRuleId] = useState<number | null>(null);
 
     const {
         categoryRules,
         isLoading: isLoadingRules,
         createRule,
+        updateRule,
+        deleteRule,
     } = useCategoryRules(category.id);
 
     const onCreateRule = async (
@@ -33,13 +40,20 @@ export default function CategoryDashboard({
     ) => {
         await createRule(data);
         reset();
-        revalidate();
+        revalidateTransactions();
     };
 
     const onUpdateRule =
         (ruleId: number) => async (data: CategoryRuleFormState) => {
-            console.log("you submitted", ruleId, "and", data);
+            await updateRule(ruleId, data);
         };
+
+    const onDeleteRule = async (ruleId: number) => {
+        setDeletingRuleId(ruleId);
+        await deleteRule(ruleId);
+        setDeletingRuleId(null);
+        revalidateTransactions();
+    };
 
     return (
         <div className="category-dashboard">
@@ -62,14 +76,32 @@ export default function CategoryDashboard({
                                 rule={rule}
                                 onSubmit={onUpdateRule(rule.id)}
                                 buttons={({ busy, disabled }) => (
-                                    <>
-                                        <button
-                                            className="btn btn-primary"
-                                            disabled={disabled}
-                                        >
-                                            {busy ? "Updating" : "Update"}
-                                        </button>
-                                    </>
+                                    <div className="flex items-center gap-x-2">
+                                        <div>
+                                            <button
+                                                type="button"
+                                                className="btn btn-danger"
+                                                disabled={
+                                                    deletingRuleId === rule.id
+                                                }
+                                                onClick={() =>
+                                                    onDeleteRule(rule.id)
+                                                }
+                                            >
+                                                {deletingRuleId === rule.id
+                                                    ? "Deleting"
+                                                    : "Delete"}
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button
+                                                className="btn btn-primary"
+                                                disabled={disabled}
+                                            >
+                                                {busy ? "Updating" : "Update"}
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             />
                         </div>

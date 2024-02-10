@@ -20,7 +20,7 @@ export const GET = chainMiddleware(
 
             return NextResponse.json(transactions);
         } catch (err) {
-            console.log("error fetching category transactions", err);
+            console.warn("error fetching category transactions", err);
             return NextResponse.json(
                 { message: "Error getting category transactions" },
                 { status: 405 }

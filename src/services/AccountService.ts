@@ -69,4 +69,20 @@ export default class AccountService {
             .post<CategoryRule>(`/category/${categoryId}/rule`, data)
             .then((res) => res.data);
     }
+
+    static updateCategoryRule(
+        categoryId: number,
+        ruleId: number,
+        data: CategoryRuleFormState
+    ) {
+        return webApi
+            .put<CategoryRule>(`/category/${categoryId}/rule/${ruleId}`, data)
+            .then((res) => res.data);
+    }
+
+    static deleteCategoryRule(categoryId: number, ruleId: number) {
+        return webApi
+            .delete(`/category/${categoryId}/rule/${ruleId}`)
+            .then((res) => res.data);
+    }
 }

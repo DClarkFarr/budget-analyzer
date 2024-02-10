@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 type ArrayToKeys<T extends any[]> = {
     [K in T[number]]: any;
 };
@@ -23,7 +25,7 @@ export default function toApiResponse<
     }, {} as ArrayToKeys<typeof intKeys>);
 
     const dates = dateKeys.reduce((acc, key) => {
-        acc[key] = new Date(from[key as keyof F]);
+        acc[key] = DateTime.fromJSDate(from[key as keyof F]).toISO();
         return acc;
     }, {} as ArrayToKeys<typeof dateKeys>);
 

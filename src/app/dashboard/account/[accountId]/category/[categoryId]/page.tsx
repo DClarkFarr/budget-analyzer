@@ -24,9 +24,7 @@ export default async function CategoryManagePage({
     ))! as unknown as Category;
 
     const accountTransactions =
-        ((await getAccountTransactions(
-            account.id
-        )) as unknown as Transaction[]) || [];
+        (await getAccountTransactions(account.id)) || [];
 
     return (
         <div className="category-single">

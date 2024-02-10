@@ -51,9 +51,7 @@ export default function TransactionsTableReadonly({
             .map((t) => ({
                 ...t,
                 formattedAmount: formatCurrency(t.amount),
-                formattedDate: DateTime.fromJSDate(
-                    t.date as unknown as Date
-                ).toFormat("DD"),
+                formattedDate: DateTime.fromISO(t.date).toFormat("DD"),
                 matched: matchedTransactionsIds.includes(t.id),
             }))
             .filter((t) => {
@@ -164,6 +162,8 @@ export default function TransactionsTableReadonly({
                 >
                     <div className="transactions__scroller">
                         <table
+                            cellPadding={0}
+                            cellSpacing={0}
                             className={`transactions__table table w-full table--sm`}
                         >
                             <tbody>

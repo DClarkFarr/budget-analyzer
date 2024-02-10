@@ -1,5 +1,6 @@
-import { ProcessedTransaction } from "@/types/Account/Transaction";
+import { ProcessedTransaction, Transaction } from "@/types/Account/Transaction";
 import { prisma } from "../index";
+import toApiResponse from "@/server/methods/response/toApiResponse";
 
 export async function getAccountTransactions(accountId: number) {
     return (
@@ -8,7 +9,13 @@ export async function getAccountTransactions(accountId: number) {
                 where: { accountId },
                 orderBy: { date: "desc" },
             })
-        )?.map((t) => ({ ...t, amount: parseFloat(t.amount.toString()) })) || []
+        )?.map((t) =>
+            toApiResponse<Transaction>(t, {
+                intKeys: ["id", "accountId", "userId"],
+                dateKeys: ["createdAt", "date"],
+                floatKeys: ["amount"],
+            })
+        ) || []
     );
 }
 

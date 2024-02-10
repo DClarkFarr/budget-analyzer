@@ -47,6 +47,10 @@ export const GET = chainMiddleware(
     async (req) => {
         try {
             const rules = await getCategoryRules(req.category.id);
+
+            rules.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
             return NextResponse.json(rules);
         } catch (err) {
             console.warn("error creating category rule", err);

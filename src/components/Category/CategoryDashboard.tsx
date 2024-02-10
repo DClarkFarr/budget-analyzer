@@ -7,7 +7,9 @@ import RuleForm from "./RuleForm";
 import { Transaction } from "@/types/Account/Transaction";
 import AccountService from "@/services/AccountService";
 import useCategoryRules from "@/hooks/useCategoryRules";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import TransactionsTableReadonly from "./TransactionsTableReadonly";
+import { formatCurrency } from "@/methods/currency";
 
 export default function CategoryDashboard({
     category,
@@ -25,6 +27,21 @@ export default function CategoryDashboard({
     } = useCategoryTransactions(category.id);
 
     const [deletingRuleId, setDeletingRuleId] = useState<number | null>(null);
+
+    const transactionIds = useMemo(() => {
+        return transactions.map((t) => t.id);
+    }, [transactions]);
+
+    const totals = useMemo(() => {
+        return transactions.reduce(
+            (acc, t) => {
+                acc[t.expenseType] += t.amount;
+                acc.net += t.expenseType === "incoming" ? t.amount : -t.amount;
+                return acc;
+            },
+            { incoming: 0, outgoing: 0, net: 0 }
+        );
+    }, [transactions]);
 
     const {
         categoryRules,
@@ -57,10 +74,6 @@ export default function CategoryDashboard({
 
     return (
         <div className="category-dashboard">
-            <div className="mb-4">
-                Category is matching {transactions.length} of{" "}
-                {accountTransactions.length} transactions.
-            </div>
             <div className="rules flex flex-col gap-y-3 mb-4">
                 {isLoadingRules && (
                     <div className="loading">Loading Rules...</div>
@@ -106,7 +119,7 @@ export default function CategoryDashboard({
                             />
                         </div>
                     ))}
-                <div className="bg-sky-100 p-4">
+                <div className="bg-sky-100 p-4 mb-4">
                     <h4 className="font-semibold">Create New Rule</h4>
                     <RuleForm
                         transactions={accountTransactions}
@@ -123,6 +136,40 @@ export default function CategoryDashboard({
                         )}
                     />
                 </div>
+
+                {isLoading && (
+                    <div className="loading">Loading Transactions...</div>
+                )}
+                {!isLoading && (
+                    <div>
+                        <h2 className="text-xl mb-2">Transactions</h2>
+                        <div className="mb-4">
+                            <div>
+                                Category is matching {transactions.length} of{" "}
+                                {accountTransactions.length} transactions.
+                            </div>
+                            <div>
+                                <span className="text-green-600">
+                                    {formatCurrency(totals.incoming)}{" "}
+                                </span>
+                                Incoming,{" "}
+                                <span className="text-red-600">
+                                    {formatCurrency(totals.outgoing)}{" "}
+                                </span>
+                                Outgoing,{" "}
+                                <span className="text-sky-600">
+                                    {formatCurrency(totals.net)}{" "}
+                                </span>
+                                Net
+                            </div>
+                        </div>
+                        <TransactionsTableReadonly
+                            transactions={accountTransactions}
+                            matchedTransactionsIds={transactionIds}
+                            height={600}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

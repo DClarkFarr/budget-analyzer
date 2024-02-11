@@ -105,6 +105,7 @@ model CategoryTransactions {
   transactionId Int
   createdAt     DateTime  @default(now())
   ignoredAt     DateTime?
+  setAt         DateTime?
 
   category    Category           @relation(fields: [categoryId], references: [id])
   transaction AccountTransaction @relation(fields: [transactionId], references: [id])

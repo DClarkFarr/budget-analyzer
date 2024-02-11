@@ -53,15 +53,28 @@ export async function getCategoryTransactions(categoryId: number) {
         );
 }
 
-export async function getCategoryTransactionPivots(categoryId: number) {
-    return prisma.categoryTransactions.findMany({
-        where: { categoryId },
+export async function getCategoryTransactionPivots(
+    categoryId: number,
+    { excludeSet = false }: { excludeSet?: boolean } = {}
+) {
+    const rows = await prisma.categoryTransactions.findMany({
+        where: { categoryId, setAt: excludeSet ? null : undefined },
     });
+
+    return rows;
 }
 
 export async function syncCategoryRuleTransactions(category: Category) {
+    /**
+     * TODO: change this to getAccountTransactions() do
+     * include {
+     *  categories (categoryTransactions)
+     *  Remove getCategoryTransactionPivots
+     *  Loop over t.category[] to see if is ignored/is set
+     * }
+     */
     const pivots = keyBy(
-        await getCategoryTransactionPivots(category.id),
+        await getCategoryTransactionPivots(category.id, { excludeSet: false }),
         "transactionId"
     );
 
@@ -72,7 +85,8 @@ export async function syncCategoryRuleTransactions(category: Category) {
 
     (await getAccountTransactions(category.accountId)).forEach((t) => {
         const wasMatched = pivots[t.id] ? true : false;
-        const wasIgnored = !pivots[t.id]?.ignoredAt;
+        const wasIgnored = !!pivots[t.id]?.ignoredAt;
+        const wasSet = !!pivots[t.id]?.setAt;
 
         let isMatched = false;
         for (let i = 0; i < rules.length; i++) {
@@ -92,7 +106,10 @@ export async function syncCategoryRuleTransactions(category: Category) {
             }
         }
 
-        if (wasMatched !== isMatched || (isMatched && wasIgnored)) {
+        if (wasSet) {
+            console.log("got", wasSet, "from", t, "and", pivots[t.id]);
+            // do nothing
+        } else if (wasMatched !== isMatched || (isMatched && wasIgnored)) {
             if (isMatched) {
                 toAdd.push(t.id);
             } else {

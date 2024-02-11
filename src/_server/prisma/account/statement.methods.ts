@@ -38,11 +38,6 @@ export async function getAccountDuplicateTransactions(accountId: number) {
         accountId
     );
 
-    console.log(
-        "got duplicates",
-        duplicatesGrouped.length,
-        duplicatesGrouped[0]
-    );
     const transactions = await prisma.accountTransaction.findMany({
         where: {
             id: {
@@ -57,8 +52,6 @@ export async function getAccountDuplicateTransactions(accountId: number) {
             },
         },
     });
-
-    console.log("got transaction", transactions.length, transactions[0]);
 
     return transactions.map((t) => {
         return toApiResponse<Transaction & { category: Category }>(

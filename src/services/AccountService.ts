@@ -35,6 +35,14 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
+    static getDuplicateTransactions(accountId: number) {
+        return webApi
+            .get<(Transaction & { category: Category[] })[]>(
+                `/account/${accountId}/transaction/duplicate`
+            )
+            .then((res) => res.data);
+    }
+
     static getCategories(accountId: number) {
         return webApi
             .get<Category[]>(`/account/${accountId}/category`)

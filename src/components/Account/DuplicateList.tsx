@@ -1,10 +1,10 @@
 "use client";
 
-import { useUncategorizedQuery } from "@/hooks/useUncategorizedQuery";
 import TransactionsTable from "../Statement/TransactionsTable";
+import { useDuplicateQuery } from "@/hooks/useDuplicateQuery";
 
 export default function DuplicateList({ accountId }: { accountId: number }) {
-    const { transactions, isLoading } = useUncategorizedQuery(accountId);
+    const { transactions, isLoading } = useDuplicateQuery(accountId);
 
     return (
         <>

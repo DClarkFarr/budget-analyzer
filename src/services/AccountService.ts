@@ -37,7 +37,7 @@ export default class AccountService {
 
     static getDuplicateTransactions(accountId: number) {
         return webApi
-            .get<(Transaction & { category: Category[] })[]>(
+            .get<(Transaction & { categories: Category[] })[]>(
                 `/account/${accountId}/transaction/duplicate`
             )
             .then((res) => res.data);

@@ -1,5 +1,6 @@
 "use client";
 
+import DuplicateTransactionsTable from "../Statement/DuplicateTransactionsTable";
 import TransactionsTable from "../Statement/TransactionsTable";
 import { useDuplicateQuery } from "@/hooks/useDuplicateQuery";
 
@@ -18,7 +19,7 @@ export default function DuplicateList({ accountId }: { accountId: number }) {
             {isLoading && <div>Loading translations...</div>}
             {!isLoading && (
                 <div>
-                    <TransactionsTable transactions={transactions} />
+                    <DuplicateTransactionsTable transactions={transactions} />
                 </div>
             )}
             {!isLoading && transactions.length === 0 && (

@@ -54,10 +54,10 @@ export async function getAccountDuplicateTransactions(accountId: number) {
     });
 
     return transactions.map((t) => {
-        return toApiResponse<Transaction & { category: Category }>(
+        return toApiResponse<Transaction & { categories: Category[] }>(
             {
                 ...t,
-                category: t.categories.map((c) =>
+                categories: t.categories.map((c) =>
                     toApiResponse<Category>(c.category, {
                         intKeys: ["id", "accountId", "userId"],
                         dateKeys: ["createdAt", "startAt", "endAt"],

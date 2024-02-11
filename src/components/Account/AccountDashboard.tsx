@@ -13,6 +13,7 @@ import CategoryList from "./CategoryList";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryFormState } from "@/types/Statement";
+import UncategorizedList from "./UncategorizedList";
 
 export default function AccountDashboard({
     user,
@@ -65,6 +66,11 @@ export default function AccountDashboard({
                     onUpdateCategory={onCategoryUpdate}
                 />
             ),
+        },
+        {
+            label: "Uncategorized Transactions",
+            key: "uncategorized",
+            pane: <UncategorizedList accountId={accountId} />,
         },
     ];
 

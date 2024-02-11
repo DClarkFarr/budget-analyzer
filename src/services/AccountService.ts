@@ -23,15 +23,16 @@ export default class AccountService {
 
     static getTransactions(accountId: number) {
         return webApi
-            .get<(Transaction & { amount: string })[]>(
-                `/account/${accountId}/transaction`
+            .get<Transaction[]>(`/account/${accountId}/transaction`)
+            .then((res) => res.data);
+    }
+
+    static getUncategorizedTransactions(accountId: number) {
+        return webApi
+            .get<Transaction[]>(
+                `/account/${accountId}/transaction/uncategorized`
             )
-            .then((res) =>
-                res.data.map(
-                    (t) =>
-                        ({ ...t, amount: parseFloat(t.amount) } as Transaction)
-                )
-            );
+            .then((res) => res.data);
     }
 
     static getCategories(accountId: number) {

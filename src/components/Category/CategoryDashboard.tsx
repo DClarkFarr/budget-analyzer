@@ -63,6 +63,7 @@ export default function CategoryDashboard({
     const onUpdateRule =
         (ruleId: number) => async (data: CategoryRuleFormState) => {
             await updateRule(ruleId, data);
+            revalidateTransactions();
         };
 
     const onDeleteRule = async (ruleId: number) => {

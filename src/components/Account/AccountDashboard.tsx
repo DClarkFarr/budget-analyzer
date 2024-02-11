@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryFormState } from "@/types/Statement";
 import UncategorizedList from "./UncategorizedList";
+import DuplicateList from "./DuplicateList";
 
 export default function AccountDashboard({
     user,
@@ -71,6 +72,11 @@ export default function AccountDashboard({
             label: "Uncategorized Transactions",
             key: "uncategorized",
             pane: <UncategorizedList accountId={accountId} />,
+        },
+        {
+            label: "Duplicate Transactions",
+            key: "duplicates",
+            pane: <DuplicateList accountId={accountId} />,
         },
     ];
 

@@ -77,17 +77,29 @@ export default function RuleForm({
         startTransition(() => {
             setMatchedTransactions(
                 transactions.reduce((acc, transaction) => {
-                    var regExp = new RegExp(ruleText, "i");
-
                     if (
                         transactionType.length &&
                         transactionType !== transaction.expenseType
                     ) {
                         return acc;
                     }
-                    if (regExp.test(transaction.description)) {
-                        acc.push(transaction.id);
+
+                    try {
+                        var regExp = new RegExp(ruleText, "i");
+
+                        if (regExp.test(transaction.description)) {
+                            acc.push(transaction.id);
+                        }
+                    } catch (err) {
+                        if (
+                            transaction.description
+                                .toLowerCase()
+                                .includes(ruleText.toLowerCase())
+                        ) {
+                            acc.push(transaction.id);
+                        }
                     }
+
                     return acc;
                 }, [] as number[])
             );

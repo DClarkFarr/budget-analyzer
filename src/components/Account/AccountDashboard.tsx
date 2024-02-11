@@ -1,8 +1,9 @@
 "use client";
 
 import useAccountQuery, {
-  useCreateCategoryMutation,
-  useDeleteCategoryMutation,
+    useCreateCategoryMutation,
+    useDeleteCategoryMutation,
+    useUpdateCategoryMutation,
 } from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
 import TransactionsTable from "../Statement/TransactionsTable";
@@ -14,86 +15,99 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryFormState } from "@/types/Statement";
 
 export default function AccountDashboard({
-  user,
-  accountId,
+    user,
+    accountId,
 }: {
-  user: User;
-  accountId: number;
+    user: User;
+    accountId: number;
 }) {
-  const { account, transactions, isLoading, categories } =
-    useAccountQuery(accountId);
+    const { account, transactions, isLoading, categories } =
+        useAccountQuery(accountId);
 
-  const { createCategory } = useCreateCategoryMutation(accountId);
-  const { deleteCategory } = useDeleteCategoryMutation(accountId);
+    const { createCategory } = useCreateCategoryMutation(accountId);
+    const { deleteCategory } = useDeleteCategoryMutation(accountId);
+    const { updateCategory } = useUpdateCategoryMutation(accountId);
 
-  const onCreateCategory = async (data: CategoryFormState) => {
-    await createCategory(data);
-  };
+    const onCreateCategory = async (data: CategoryFormState) => {
+        await createCategory(data);
+    };
 
-  const onDeleteCategory = async (categoryId: number) => {
-    deleteCategory(categoryId);
-  };
+    const onDeleteCategory = async (categoryId: number) => {
+        await deleteCategory(categoryId);
+    };
 
-  const tabs: Tab[] = [
-    {
-      label: "Range",
-      key: "statement",
-      pane: <StatementTransactionRange transactions={transactions} />,
-    },
-    {
-      label: "Transactions",
-      key: "transactions",
-      pane: <TransactionsTable transactions={transactions} />,
-    },
-    {
-      label: "Categories",
-      key: "categories",
-      pane: (
-        <CategoryList
-          categories={categories}
-          onCreateCategory={onCreateCategory}
-          onDeleteCategory={onDeleteCategory}
-        />
-      ),
-    },
-  ];
+    const onCategoryUpdate = async (
+        categoryId: number,
+        data: CategoryFormState
+    ) => {
+        await updateCategory(categoryId, data);
+    };
 
-  const router = useRouter();
-  const [view, setView] = useState(
-    "statement" as "statement" | "transactions" | "categories"
-  );
+    const tabs: Tab[] = [
+        {
+            label: "Range",
+            key: "statement",
+            pane: <StatementTransactionRange transactions={transactions} />,
+        },
+        {
+            label: "Transactions",
+            key: "transactions",
+            pane: <TransactionsTable transactions={transactions} />,
+        },
+        {
+            label: "Categories",
+            key: "categories",
+            pane: (
+                <CategoryList
+                    categories={categories}
+                    onCreateCategory={onCreateCategory}
+                    onDeleteCategory={onDeleteCategory}
+                    onUpdateCategory={onCategoryUpdate}
+                />
+            ),
+        },
+    ];
 
-  const search = useSearchParams();
+    const router = useRouter();
+    const [view, setView] = useState(
+        "statement" as "statement" | "transactions" | "categories"
+    );
 
-  useEffect(() => {
-    const initialView = search.get("view");
-    if (initialView) {
-      setView(initialView as "statement" | "transactions" | "categories");
-    }
-  }, []);
+    const search = useSearchParams();
 
-  const onChangeTab = (view: string) => {
-    setView(view as "statement" | "transactions" | "categories");
-    router.push(`?view=${view}`);
-  };
+    useEffect(() => {
+        const initialView = search.get("view");
+        if (initialView) {
+            setView(initialView as "statement" | "transactions" | "categories");
+        }
+    }, []);
 
-  return (
-    <div className="account-dashboard">
-      <h1 className="text-2xl mb-2">Account Dashboard</h1>
-      {isLoading && (
-        <div className="p-[100px] w-full flex justify-center items-center text-2xl text-gray-500 font-semibold">
-          Loading...
+    const onChangeTab = (view: string) => {
+        setView(view as "statement" | "transactions" | "categories");
+        router.push(`?view=${view}`);
+    };
+
+    return (
+        <div className="account-dashboard">
+            <h1 className="text-2xl mb-2">Account Dashboard</h1>
+            {isLoading && (
+                <div className="p-[100px] w-full flex justify-center items-center text-2xl text-gray-500 font-semibold">
+                    Loading...
+                </div>
+            )}
+            {!isLoading && account && (
+                <>
+                    <p className="lead text-lg mb-4 text-gray-600">
+                        Account Name: {account.name}
+                    </p>
+
+                    <TabsView
+                        tabs={tabs}
+                        onTabChange={onChangeTab}
+                        activeTab={view}
+                    />
+                </>
+            )}
         </div>
-      )}
-      {!isLoading && account && (
-        <>
-          <p className="lead text-lg mb-4 text-gray-600">
-            Account Name: {account.name}
-          </p>
-
-          <TabsView tabs={tabs} onTabChange={onChangeTab} activeTab={view} />
-        </>
-      )}
-    </div>
-  );
+    );
 }

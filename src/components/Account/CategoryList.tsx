@@ -18,10 +18,15 @@ export default function CategoryList({
     categories,
     onCreateCategory,
     onDeleteCategory,
+    onUpdateCategory,
 }: {
     categories: Category[];
     onCreateCategory: (data: CategoryFormState) => Promise<void>;
     onDeleteCategory: (categoryId: number) => Promise<void>;
+    onUpdateCategory: (
+        categoryId: number,
+        data: CategoryFormState
+    ) => Promise<void>;
 }) {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(
@@ -38,6 +43,23 @@ export default function CategoryList({
     const onCreateCategoryWrapped = async (data: CategoryFormState) => {
         await onCreateCategory(data);
         onHideCategoryModal();
+    };
+
+    const onUpdateCategoryWrapped = async (
+        categoryId: number,
+        data: CategoryFormState
+    ) => {
+        await onUpdateCategory(categoryId, data);
+        onHideCategoryModal();
+        setSelectedCategory(null);
+    };
+
+    const onSubmitCategoryModal = async (data: CategoryFormState) => {
+        if (selectedCategory) {
+            await onUpdateCategoryWrapped(selectedCategory.id, data);
+        } else {
+            await onCreateCategoryWrapped(data);
+        }
     };
 
     const onDeleteCategoryWrapped = (categoryId: number) => {
@@ -59,7 +81,7 @@ export default function CategoryList({
                 category={selectedCategory}
                 show={showCategoryModal}
                 onClose={onHideCategoryModal}
-                onSubmit={onCreateCategoryWrapped}
+                onSubmit={onSubmitCategoryModal}
             />
             <div className="lg:flex items-center gap-x-4 mb-4">
                 <div>

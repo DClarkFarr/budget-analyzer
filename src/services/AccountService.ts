@@ -52,6 +52,16 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
+    static updateCategory(
+        accountId: number,
+        categoryId: number,
+        data: CategoryFormState
+    ) {
+        return webApi
+            .put<Category>(`/account/${accountId}/category/${categoryId}`, data)
+            .then((res) => res.data);
+    }
+
     static getCategoryTransactions(categoryId: number) {
         return webApi
             .get<Transaction[]>(`/category/${categoryId}/transaction`)

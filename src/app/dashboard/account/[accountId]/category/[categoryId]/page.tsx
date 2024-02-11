@@ -19,7 +19,6 @@ export default async function CategoryManagePage({
     ))!;
 
     const category = (await getCategory(
-        parseInt(params.accountId),
         parseInt(params.categoryId)
     ))! as unknown as Category;
 

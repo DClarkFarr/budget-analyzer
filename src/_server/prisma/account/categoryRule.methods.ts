@@ -8,8 +8,11 @@ import toApiResponse from "@/server/methods/response/toApiResponse";
 import { getAccountTransactions } from "./statement.methods";
 import { keyBy } from "lodash-es";
 import UserError from "@/server/exceptions/UserException";
+import { getCategory } from "./category.methods";
 
 export async function getCategoryTransactions(categoryId: number) {
+    const category = (await getCategory(categoryId))!;
+
     const res = await prisma.category.findFirst({
         where: {
             id: categoryId,
@@ -23,13 +26,31 @@ export async function getCategoryTransactions(categoryId: number) {
         },
     });
 
-    return (res?.transactions || []).map((p) =>
-        toApiResponse(p.transaction, {
-            intKeys: ["id", "accountId", "userId"],
-            dateKeys: ["date", "createdAt"],
-            floatKeys: ["amount"],
+    return (res?.transactions || [])
+        .filter((p) => {
+            if (
+                category.startAt &&
+                p.transaction.date < new Date(category.startAt)
+            ) {
+                return false;
+            }
+
+            if (
+                category.endAt &&
+                p.transaction.date > new Date(category.endAt)
+            ) {
+                return false;
+            }
+
+            return true;
         })
-    );
+        .map((p) =>
+            toApiResponse(p.transaction, {
+                intKeys: ["id", "accountId", "userId"],
+                dateKeys: ["date", "createdAt"],
+                floatKeys: ["amount"],
+            })
+        );
 }
 
 export async function getCategoryTransactionPivots(categoryId: number) {

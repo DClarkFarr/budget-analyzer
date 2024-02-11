@@ -1,11 +1,7 @@
 import { Category } from "@/types/Statement";
 import { MiddlewareCallback } from "../methods/router/chainMiddleware";
 import { IronSessionRequestUser } from "../methods/session";
-import { NextRequest } from "next/server";
-import {
-    getCategory,
-    getUserCategory,
-} from "../prisma/account/category.methods";
+import { getCategory } from "../prisma/account/category.methods";
 
 export type IsUserCategoryMiddleware = IronSessionRequestUser & {
     category: Category;
@@ -30,13 +26,14 @@ export const isUserCategoryMiddleware: (
             return next(new Error("No categoryId"));
         }
 
-        const category = await getUserCategory(
-            req.session.user.id,
-            parseInt(categoryId)
-        );
+        const category = await getCategory(parseInt(categoryId));
 
         if (!category) {
             return next(new Error("Category not found"));
+        }
+
+        if (category.userId !== req.session.user.id) {
+            return next(new Error("Category not owned by user"));
         }
 
         Object.assign(req, { category });

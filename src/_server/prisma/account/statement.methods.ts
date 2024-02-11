@@ -3,19 +3,18 @@ import { prisma } from "../index";
 import toApiResponse from "@/server/methods/response/toApiResponse";
 
 export async function getAccountTransactions(accountId: number) {
-    return (
-        (
-            await prisma.accountTransaction.findMany({
-                where: { accountId },
-                orderBy: { date: "desc" },
-            })
-        )?.map((t) =>
-            toApiResponse<Transaction>(t, {
-                intKeys: ["id", "accountId", "userId"],
-                dateKeys: ["createdAt", "date"],
-                floatKeys: ["amount"],
-            })
-        ) || []
+    const records =
+        (await prisma.accountTransaction.findMany({
+            where: { accountId },
+            orderBy: { date: "desc" },
+        })) || [];
+
+    return records.map((t) =>
+        toApiResponse<Transaction>(t, {
+            intKeys: ["id", "accountId", "userId"],
+            dateKeys: ["createdAt", "date"],
+            floatKeys: ["amount"],
+        })
     );
 }
 

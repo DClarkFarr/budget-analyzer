@@ -9,6 +9,8 @@ import { getAccountTransactions } from "./statement.methods";
 import { keyBy } from "lodash-es";
 import UserError from "@/server/exceptions/UserException";
 import { getCategory } from "./category.methods";
+import { Transaction } from "@/types/Account/Transaction";
+import { CategoryTransactions } from "@prisma/client";
 
 export async function getCategoryTransactions(categoryId: number) {
     const category = (await getCategory(categoryId))!;
@@ -64,63 +66,127 @@ export async function getCategoryTransactionPivots(
     return rows;
 }
 
-export async function syncCategoryRuleTransactions(category: Category) {
+export function ruleMatchesTransaction<T extends Transaction>(
+    rule: CategoryRule,
+    transaction: T
+) {
+    let isMatched = false;
+    if (
+        !rule.transactionType ||
+        rule.transactionType === transaction.expenseType
+    ) {
+        try {
+            const regExp = new RegExp(rule.rule, "i");
+
+            isMatched = regExp.test(transaction.description);
+        } catch {
+            isMatched = transaction.description
+                .toLowerCase()
+                .includes(rule.rule.toLowerCase());
+        }
+    }
+
+    return isMatched;
+}
+
+export async function syncCategoryRuleTransactions(
+    category: Category,
+    rule?: CategoryRule
+) {
     /**
-     * TODO: change this to getAccountTransactions() do
-     * include {
-     *  categories (categoryTransactions)
-     *  Remove getCategoryTransactionPivots
-     *  Loop over t.category[] to see if is ignored/is set
-     * }
+     * Filter out the rule in question, if there is one
      */
-    const pivots = keyBy(
-        await getCategoryTransactionPivots(category.id, { excludeSet: false }),
-        "transactionId"
-    );
+    const rules = (await getCategoryRules(category.id)).filter((c) => {
+        return !rule || c.id !== rule.id;
+    });
 
-    const rules = await getCategoryRules(category.id);
+    const toAdd: number[] = []; // transaction ids
+    const toRemove: number[] = []; // categoryTransaction ids
 
-    const toAdd: number[] = [];
-    const toRemove: number[] = [];
+    const transactions = await getAccountTransactions(category.accountId, {
+        includeCategoryPivots: true,
+        minDate: category.startAt || undefined,
+        maxDate: category.endAt || undefined,
+    });
 
-    (await getAccountTransactions(category.accountId)).forEach((t) => {
-        const wasMatched = pivots[t.id] ? true : false;
-        const wasIgnored = !!pivots[t.id]?.ignoredAt;
-        const wasSet = !!pivots[t.id]?.setAt;
-
-        let isMatched = false;
-        for (let i = 0; i < rules.length; i++) {
-            const rule = rules[i];
-            if (
-                rule.transactionType &&
-                rule.transactionType !== t.expenseType
-            ) {
-                isMatched = false;
-            } else {
-                const regExp = new RegExp(rule.rule, "i");
-
-                if (regExp.test(t.description)) {
-                    isMatched = true;
-                    break;
+    transactions.forEach((t) => {
+        const pivots = t.categories.reduce(
+            (acc, c) => {
+                if (c.setAt) {
+                    /**
+                     * If it was set for any category, then we shouldn't touch it
+                     */
+                    acc.wasSet = true;
                 }
+
+                if (c.categoryId === category.id) {
+                    if (c.ignoredAt) {
+                        /**
+                         * If it was ignored in the same category, we won't touch it unless the rule in question is a match
+                         */
+                        acc.wasIgnored.push(c);
+                    } else {
+                        /**
+                         * Only set if was matched for this category
+                         */
+                        acc.wasMatched.push(c);
+                    }
+                }
+
+                return acc;
+            },
+            {
+                wasIgnored: [] as CategoryTransactions[],
+                wasMatched: [] as CategoryTransactions[],
+                wasSet: false,
+            }
+        );
+
+        let isMatchedByOthers = false;
+        for (let i = 0; i < rules.length; i++) {
+            const r = rules[i];
+            if (ruleMatchesTransaction(r, t)) {
+                isMatchedByOthers = true;
+                break;
             }
         }
 
-        if (wasSet) {
-            console.log("got", wasSet, "from", t, "and", pivots[t.id]);
+        let isMatchedByThis = false;
+        if (rule) {
+            isMatchedByThis = ruleMatchesTransaction(rule, t);
+        }
+
+        if (pivots.wasSet) {
+            console.log("transaction was set", t);
             // do nothing
-        } else if (wasMatched !== isMatched || (isMatched && wasIgnored)) {
-            if (isMatched) {
+        } else {
+            if (pivots.wasIgnored.length) {
+                // If it was ignored, we don't care if it was matched.
+                // We only care if it was matched by the rule in question.
+                // Don't remove if it was ignored
+                if (isMatchedByThis) {
+                    /**
+                     * The altered rule matches the transaction.
+                     * So we can remove other ignored rows for this category
+                     */
+                    toRemove.push(...pivots.wasIgnored.map((c) => c.id));
+                    toAdd.push(t.id);
+                }
+            } else if (
+                !pivots.wasMatched.length &&
+                (isMatchedByOthers || isMatchedByThis)
+            ) {
+                /**
+                 * If it wasn't matched by any rule, we add it
+                 */
                 toAdd.push(t.id);
-            } else {
-                toRemove.push(t.id);
             }
         }
     });
 
     await prisma.categoryTransactions.deleteMany({
         where: {
-            transactionId: {
+            id: {
                 in: toRemove,
             },
             categoryId: category.id,

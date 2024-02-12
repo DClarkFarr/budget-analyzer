@@ -1,17 +1,36 @@
 import { ProcessedTransaction, Transaction } from "@/types/Account/Transaction";
 import { prisma } from "../index";
 import toApiResponse from "@/server/methods/response/toApiResponse";
-import { Category } from "@prisma/client";
+import { Category, CategoryTransactions } from "@prisma/client";
 
-export async function getAccountTransactions(accountId: number) {
-    const records =
-        (await prisma.accountTransaction.findMany({
-            where: { accountId },
-            orderBy: { date: "desc" },
-        })) || [];
+export async function getAccountTransactions<IC extends boolean>(
+    accountId: number,
+    options: {
+        includeCategoryPivots?: IC;
+        minDate?: string;
+        maxDate?: string;
+    } = {}
+) {
+    type Response = IC extends true
+        ? Transaction & { categories: CategoryTransactions[] }
+        : Transaction;
+
+    const records = (await prisma.accountTransaction.findMany({
+        where: {
+            accountId,
+            date: {
+                gte: options.minDate,
+                lte: options.maxDate,
+            },
+        },
+        include: {
+            categories: !!options?.includeCategoryPivots,
+        },
+        orderBy: { date: "desc" },
+    })) as unknown as Response[];
 
     return records.map((t) =>
-        toApiResponse<Transaction>(t, {
+        toApiResponse<Response>(t, {
             intKeys: ["id", "accountId", "userId"],
             dateKeys: ["createdAt", "date"],
             floatKeys: ["amount"],

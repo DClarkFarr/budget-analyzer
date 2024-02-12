@@ -25,7 +25,7 @@ export const POST = chainMiddleware(
 
             const rule = await createCategoryRule(category, body);
 
-            syncCategoryRuleTransactions(category);
+            syncCategoryRuleTransactions(category, rule);
 
             return NextResponse.json(rule);
         } catch (err) {

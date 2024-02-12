@@ -25,7 +25,7 @@ export const PUT = chainMiddleware(
 
             const rule = await updateCategoryRule(category.id, ruleId, body);
 
-            await syncCategoryRuleTransactions(category);
+            await syncCategoryRuleTransactions(category, rule);
 
             return NextResponse.json(rule);
         } catch (err) {

@@ -104,4 +104,13 @@ export default class AccountService {
             .delete(`/category/${categoryId}/rule/${ruleId}`)
             .then((res) => res.data);
     }
+
+    static moveTransactionToCategory(
+        categoryId: number,
+        transactionId: number
+    ) {
+        return webApi
+            .post(`/category/${categoryId}/transaction`, { transactionId })
+            .then((res) => res.data);
+    }
 }

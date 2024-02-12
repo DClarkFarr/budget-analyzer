@@ -10,49 +10,51 @@ import { keyBy } from "lodash-es";
 import UserError from "@/server/exceptions/UserException";
 import { getCategory } from "./category.methods";
 import { Transaction } from "@/types/Account/Transaction";
-import { CategoryTransactions } from "@prisma/client";
+import { AccountTransaction, CategoryTransactions } from "@prisma/client";
 
 export async function getCategoryTransactions(categoryId: number) {
     const category = (await getCategory(categoryId))!;
 
-    const res = await prisma.category.findFirst({
-        where: {
-            id: categoryId,
-        },
-        include: {
-            transactions: {
-                include: {
-                    transaction: true,
-                },
-            },
-        },
-    });
+    const params: (string | number)[] = [categoryId];
+    if (category.startAt) {
+        params.push(category.startAt);
+    }
+    if (category.endAt) {
+        params.push(category.endAt);
+    }
 
-    return (res?.transactions || [])
-        .filter((p) => {
-            if (
-                category.startAt &&
-                p.transaction.date < new Date(category.startAt)
-            ) {
-                return false;
-            }
+    const query = `
+      SELECT 
+        t.* 
+      FROM AccountTransaction t
+      JOIN CategoryTransactions ct ON ct.transactionId = t.id
+      WHERE ct.categoryId = ?
+      AND ct.ignoredAt IS NULL
+      ${category.startAt ? "AND t.date >= ? " : ""}
+      ${category.endAt ? "AND t.date <= ? " : ""}
+      AND EXISTS(
+        SELECT c.id FROM Category c
+        WHERE c.id = ct.categoryId
+        AND c.deletedAt IS NULL
+      )
+    `;
 
-            if (
-                category.endAt &&
-                p.transaction.date > new Date(category.endAt)
-            ) {
-                return false;
-            }
+    const rawTransactions = await prisma.$queryRawUnsafe<AccountTransaction[]>(
+        query,
+        ...params
+    );
 
-            return true;
+    const matched = rawTransactions.filter((t) =>
+        t.description.toLocaleLowerCase().includes("audible")
+    );
+
+    return rawTransactions.map((t) =>
+        toApiResponse<Transaction>(t, {
+            intKeys: ["id", "accountId", "userId"],
+            dateKeys: ["date", "createdAt"],
+            floatKeys: ["amount"],
         })
-        .map((p) =>
-            toApiResponse(p.transaction, {
-                intKeys: ["id", "accountId", "userId"],
-                dateKeys: ["date", "createdAt"],
-                floatKeys: ["amount"],
-            })
-        );
+    );
 }
 
 export async function getCategoryTransactionPivots(
@@ -157,7 +159,7 @@ export async function syncCategoryRuleTransactions(
         }
 
         if (pivots.wasSet) {
-            console.log("transaction was set", t);
+            // console.log("transaction was set", t);
             // do nothing
         } else {
             if (pivots.wasIgnored.length) {
@@ -180,6 +182,14 @@ export async function syncCategoryRuleTransactions(
                  * If it wasn't matched by any rule, we add it
                  */
                 toAdd.push(t.id);
+            } else if (pivots.wasMatched.length) {
+                /**
+                 * Old records that aren't matched anymore.
+                 * Remove
+                 */
+
+                console.log("removing", ...pivots.wasMatched.map((c) => c.id));
+                toRemove.push(...pivots.wasMatched.map((c) => c.id));
             }
         }
     });
@@ -296,4 +306,40 @@ export async function getCategoryRules(categoryId: number) {
             dateKeys: ["createdAt"],
         })
     );
+}
+
+export async function moveTransactionToCategory(
+    category: Category,
+    transactionId: number
+) {
+    await prisma.categoryTransactions.updateMany({
+        where: {
+            transactionId,
+            categoryId: {
+                not: category.id,
+            },
+        },
+        data: {
+            ignoredAt: new Date(),
+        },
+    });
+
+    await prisma.categoryTransactions.upsert({
+        where: {
+            category_transaction: {
+                categoryId: category.id,
+                transactionId,
+            },
+        },
+        update: {
+            ignoredAt: null,
+            setAt: new Date(),
+        },
+        create: {
+            categoryId: category.id,
+            transactionId,
+            ignoredAt: null,
+            setAt: new Date(),
+        },
+    });
 }

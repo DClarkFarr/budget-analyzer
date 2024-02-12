@@ -5,7 +5,8 @@ import TransactionsTable from "../Statement/TransactionsTable";
 import { useDuplicateQuery } from "@/hooks/useDuplicateQuery";
 
 export default function DuplicateList({ accountId }: { accountId: number }) {
-    const { transactions, isLoading } = useDuplicateQuery(accountId);
+    const { transactions, isLoading, moveTransactionToCategory } =
+        useDuplicateQuery(accountId);
 
     return (
         <>
@@ -19,7 +20,10 @@ export default function DuplicateList({ accountId }: { accountId: number }) {
             {isLoading && <div>Loading translations...</div>}
             {!isLoading && (
                 <div>
-                    <DuplicateTransactionsTable transactions={transactions} />
+                    <DuplicateTransactionsTable
+                        transactions={transactions}
+                        onSelectCategory={moveTransactionToCategory}
+                    />
                 </div>
             )}
             {!isLoading && transactions.length === 0 && (

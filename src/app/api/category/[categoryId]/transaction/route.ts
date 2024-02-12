@@ -4,7 +4,10 @@ import {
     hasUserMiddleware,
     startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
-import { getCategoryTransactions } from "@/server/prisma/account/categoryRule.methods";
+import {
+    getCategoryTransactions,
+    moveTransactionToCategory,
+} from "@/server/prisma/account/categoryRule.methods";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +26,37 @@ export const GET = chainMiddleware(
             console.warn("error fetching category transactions", err);
             return NextResponse.json(
                 { message: "Error getting category transactions" },
+                { status: 405 }
+            );
+        }
+    }
+);
+
+/**
+ * Set category transaction pivot
+ */
+export const POST = chainMiddleware(
+    [startSessionMiddleware(), hasUserMiddleware(), isUserCategoryMiddleware()],
+    async (req, res) => {
+        const category = req.category;
+        const body = (await req.json()) as { transactionId: number };
+        if (!body.transactionId) {
+            return NextResponse.json(
+                { message: "Transaction ID required" },
+                { status: 400 }
+            );
+        }
+
+        try {
+            await moveTransactionToCategory(category, body.transactionId);
+
+            return NextResponse.json({
+                message: "Transaction moved to category",
+            });
+        } catch (err) {
+            console.warn("error setting category transaction pivot", err);
+            return NextResponse.json(
+                { message: "Moving transaction to category" },
                 { status: 405 }
             );
         }

@@ -21,8 +21,13 @@ const bankMap = {
 
 export default function DuplicateTransactionsTable({
     transactions,
+    onSelectCategory,
 }: {
     transactions: (Transaction & { categories: Category[] })[];
+    onSelectCategory: (
+        categoryId: number,
+        transactionId: number
+    ) => Promise<void>;
 }) {
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -125,6 +130,18 @@ export default function DuplicateTransactionsTable({
         setHideOutgoing(!hideOutgoing);
     };
 
+    const [updatingCategory, setUpdatingCategory] = useState<number | false>(
+        false
+    );
+    const onClickCategory = async (
+        categoryId: number,
+        transactionId: number
+    ) => {
+        setUpdatingCategory(categoryId);
+        await onSelectCategory(categoryId, transactionId);
+        setUpdatingCategory(false);
+    };
+
     return (
         <>
             <div className="lg:flex items-center justify-between mb-3">
@@ -224,8 +241,23 @@ export default function DuplicateTransactionsTable({
                                             <div className="flex flex-col gap-y-2">
                                                 {t.categories.map((c) => (
                                                     <div key={c.id}>
-                                                        <button className="btn btn-primary btn-sm w-[150px]">
-                                                            {c.name}
+                                                        <button
+                                                            className="btn btn-primary btn-sm w-[150px]"
+                                                            onClick={() =>
+                                                                onClickCategory(
+                                                                    c.id,
+                                                                    t.id
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                c.id ===
+                                                                updatingCategory
+                                                            }
+                                                        >
+                                                            {c.id ===
+                                                            updatingCategory
+                                                                ? "Updating..."
+                                                                : c.name}
                                                         </button>
                                                     </div>
                                                 ))}

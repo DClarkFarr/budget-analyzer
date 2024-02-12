@@ -6,11 +6,27 @@ type ArrToObject<T extends string[]> = {
   [K in T[number]]: string;
 };
 export default abstract class UploadDriver {
+  accountId: number;
   file: File;
-  constructor(file: File) {
+  transactions: ProcessedTransaction[] = [];
+
+  constructor(accountId: number, file: File) {
+    this.accountId = accountId;
     this.file = file;
   }
-  abstract getTransactions(): Promise<ProcessedTransaction[]>;
+  async getTransactions(): Promise<ProcessedTransaction[]> {
+    if (!this.transactions.length) {
+      await this.processTransactions();
+    }
+
+    this.fileIsValidOrThrow();
+
+    return this.transactions;
+  }
+
+  abstract processTransactions(): Promise<void>;
+
+  abstract fileIsValidOrThrow(): void;
 
   strToHash(str: string) {
     return crypto.createHash("md5").update(str).digest("hex");

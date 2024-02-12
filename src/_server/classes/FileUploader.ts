@@ -6,11 +6,13 @@ import VenmoUploader from "./FileUploader/VenmoUploader";
 export class FileUploader {
   type: StatementType;
   file: File;
+  accountId: number;
 
   driver: UploadDriver;
-  constructor(type: StatementType, file: File) {
+  constructor(accountId: number, type: StatementType, file: File) {
     this.type = type;
     this.file = file;
+    this.accountId = accountId;
 
     this.driver = this.getDriver();
   }
@@ -18,9 +20,9 @@ export class FileUploader {
   getDriver() {
     switch (this.type) {
       case "wells_fargo":
-        return new WellsFargoUploader(this.file);
+        return new WellsFargoUploader(this.accountId, this.file);
       case "venmo":
-        return new VenmoUploader(this.file);
+        return new VenmoUploader(this.accountId, this.file);
       default:
         throw new Error("Invalid statement type");
     }

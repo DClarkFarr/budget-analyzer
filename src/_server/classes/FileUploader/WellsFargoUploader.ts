@@ -3,7 +3,27 @@ import UploadDriver from "./UploadDriver";
 import { DateTime } from "luxon";
 
 export default class WellsFargoUploader extends UploadDriver {
-  async getTransactions() {
+  fileIsValidOrThrow() {
+    if (!this.transactions.length) {
+      throw new Error("No transactions");
+    }
+
+    const [row] = this.transactions;
+
+    if (!(row.date && DateTime.fromISO(row.date).isValid)) {
+      throw new Error("Invalid date: " + row.date);
+    }
+
+    if (isNaN(row.amount)) {
+      throw new Error("Invalid amount: " + row.amount);
+    }
+
+    if (!row.description) {
+      throw new Error("Invalid description: " + row.description);
+    }
+  }
+
+  async processTransactions() {
     const transactions: ProcessedTransaction[] = [];
 
     const rows = await this.fileToCsv([
@@ -27,11 +47,11 @@ export default class WellsFargoUploader extends UploadDriver {
         description,
         date,
         hash: this.strToHash(
-          [amount, expenseType, description, date].join("--")
+          [this.accountId, amount, expenseType, description, date].join("--")
         ),
       });
     });
 
-    return transactions;
+    this.transactions = transactions;
   }
 }

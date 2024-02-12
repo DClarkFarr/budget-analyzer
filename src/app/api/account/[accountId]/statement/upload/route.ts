@@ -22,20 +22,35 @@ export const POST = chainMiddleware(
     const file = fd.get("file");
     const type = fd.get("type");
 
-    const uploader = new FileUploader(type as StatementType, file as File);
-
-    const transactions = await uploader.getTransactions();
-
-    const { created, skipped } = await importProcessedTransactions(
-      userId,
+    const uploader = new FileUploader(
       accountId,
-      transactions
+      type as StatementType,
+      file as File
     );
 
-    return NextResponse.json({
-      message: "Upload successful",
-      created,
-      skipped,
-    });
+    try {
+      const transactions = await uploader.getTransactions();
+
+      const { created, skipped } = await importProcessedTransactions(
+        userId,
+        accountId,
+        transactions
+      );
+
+      return NextResponse.json({
+        message: "Upload successful",
+        created,
+        skipped,
+      });
+    } catch (err) {
+      console.warn("Error uploading statement", err);
+      return NextResponse.json(
+        {
+          message: "Error uploading statement",
+          error: (err as Error)?.message,
+        },
+        { status: 400 }
+      );
+    }
   }
 );

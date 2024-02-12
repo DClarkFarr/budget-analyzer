@@ -206,7 +206,6 @@ export async function syncCategoryRuleTransactions(
     },
   });
 
-  console.log("to add", toAdd);
   await Promise.all(
     toAdd.map((transactionId) => {
       return prisma.categoryTransactions.upsert({

@@ -57,7 +57,10 @@ export default function CategoryDashboard({
     ) => {
         await createRule(data);
         reset();
-        revalidateTransactions();
+
+        setTimeout(() => {
+            revalidateTransactions();
+        }, 100);
     };
 
     const onUpdateRule =

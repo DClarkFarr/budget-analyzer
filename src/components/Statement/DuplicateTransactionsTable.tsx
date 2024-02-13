@@ -22,12 +22,14 @@ const bankMap = {
 export default function DuplicateTransactionsTable({
     transactions,
     onSelectCategory,
+    footer,
 }: {
     transactions: (Transaction & { categories: Category[] })[];
     onSelectCategory: (
         categoryId: number,
         transactionId: number
     ) => Promise<void>;
+    footer?: React.ReactNode;
 }) {
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -267,6 +269,7 @@ export default function DuplicateTransactionsTable({
                                 ))}
                             </tbody>
                         </table>
+                        {footer}
                     </div>
                 </div>
             </div>

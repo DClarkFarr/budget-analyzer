@@ -23,12 +23,17 @@ export default function DuplicateList({ accountId }: { accountId: number }) {
                     <DuplicateTransactionsTable
                         transactions={transactions}
                         onSelectCategory={moveTransactionToCategory}
+                        footer={
+                            <>
+                                {!isLoading && transactions.length === 0 && (
+                                    <div className="pt-3">
+                                        No duplicate transactions found. Good
+                                        job!
+                                    </div>
+                                )}
+                            </>
+                        }
                     />
-                </div>
-            )}
-            {!isLoading && transactions.length === 0 && (
-                <div className="pt-3">
-                    No duplicate transactions found. Good job!
                 </div>
             )}
         </>

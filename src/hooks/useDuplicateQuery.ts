@@ -1,17 +1,8 @@
 import AccountService from "@/services/AccountService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export function useDuplicateQuery(accountId: number) {
+export function useMoveTransactionMutation(accountId: number) {
     const queryClient = useQueryClient();
-
-    const {
-        data: transactions,
-        isLoading,
-        isSuccess,
-    } = useQuery({
-        queryKey: ["duplicate", accountId],
-        queryFn: () => AccountService.getDuplicateTransactions(accountId),
-    });
 
     const { mutateAsync: moveTransactionMutation } = useMutation({
         mutationFn: ({
@@ -27,6 +18,9 @@ export function useDuplicateQuery(accountId: number) {
                 queryKey: ["duplicate", accountId],
             });
             queryClient.invalidateQueries({
+                queryKey: ["uncategorized", accountId],
+            });
+            queryClient.invalidateQueries({
                 queryKey: ["category", "rules", categoryId],
             });
             queryClient.invalidateQueries({
@@ -35,15 +29,32 @@ export function useDuplicateQuery(accountId: number) {
         },
     });
 
+    const moveTransactionToCategory = async (
+        categoryId: number,
+        transactionId: number
+    ) => moveTransactionMutation({ categoryId, transactionId });
+
+    return moveTransactionToCategory;
+}
+
+export function useDuplicateQuery(accountId: number) {
+    const queryClient = useQueryClient();
+
+    const {
+        data: transactions,
+        isLoading,
+        isSuccess,
+    } = useQuery({
+        queryKey: ["duplicate", accountId],
+        queryFn: () => AccountService.getDuplicateTransactions(accountId),
+    });
+
     const revalidate = () =>
         queryClient.refetchQueries({
             queryKey: ["duplicate", accountId],
         });
 
-    const moveTransactionToCategory = async (
-        categoryId: number,
-        transactionId: number
-    ) => moveTransactionMutation({ categoryId, transactionId });
+    const moveTransactionToCategory = useMoveTransactionMutation(accountId);
 
     return {
         transactions: transactions || [],

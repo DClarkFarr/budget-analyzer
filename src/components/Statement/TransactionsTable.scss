@@ -1,12 +1,13 @@
 .transactions {
-  table td {
-    font-size: 13px;
-  }
+    table td {
+        font-size: 13px;
+    }
 
-  &__wrapper {
-    $offset: var(--offset, 0px);
-    max-height: calc(100vh - $offset - 50px);
-    overflow: hidden;
-    overflow-y: auto;
-  }
+    &__wrapper {
+        $offset: var(--offset, 0px);
+        max-height: calc(100vh - $offset - 50px);
+        min-height: 300px;
+        overflow: hidden;
+        overflow-y: auto;
+    }
 }

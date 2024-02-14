@@ -132,7 +132,7 @@ export const useCreateCategoryMutation = (accountId: number) => {
                         return a.name.localeCompare(b.name);
                     });
 
-                    return categories;
+                    return [...categories];
                 }
             );
         },

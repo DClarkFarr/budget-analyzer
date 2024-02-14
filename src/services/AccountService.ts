@@ -77,6 +77,21 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
+    static getCategoriesTotals<K extends number>(categoryIds: K[]) {
+        return webApi
+            .get<{
+                [ID in K]: {
+                    incoming: number;
+                    outgoing: number;
+                    net: number;
+                    count: number;
+                };
+            }>(`/category/total`, {
+                params: { categoryIds: categoryIds.join(",") },
+            })
+            .then((res) => res.data);
+    }
+
     static getCategoryRules(categoryId: number) {
         return webApi
             .get<CategoryRule[]>(`/category/${categoryId}/rule`)

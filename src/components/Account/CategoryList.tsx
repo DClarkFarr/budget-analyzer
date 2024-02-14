@@ -1,7 +1,7 @@
 "use client";
 
 import { Category, CategoryFormState } from "@/types/Statement";
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import CreateCategoryModal from "./CreateCategoryModal";
 import { DateTime } from "luxon";
 import {
@@ -11,6 +11,8 @@ import {
     FaCircleNotch,
 } from "react-icons/fa";
 import Link from "next/link";
+import { useCategoryTotals } from "@/hooks/useCategoryTotals";
+import { formatCurrency } from "@/methods/currency";
 
 const Spinner = () => <FaCircleNotch className="animate-spin" />;
 
@@ -34,6 +36,32 @@ export default function CategoryList({
     );
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [, transition] = useTransition();
+
+    const categoryIds = useMemo(() => {
+        return categories.map((c) => c.id);
+    }, [categories]);
+
+    const { totals: categoryTotals, isLoading } =
+        useCategoryTotals(categoryIds);
+
+    console.log("cateogries count", categories.length);
+
+    useEffect(() => {
+        console.log(
+            "looking at",
+            isLoading,
+            "and",
+            categoryIds.length,
+            "vs",
+            Object.keys(categoryTotals || {}).length
+        );
+        if (
+            !isLoading &&
+            categoryIds.length !== Object.keys(categoryTotals || {}).length
+        ) {
+            console.log("was not the same!");
+        }
+    }, [JSON.stringify(categoryIds), isLoading]);
 
     const onHideCategoryModal = () => {
         setShowCategoryModal(false);
@@ -107,9 +135,9 @@ export default function CategoryList({
                 {categories.map((category) => (
                     <div
                         key={category.id}
-                        className="category flex w-full items-center p-3 bg-slate-50"
+                        className="category flex w-full gap-x-3 items-center p-3 bg-slate-50"
                     >
-                        <div className="shrink w-1/2">
+                        <div className="w-1/3">
                             <div className="category__name text-lg">
                                 {category.name}
                             </div>
@@ -143,7 +171,52 @@ export default function CategoryList({
                                 )}
                             </div>
                         </div>
-                        <div className="shrink">{category.type}</div>
+                        <div className="">{category.type}</div>
+                        <div className="">
+                            <div className="flex gap-x-2 text-center">
+                                <div>
+                                    <div className="text-green-600">
+                                        {formatCurrency(
+                                            categoryTotals?.[category.id]
+                                                ?.incoming || 0
+                                        )}
+                                    </div>
+                                    Income
+                                </div>
+                                <div>
+                                    <div className="text-red-600">
+                                        {formatCurrency(
+                                            categoryTotals?.[category.id]
+                                                ?.outgoing || 0
+                                        )}
+                                    </div>
+                                    <div>Expense</div>
+                                </div>
+                                <div>
+                                    <div
+                                        className={`${
+                                            (categoryTotals?.[category.id]
+                                                ?.net || 0) >= 0
+                                                ? "text-green-600"
+                                                : "text-red-600"
+                                        }`}
+                                    >
+                                        {formatCurrency(
+                                            categoryTotals?.[category.id]
+                                                ?.net || 0
+                                        )}
+                                    </div>
+                                    <div>Net</div>
+                                </div>
+                                <div>
+                                    <div className="text-gray-600">
+                                        {categoryTotals?.[category.id]?.count ||
+                                            0}
+                                    </div>
+                                    <div>Count</div>
+                                </div>
+                            </div>
+                        </div>
                         <div className="ml-auto">
                             <div className="flex gap-x-2">
                                 <div>

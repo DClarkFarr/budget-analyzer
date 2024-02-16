@@ -13,6 +13,8 @@ import {
 import Link from "next/link";
 import { useCategoryTotals } from "@/hooks/useCategoryTotals";
 import { formatCurrency } from "@/methods/currency";
+import { useConfirmModal } from "../Control/ConfirmModal";
+import { useModalContext } from "../Providers/ModalProvider";
 
 const Spinner = () => <FaCircleNotch className="animate-spin" />;
 
@@ -70,10 +72,10 @@ export default function CategoryList({
         }
     };
 
-    const onDeleteCategoryWrapped = (categoryId: number) => {
+    const onDeleteCategoryWrapped = async (categoryId: number) => {
         setDeletingId(categoryId);
+        await onDeleteCategory(categoryId);
         transition(() => {
-            onDeleteCategory(categoryId);
             setDeletingId(null);
         });
     };
@@ -81,6 +83,26 @@ export default function CategoryList({
     const onEditCategory = (category: Category) => {
         setSelectedCategory(category);
         setShowCategoryModal(true);
+    };
+
+    const { showConfirmModal, onClickClose, onClickConfirm } =
+        useConfirmModal();
+
+    const onClickDeleteCategory = async (category: Category) => {
+        showConfirmModal(`delete-cateogry-${category.id}`, {
+            show: true,
+            title: "Really delete category?",
+            message: `Are you sure you want to delete category "${category.name}"?`,
+            accept: "Delete",
+            onConfirm: async () => {
+                onClickConfirm(`delete-cateogry-${category.id}`, async () => {
+                    await onDeleteCategoryWrapped(category.id);
+                });
+            },
+            onClose: async () => {
+                onClickClose(`delete-cateogry-${category.id}`, async () => {});
+            },
+        });
     };
 
     return (
@@ -219,7 +241,7 @@ export default function CategoryList({
                                     <button
                                         className="btn btn-icon text-red-600"
                                         onClick={() =>
-                                            onDeleteCategoryWrapped(category.id)
+                                            onClickDeleteCategory(category)
                                         }
                                     >
                                         {deletingId === category.id ? (

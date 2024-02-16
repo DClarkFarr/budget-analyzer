@@ -1,7 +1,9 @@
 import AccountService from "@/services/AccountService";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCategoryTotals(categoryIds: number[]) {
+    const queryClient = useQueryClient();
+
     const {
         data: totals,
         isLoading,
@@ -11,5 +13,11 @@ export function useCategoryTotals(categoryIds: number[]) {
         queryFn: () => AccountService.getCategoriesTotals(categoryIds),
     });
 
-    return { totals, isLoading, isSuccess };
+    const refetch = () => {
+        queryClient.refetchQueries({
+            queryKey: ["categoryTotals"],
+        });
+    };
+
+    return { totals, isLoading, isSuccess, refetch };
 }

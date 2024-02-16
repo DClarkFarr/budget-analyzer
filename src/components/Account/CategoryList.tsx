@@ -39,29 +39,9 @@ export default function CategoryList({
 
     const categoryIds = useMemo(() => {
         return categories.map((c) => c.id);
-    }, [categories]);
+    }, [categories, categories.length]);
 
-    const { totals: categoryTotals, isLoading } =
-        useCategoryTotals(categoryIds);
-
-    console.log("cateogries count", categories.length);
-
-    useEffect(() => {
-        console.log(
-            "looking at",
-            isLoading,
-            "and",
-            categoryIds.length,
-            "vs",
-            Object.keys(categoryTotals || {}).length
-        );
-        if (
-            !isLoading &&
-            categoryIds.length !== Object.keys(categoryTotals || {}).length
-        ) {
-            console.log("was not the same!");
-        }
-    }, [JSON.stringify(categoryIds), isLoading]);
+    const { totals: categoryTotals } = useCategoryTotals(categoryIds);
 
     const onHideCategoryModal = () => {
         setShowCategoryModal(false);

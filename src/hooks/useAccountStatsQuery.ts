@@ -1,18 +1,18 @@
 import AccountService from "@/services/AccountService";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function useAccountsQuery(userId?: number) {
+export default function useAccountStatsQuery(userId?: number) {
   const queryClient = useQueryClient();
 
   const { isLoading, isError, isSuccess, data, error } = useQuery({
-    queryKey: ["accounts", userId],
-    queryFn: AccountService.list,
+    queryKey: ["accounts", "stats", userId],
+    queryFn: AccountService.accountsStats,
     retry: 1,
   });
 
   const revalidate = () => {
     queryClient.refetchQueries({
-      queryKey: ["accounts", userId],
+      queryKey: ["accounts", "stats", userId],
     });
   };
 
@@ -20,7 +20,7 @@ export default function useAccountsQuery(userId?: number) {
     isLoading,
     isError,
     isSuccess,
-    accounts: data || [],
+    stats: data || {},
     error,
     revalidate,
   };

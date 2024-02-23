@@ -1,10 +1,14 @@
 "use client";
+import useAccountStatsQuery from "@/hooks/useAccountStatsQuery";
 import useAccountsQuery from "@/hooks/useAccountsQuery";
+import { formatNumber } from "@/methods/number";
 import { User } from "@/types/User";
+import { DateTime } from "luxon";
 import Link from "next/link";
 
 export default function AccountList({ user }: { user: User }) {
   const { accounts, isLoading } = useAccountsQuery(user.id);
+  const { stats, isLoading: statsLoading } = useAccountStatsQuery(user.id);
 
   return (
     <div className="account__list">
@@ -37,22 +41,41 @@ export default function AccountList({ user }: { user: User }) {
             </tr>
           </thead>
           <tbody>
-            {accounts.map((account) => (
-              <tr key={account.id}>
-                <td className="px-3 py-2">{account.id}</td>
-                <td className="px-3 py-2">{account.name}</td>
-                <td className="px-3 py-2 w-1/3">TO DO</td>
-                <td className="px-3 py-2 w-1/3">TO DO</td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/dashboard/account/${account.id}`}
-                  >
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {accounts.map((account) => {
+              const accountStats = stats[account.id] || {
+                count: 0,
+                startAt: null,
+                endAt: null,
+              };
+              return (
+                <tr key={account.id}>
+                  <td className="px-3 py-2">{account.id}</td>
+                  <td className="px-3 py-2">{account.name}</td>
+                  <td className="px-3 py-2 w-1/3">
+                    {statsLoading && "Loading..."}
+                    {!statsLoading && formatNumber(accountStats.count)}
+                  </td>
+                  <td className="px-3 py-2 w-1/3">
+                    {statsLoading && "Loading..."}
+                    {!statsLoading && accountStats.startAt
+                      ? DateTime.fromISO(accountStats.startAt).toFormat("DD")
+                      : "N/A"}
+                    {!statsLoading && " - "}
+                    {!statsLoading && accountStats.endAt
+                      ? DateTime.fromISO(accountStats.endAt).toFormat("DD")
+                      : "N/A"}
+                  </td>
+                  <td>
+                    <Link
+                      className="btn btn-primary btn-sm"
+                      href={`/dashboard/account/${account.id}`}
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

@@ -1,6 +1,6 @@
 import UserError from "@/server/exceptions/UserException";
 import { AccountFormState } from "@/types/Account";
-import { prisma } from "./index";
+import { prisma } from "./client";
 import { Account } from "@prisma/client";
 
 export async function getUserAccounts(userId: number) {

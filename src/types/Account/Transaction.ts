@@ -23,3 +23,9 @@ export type ProcessedTransaction = Omit<
   Transaction,
   "id" | "accountId" | "userId" | "createdAt"
 >;
+
+export type AccountTransactionsTotal = {
+  count: number;
+  startAt: string | null;
+  endAt: string | null;
+};

@@ -3,7 +3,7 @@ import {
   CategoryRule,
   CategoryRuleFormState,
 } from "@/types/Statement";
-import { prisma } from "../index";
+import { prisma } from "../client";
 import toApiResponse from "@/server/methods/response/toApiResponse";
 import { getAccountTransactions } from "./statement.methods";
 import { keyBy } from "lodash-es";

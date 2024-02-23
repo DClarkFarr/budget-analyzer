@@ -1,5 +1,5 @@
 import { validateEmail } from "@/server/methods/validate";
-import { prisma } from "@/server/prisma";
+import { prisma } from "@/server/prisma/client";
 import { User } from "@/types/User";
 
 export const findUserById = async (id: number) => {

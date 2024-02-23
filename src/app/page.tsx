@@ -12,7 +12,6 @@ export function metadata(): Metadata {
 }
 
 export default async function Home() {
-  console.log("home page wants session");
   let user: User | undefined = undefined;
   try {
     user = (await getSessionUser()) || undefined;

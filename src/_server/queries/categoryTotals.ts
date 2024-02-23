@@ -72,9 +72,5 @@ export async function getCategoryTotals(userId: number, categoryId: number) {
 
   totals.count = transactions.length;
 
-  if (categoryId === 14) {
-    console.log("total was", transactions.length, "from", transactions[0]);
-  }
-
   return totals;
 }

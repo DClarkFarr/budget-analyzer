@@ -41,8 +41,6 @@ export default function UncategorizedList({
       ...transactionsToObject(transactions),
       ...old,
     }));
-
-    console.log("transactions were", transactions);
   }, [transactions.length]);
 
   const onSelectCategory =

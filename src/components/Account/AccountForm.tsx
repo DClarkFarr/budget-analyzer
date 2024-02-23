@@ -27,6 +27,7 @@ export default function AccountForm({
     register,
     handleSubmit,
     getValues,
+    reset,
   } = useForm({
     mode: "onChange",
     defaultValues: { name: "", color: "#000000", ...initialState },
@@ -42,6 +43,7 @@ export default function AccountForm({
       try {
         const created = await onSubmit(data);
         onSuccess(created);
+        reset();
 
         setAlert({
           success: true,

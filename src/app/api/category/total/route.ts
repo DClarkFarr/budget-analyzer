@@ -3,11 +3,8 @@ import {
   hasUserMiddleware,
   startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
-import {
-  getCategoriesTotals,
-  getCategoryTotals,
-} from "@/server/queries/categoryTotals";
-import { NextResponse, NextRequest } from "next/server";
+import { getCategoriesTotals } from "@/server/queries/categoryTotals";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 

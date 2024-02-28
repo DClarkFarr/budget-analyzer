@@ -3,6 +3,7 @@ import { ExpenseType } from "./Account/Transaction";
 export enum StatementTypes {
     wells_fargo = "wells_fargo",
     venmo = "venmo",
+    afcu = "afcu",
 }
 export type StatementType = keyof typeof StatementTypes;
 

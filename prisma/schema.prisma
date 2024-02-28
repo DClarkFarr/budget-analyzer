@@ -50,6 +50,7 @@ enum TRANSACTION_TYPE {
 enum BANK_TYPE {
   wells_fargo
   venmo
+  afcu
 }
 
 model AccountTransaction {

@@ -5,7 +5,6 @@ import { Account } from "@/types/Account";
 import { Category, CategoryRuleFormState } from "@/types/Statement";
 import RuleForm from "./RuleForm";
 import { Transaction } from "@/types/Account/Transaction";
-import AccountService from "@/services/AccountService";
 import useCategoryRules from "@/hooks/useCategoryRules";
 import { useMemo, useState } from "react";
 import TransactionsTableReadonly from "./TransactionsTableReadonly";

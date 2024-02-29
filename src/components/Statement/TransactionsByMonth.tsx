@@ -1,5 +1,5 @@
 import { formatCurrency } from "@/methods/currency";
-import { Transaction } from "@/types/Account/Transaction";
+import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
 
@@ -10,7 +10,7 @@ export default function TransactionsByMonth({
 }: {
     startDate: string;
     endDate: string;
-    transactions: Transaction[];
+    transactions: WithCategories<Transaction>[];
 }) {
     const monthsToShow = useMemo(() => {
         const months: DateTime[] = [];
@@ -44,6 +44,10 @@ export default function TransactionsByMonth({
         > = {};
 
         transactions.forEach((t) => {
+            const isIgnored = t.categories.every((c) => c.type === "ignore");
+            if (isIgnored) {
+                return;
+            }
             const month = DateTime.fromISO(t.date).toFormat("yyyy-MM");
             if (!map[month]) {
                 map[month] = { incoming: 0, outgoing: 0, net: 0 };

@@ -35,7 +35,7 @@ export async function getAccountTransactions<
         },
         include: {
             categories: !!options?.withCategories
-                ? { include: { category: true } }
+                ? { include: { category: true }, where: { ignoredAt: null } }
                 : !!options?.includeCategoryPivots,
         },
         orderBy: { date: "desc" },

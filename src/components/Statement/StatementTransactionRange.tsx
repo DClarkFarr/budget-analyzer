@@ -1,4 +1,4 @@
-import { Transaction } from "@/types/Account/Transaction";
+import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import TransactionsByMonth from "./TransactionsByMonth";
@@ -6,7 +6,7 @@ import TransactionsByMonth from "./TransactionsByMonth";
 export default function StatementTransactionRange({
     transactions,
 }: {
-    transactions: Transaction[];
+    transactions: WithCategories<Transaction>[];
 }) {
     const transactionsByMonth = useMemo(() => {
         return Object.entries(

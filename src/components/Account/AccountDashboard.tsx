@@ -23,8 +23,10 @@ export default function AccountDashboard({
     user: User;
     accountId: number;
 }) {
-    const { account, transactions, isLoading, categories } =
-        useAccountQuery(accountId);
+    const { account, transactions, isLoading, categories } = useAccountQuery(
+        accountId,
+        { withCategories: true }
+    );
 
     const { createCategory } = useCreateCategoryMutation(accountId);
     const { deleteCategory } = useDeleteCategoryMutation(accountId);
@@ -54,7 +56,12 @@ export default function AccountDashboard({
         {
             label: "Transactions",
             key: "transactions",
-            pane: <TransactionsTable transactions={transactions} />,
+            pane: (
+                <TransactionsTable
+                    transactions={transactions}
+                    withCategories={true}
+                />
+            ),
         },
         {
             label: "Categories",

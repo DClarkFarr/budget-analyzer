@@ -1,4 +1,4 @@
-import { Transaction } from "@/types/Account/Transaction";
+import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { DateTime } from "luxon";
 import {
     useCallback,
@@ -18,14 +18,19 @@ type Slot = {
     heading: string;
     cell: (t: Transaction) => React.ReactNode;
 };
-export default function TransactionsTable({
-    transactions,
-    slots = [],
+
+export default function TransactionsTable<WC extends boolean | undefined>({
     footer,
+    slots = [],
+    transactions,
+    withCategories = false,
 }: {
     slots?: Slot[];
-    transactions: Transaction[];
+    transactions: WC extends true
+        ? WithCategories<Transaction>[]
+        : Transaction[];
     footer?: React.ReactNode;
+    withCategories?: WC;
 }) {
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -204,6 +209,7 @@ export default function TransactionsTable({
                                     {slots.map((s) => (
                                         <th key={s.key}>{s.heading}</th>
                                     ))}
+                                    {withCategories && <th>Categories</th>}
                                 </tr>
                                 {filteredTransactions.current.map((t) => (
                                     <tr
@@ -227,6 +233,22 @@ export default function TransactionsTable({
                                         {slots.map((s) => (
                                             <td key={s.key}>{s.cell(t)}</td>
                                         ))}
+                                        {withCategories && (
+                                            <td>
+                                                <div className="min-w-[150px] flex gap-2 flex-wrap">
+                                                    {(
+                                                        t as WithCategories<Transaction>
+                                                    ).categories.map((c) => (
+                                                        <div
+                                                            key={c.id}
+                                                            className="category bg-gray-300 rounded-sm leading-none whitespace-nowrap py-1 px-2"
+                                                        >
+                                                            {c.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

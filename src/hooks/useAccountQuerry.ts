@@ -6,7 +6,12 @@ import { Category, CategoryFormState } from "@/types/Statement";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-export default function useAccountQuery(accountId: number) {
+export default function useAccountQuery<WC extends boolean>(
+    accountId: number,
+    options: { withCategories: WC } = {
+        withCategories: false as WC,
+    }
+) {
     const [
         { data: account, isLoading: accountLoading, isError: accountError },
         {
@@ -28,7 +33,8 @@ export default function useAccountQuery(accountId: number) {
             },
             {
                 queryKey: ["transactions", accountId],
-                queryFn: () => AccountService.getTransactions(accountId),
+                queryFn: () =>
+                    AccountService.getTransactions<WC>(accountId, options),
                 staleTime: Infinity,
             },
             {

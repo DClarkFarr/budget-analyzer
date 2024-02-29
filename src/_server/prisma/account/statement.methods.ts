@@ -3,44 +3,68 @@ import { prisma } from "../client";
 import toApiResponse from "@/server/methods/response/toApiResponse";
 import { Category, CategoryTransactions } from "@prisma/client";
 
-export async function getAccountTransactions<IC extends boolean>(
-  accountId: number,
-  options: {
-    includeCategoryPivots?: IC;
-    minDate?: string;
-    maxDate?: string;
-  } = {}
+export async function getAccountTransactions<
+    IC extends boolean,
+    WC extends boolean
+>(
+    accountId: number,
+    options: {
+        includeCategoryPivots?: IC;
+        withCategories?: WC;
+        minDate?: string;
+        maxDate?: string;
+    } = {}
 ) {
-  type Response = IC extends true
-    ? Transaction & { categories: CategoryTransactions[] }
-    : Transaction;
+    type TransactionWithCategories = Transaction & {
+        categories: (CategoryTransactions & { category: Category[] })[];
+    };
 
-  const records = (await prisma.accountTransaction.findMany({
-    where: {
-      accountId,
-      date: {
-        gte: options.minDate,
-        lte: options.maxDate,
-      },
-    },
-    include: {
-      categories: !!options?.includeCategoryPivots,
-    },
-    orderBy: { date: "desc" },
-  })) as unknown as Response[];
+    type Response = WC extends true
+        ? TransactionWithCategories
+        : IC extends true
+        ? Transaction & { categories: CategoryTransactions[] }
+        : Transaction;
 
-  return records.map((t) =>
-    toApiResponse<Response>(t, {
-      intKeys: ["id", "accountId", "userId"],
-      dateKeys: ["createdAt", "date"],
-      floatKeys: ["amount"],
-    })
-  );
+    const records = (await prisma.accountTransaction.findMany({
+        where: {
+            accountId,
+            date: {
+                gte: options.minDate,
+                lte: options.maxDate,
+            },
+        },
+        include: {
+            categories: !!options?.withCategories
+                ? { include: { category: true } }
+                : !!options?.includeCategoryPivots,
+        },
+        orderBy: { date: "desc" },
+    })) as unknown as Response[];
+
+    return records
+        .map((t) => {
+            if (options.withCategories) {
+                const item = t as TransactionWithCategories;
+
+                return {
+                    ...t,
+                    categories: item.categories.map((c) => c.category),
+                };
+            }
+            return t;
+        })
+        .map((t) =>
+            toApiResponse<Response>(t, {
+                intKeys: ["id", "accountId", "userId"],
+                dateKeys: ["createdAt", "date"],
+                floatKeys: ["amount"],
+            })
+        );
 }
 
 export async function getAccountDuplicateTransactions(accountId: number) {
-  const duplicatesGrouped = await prisma.$queryRawUnsafe<Transaction[]>(
-    `
+    const duplicatesGrouped = await prisma.$queryRawUnsafe<Transaction[]>(
+        `
         SELECT 
           t.*,
           GROUP_CONCAT(ct.categoryId) as categoryIds,
@@ -54,44 +78,44 @@ export async function getAccountDuplicateTransactions(accountId: number) {
         GROUP BY t.id
         HAVING total > 1
     `,
-    accountId
-  );
-
-  const transactions = await prisma.accountTransaction.findMany({
-    where: {
-      id: {
-        in: duplicatesGrouped.map((t) => t.id),
-      },
-    },
-    include: {
-      categories: {
-        include: {
-          category: true,
-        },
-      },
-    },
-  });
-
-  return transactions.map((t) => {
-    return toApiResponse<Transaction & { categories: Category[] }>(
-      {
-        ...t,
-        categories: t.categories.map((c) =>
-          toApiResponse<Category>(c.category, {
-            intKeys: ["id", "accountId", "userId"],
-            dateKeys: ["createdAt", "startAt", "endAt"],
-          })
-        ),
-      },
-      {
-        floatKeys: ["amount"],
-      }
+        accountId
     );
-  });
+
+    const transactions = await prisma.accountTransaction.findMany({
+        where: {
+            id: {
+                in: duplicatesGrouped.map((t) => t.id),
+            },
+        },
+        include: {
+            categories: {
+                include: {
+                    category: true,
+                },
+            },
+        },
+    });
+
+    return transactions.map((t) => {
+        return toApiResponse<Transaction & { categories: Category[] }>(
+            {
+                ...t,
+                categories: t.categories.map((c) =>
+                    toApiResponse<Category>(c.category, {
+                        intKeys: ["id", "accountId", "userId"],
+                        dateKeys: ["createdAt", "startAt", "endAt"],
+                    })
+                ),
+            },
+            {
+                floatKeys: ["amount"],
+            }
+        );
+    });
 }
 export async function getAccountUncategorizedTransactions(accountId: number) {
-  const transactions = await prisma.$queryRawUnsafe<Transaction[]>(
-    `
+    const transactions = await prisma.$queryRawUnsafe<Transaction[]>(
+        `
         SELECT t.* 
         FROM AccountTransaction t 
         WHERE t.accountId = ?
@@ -104,40 +128,40 @@ export async function getAccountUncategorizedTransactions(accountId: number) {
         )
         GROUP BY t.id
       `,
-    accountId
-  );
+        accountId
+    );
 
-  return transactions.map((t) =>
-    toApiResponse(t, {
-      floatKeys: ["amount"],
-    })
-  );
+    return transactions.map((t) =>
+        toApiResponse(t, {
+            floatKeys: ["amount"],
+        })
+    );
 }
 
 export async function insertTransaction(
-  userId: number,
-  accountId: number,
-  transaction: ProcessedTransaction
+    userId: number,
+    accountId: number,
+    transaction: ProcessedTransaction
 ) {
-  const existing = await prisma.accountTransaction.findFirst({
-    where: {
-      accountId,
-      userId,
-      hash: transaction.hash,
-    },
-  });
+    const existing = await prisma.accountTransaction.findFirst({
+        where: {
+            accountId,
+            userId,
+            hash: transaction.hash,
+        },
+    });
 
-  if (existing) {
-    return false;
-  }
+    if (existing) {
+        return false;
+    }
 
-  const created = await prisma.accountTransaction.create({
-    data: {
-      accountId,
-      userId,
-      ...transaction,
-    },
-  });
+    const created = await prisma.accountTransaction.create({
+        data: {
+            accountId,
+            userId,
+            ...transaction,
+        },
+    });
 
-  return created;
+    return created;
 }

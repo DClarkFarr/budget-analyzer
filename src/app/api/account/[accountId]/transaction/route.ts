@@ -24,7 +24,12 @@ export const GET = chainMiddleware(
                 );
             }
 
-            const transactions = await getAccountTransactions(accountId);
+            const withCategories =
+                req.nextUrl.searchParams.get("withCategories") === "true";
+
+            const transactions = await getAccountTransactions(accountId, {
+                withCategories,
+            });
 
             return NextResponse.json(transactions);
         } catch (err) {

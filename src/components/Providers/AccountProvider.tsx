@@ -14,7 +14,7 @@ interface AccountProviderState {
 }
 
 interface AccountProviderContext extends AccountProviderState {
-    setAccount: (account: Account | null) => Promise<void>;
+    setAccount: (account: Account | null) => Promise<AccountProviderState>;
     setYear: (year: string) => void;
 }
 
@@ -41,13 +41,13 @@ function accountProviderReducer(
         case "year":
             return { ...state, currentYear: action.payload };
         case "clear":
-            return { ...state, account: null };
+            return { ...state, ...accountProviderInitialState };
     }
 }
 
 const AccountContext = createContext<AccountProviderContext>({
     ...accountProviderInitialState,
-    setAccount: async () => {},
+    setAccount: async () => ({ ...accountProviderInitialState }),
     setYear: () => {},
 });
 
@@ -81,7 +81,7 @@ const getAccountState = async (
     return {
         account,
         startYear: startYear.toISO() || "",
-        currentYear: startYear.toISO() || "",
+        currentYear: endYear.toISO() || "",
         endYear: endYear.toISO() || "",
         years,
     };
@@ -94,11 +94,15 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     );
 
     const setAccount = async (account: Account | null) => {
+        let payload = { ...accountProviderInitialState };
         if (account) {
-            dispatch({ type: "set", payload: await getAccountState(account) });
+            payload = await getAccountState(account);
+            dispatch({ type: "set", payload });
         } else {
             dispatch({ type: "clear" });
         }
+
+        return payload;
     };
 
     const setYear = (year: string) => {

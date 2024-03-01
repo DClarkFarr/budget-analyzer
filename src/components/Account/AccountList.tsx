@@ -2,31 +2,13 @@
 import useAccountStatsQuery from "@/hooks/useAccountStatsQuery";
 import useAccountsQuery from "@/hooks/useAccountsQuery";
 import { formatNumber } from "@/methods/number";
-import { Account } from "@/types/Account";
 import { User } from "@/types/User";
 import { DateTime } from "luxon";
 import Link from "next/link";
-import { useAccountContext } from "../Providers/AccountProvider";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AccountList({ user }: { user: User }) {
     const { accounts, isLoading } = useAccountsQuery(user.id);
     const { stats, isLoading: statsLoading } = useAccountStatsQuery(user.id);
-    const router = useRouter();
-
-    const accountContext = useAccountContext();
-
-    const [enteringAccount, setEnteringAccount] = useState<number | null>(null);
-
-    useEffect(() => {
-        accountContext.setAccount(null);
-    }, []);
-
-    const onEnterAccount = async (account: Account) => {
-        await accountContext.setAccount(account);
-        router.push(`/dashboard/account/${account.id}`);
-    };
 
     return (
         <div className="account__list">
@@ -96,19 +78,12 @@ export default function AccountList({ user }: { user: User }) {
                                             : "N/A"}
                                     </td>
                                     <td>
-                                        <button
+                                        <Link
                                             className="btn btn-primary btn-sm"
-                                            onClick={() =>
-                                                onEnterAccount(account)
-                                            }
-                                            disabled={
-                                                enteringAccount === account.id
-                                            }
+                                            href={`/dashboard/account/${account.id}`}
                                         >
-                                            {enteringAccount === account.id
-                                                ? "Entering..."
-                                                : "Enter Account"}
-                                        </button>
+                                            View
+                                        </Link>
                                     </td>
                                 </tr>
                             );

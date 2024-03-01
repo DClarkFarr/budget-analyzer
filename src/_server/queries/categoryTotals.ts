@@ -1,16 +1,18 @@
 import { DateTime } from "luxon";
 import UserError from "../exceptions/UserException";
 import { prisma } from "../prisma/client";
+import { getMaxDate, getMinDate } from "../methods/date";
 
 export async function getCategoriesTotals(
     userId: number,
-    categoryIds: number[]
+    categoryIds: number[],
+    options: { minDate?: string; maxDate?: string } = {}
 ) {
     const totalsArr = await Promise.all(
         categoryIds.map(async (categoryId) => {
             return {
                 categoryId,
-                totals: await getCategoryTotals(userId, categoryId),
+                totals: await getCategoryTotals(userId, categoryId, options),
             };
         })
     );
@@ -23,7 +25,11 @@ export async function getCategoriesTotals(
     return totals;
 }
 
-export async function getCategoryTotals(userId: number, categoryId: number) {
+export async function getCategoryTotals(
+    userId: number,
+    categoryId: number,
+    options: { minDate?: string; maxDate?: string } = {}
+) {
     const category = await prisma.category.findUnique({
         where: {
             id: categoryId,
@@ -35,15 +41,15 @@ export async function getCategoryTotals(userId: number, categoryId: number) {
         throw new UserError("Category not found: " + categoryId);
     }
 
-    const startAt = category.startAt || undefined;
-    const endAt = category.endAt || undefined;
+    const startAt = getMaxDate(options.minDate, category.startAt || undefined);
+    const endAt = getMinDate(options.maxDate, category.endAt || undefined);
 
     const transactions = await prisma.accountTransaction.findMany({
         where: {
             accountId: category.accountId,
             date: {
-                gte: startAt,
-                lte: endAt,
+                gte: startAt ? startAt.toJSDate() : undefined,
+                lte: endAt ? endAt.toJSDate() : undefined,
             },
             categories: {
                 some: {

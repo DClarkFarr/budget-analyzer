@@ -16,6 +16,7 @@ import { CategoryFormState } from "@/types/Statement";
 import UncategorizedList from "./UncategorizedList";
 import DuplicateList from "./DuplicateList";
 import { useAccountContext } from "../Providers/AccountProvider";
+import useQueryParams from "@/hooks/useQueryParams";
 
 export default function AccountDashboard({
     user,
@@ -44,6 +45,8 @@ export default function AccountDashboard({
         accountId,
         currentYear
     );
+
+    const { pushQuery } = useQueryParams();
 
     const onCreateCategory = async (data: CategoryFormState) => {
         await createCategory(data);
@@ -116,7 +119,7 @@ export default function AccountDashboard({
 
     const onChangeTab = (view: string) => {
         setView(view as "statement" | "transactions" | "categories");
-        router.push(`?view=${view}`);
+        pushQuery({ view });
     };
 
     return (

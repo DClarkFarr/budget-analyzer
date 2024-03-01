@@ -47,7 +47,6 @@ export default class AccountService {
             ? WithCategories<Transaction>
             : Transaction;
 
-        console.log("options was", options);
         return webApi
             .get<Response[]>(`/account/${accountId}/transaction`, {
                 params: options,

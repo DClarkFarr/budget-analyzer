@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import Router from "next/router";
 import useSWR from "swr";
 import { User } from "@/types/User";
 
@@ -20,7 +19,7 @@ export default function useUser({
             // If redirectIfFound is also set, redirect if the user was found
             (redirectIfFound && user)
         ) {
-            Router.push(redirectTo);
+            // todo, redirect
         }
     }, [user, redirectIfFound, redirectTo]);
 

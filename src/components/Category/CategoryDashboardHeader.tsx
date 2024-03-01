@@ -7,6 +7,7 @@ import Select, { SingleValue } from "react-select";
 import { useRouter } from "next/navigation";
 import useAccountCategories from "@/hooks/useAccountCategories";
 import { useEffect, useState } from "react";
+import { useAccountContext } from "../Providers/AccountProvider";
 
 export default function CategoryDashboardHeader({
     account,
@@ -15,7 +16,8 @@ export default function CategoryDashboardHeader({
     account: Account;
     category: Category;
 }) {
-    const { categories } = useAccountCategories(account.id);
+    const { currentYear } = useAccountContext();
+    const { categories } = useAccountCategories(account.id, currentYear);
 
     const id = Date.now().toString();
     const [isMounted, setIsMounted] = useState(false);

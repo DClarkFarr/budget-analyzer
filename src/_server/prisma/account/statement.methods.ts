@@ -113,12 +113,26 @@ export async function getAccountDuplicateTransactions(accountId: number) {
         );
     });
 }
-export async function getAccountUncategorizedTransactions(accountId: number) {
+export async function getAccountUncategorizedTransactions(
+    accountId: number,
+    options: { maxDate?: string; minDate?: string } = {}
+) {
+    const params: (string | number)[] = [accountId];
+
+    if (options.minDate) {
+        params.push(options.minDate);
+    }
+    if (options.maxDate) {
+        params.push(options.maxDate);
+    }
+
     const transactions = await prisma.$queryRawUnsafe<Transaction[]>(
         `
         SELECT t.* 
         FROM AccountTransaction t 
         WHERE t.accountId = ?
+        ${options.minDate ? "AND t.date >= ?" : ""}
+        ${options.maxDate ? "AND t.date <= ?" : ""}
         AND NOT EXISTS(
           SELECT ct.id FROM CategoryTransactions ct 
           JOIN Category c ON c.id = ct.categoryId
@@ -128,7 +142,7 @@ export async function getAccountUncategorizedTransactions(accountId: number) {
         )
         GROUP BY t.id
       `,
-        accountId
+        ...params
     );
 
     return transactions.map((t) =>

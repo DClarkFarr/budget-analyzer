@@ -5,6 +5,7 @@ export function useMoveTransactionMutation(accountId: number, year: number) {
     const queryClient = useQueryClient();
 
     const { mutateAsync: moveTransactionMutation } = useMutation({
+        mutationKey: ["uncategorized", accountId, year],
         mutationFn: ({
             categoryId,
             transactionId,

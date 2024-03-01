@@ -113,8 +113,6 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "year", payload: year });
     };
 
-    console.log("rendering account provider");
-
     return (
         <AccountContext.Provider value={{ ...state, setAccount, setYear }}>
             {children}

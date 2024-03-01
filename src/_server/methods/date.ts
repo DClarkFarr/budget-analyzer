@@ -3,8 +3,6 @@ import { DateTime } from "luxon";
 export type DateTypes = DateTime | DateTime<true> | Date | string;
 
 export function toLuxonDate(date: DateTypes) {
-    console.log("got date", date);
-
     if (typeof date === "string") {
         return DateTime.fromISO(date);
     }

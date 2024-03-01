@@ -2,103 +2,110 @@
 
 import { Modal, Button } from "flowbite-react";
 import { useState } from "react";
-import { useModalContext } from "../Providers/ModalProvider";
+import { useModalPortalContext } from "../Providers/ModalPortalProvider";
+import { createPortal } from "react-dom";
 
 export type ConfirmModalProps = {
-  show: boolean;
-  onClose: () => Promise<void>;
-  onConfirm: () => Promise<void>;
-  title: string;
-  message: string | React.ReactNode;
-  accept?: string;
-  decline?: string;
-  buttons?: (buttonProps: {
-    accept: string;
-    decline: string;
+    show: boolean;
+    busy: boolean;
     onClose: () => Promise<void>;
     onConfirm: () => Promise<void>;
-  }) => React.ReactNode;
+    acceptText?: string;
+    declineText?: string;
+    title: string | React.ReactNode;
+    message: string | React.ReactNode;
+    buttons?: string | React.ReactNode;
 };
-export default function ConfirmModal({
-  accept = "Accept",
-  decline = "Cancel",
-  buttons,
-  ...props
-}: ConfirmModalProps) {
-  const [busy, setBusy] = useState(false);
-
-  const onConfirm = async () => {
-    setBusy(true);
-    props.onConfirm().finally(() => {
-      setBusy(false);
-    });
-  };
-
-  const onClose = async () => {
-    setBusy(true);
-    props.onClose().finally(() => {
-      setBusy(false);
-    });
-  };
-
-  return (
-    <Modal show={props.show} onClose={props.onClose}>
-      <Modal.Header>{props.title}</Modal.Header>
-      <Modal.Body>
-        <div>{props.message}</div>
-      </Modal.Body>
-      <Modal.Footer>
-        {buttons && buttons({ accept, decline, onClose, onConfirm })}
-        {!buttons && (
-          <>
-            <Button isProcessing={busy} onClick={() => onConfirm()}>
-              {accept}
-            </Button>
-            <Button isProcessing={busy} color="gray" onClick={() => onClose()}>
-              {decline}
-            </Button>
-          </>
-        )}
-      </Modal.Footer>
-    </Modal>
-  );
-}
 
 export function useConfirmModal() {
-  const { register, unregister, modals } = useModalContext();
+    const getInitialState = (): ConfirmModalProps => {
+        return {
+            show: false,
+            busy: false,
+            onClose: async () => {},
+            onConfirm: async () => {},
+            acceptText: "Accept",
+            declineText: "Cancel",
+            title: "Really delete this?",
+            message: "This action may or may not be reversable",
+            buttons: null,
+        };
+    };
+    const [modalProps, setModalProps] = useState<ConfirmModalProps>(
+        getInitialState()
+    );
+    const resetModal = () => setModalProps(getInitialState());
 
-  const onClickClose = async (key: string, onClose: () => Promise<void>) => {
-    await onClose();
+    const wrapBusyMethod = (method: () => Promise<void>) => {
+        return async () => {
+            setModalProps({ ...modalProps, busy: true });
+            await method();
+            setModalProps({ ...modalProps, busy: false });
+        };
+    };
 
-    unregister(key);
-  };
+    const show = (props: Partial<ConfirmModalProps>) => {
+        const onClose = props.onClose
+            ? wrapBusyMethod(props.onClose)
+            : modalProps.onClose;
 
-  const onClickConfirm = async (
-    key: string,
-    onConfirm: () => Promise<void>
-  ) => {
-    await onConfirm();
+        const onConfirm = props.onConfirm
+            ? wrapBusyMethod(props.onConfirm)
+            : modalProps.onConfirm;
 
-    unregister(key);
-  };
+        setModalProps({
+            ...modalProps,
+            ...props,
+            onClose,
+            onConfirm,
+            show: true,
+        });
+    };
+    const hide = () => {
+        resetModal();
+    };
+    return { modalProps, setModalProps, resetModal, show, hide };
+}
+export default function ConfirmModal({
+    acceptText = "Accept",
+    declineText = "Cancel",
+    buttons,
+    message,
+    title,
+    onConfirm,
+    onClose,
+    ...props
+}: ConfirmModalProps) {
+    const { target } = useModalPortalContext();
 
-  const showConfirmModal = (key: string, { ...props }: ConfirmModalProps) => {
-    register({
-      key,
-      props: { ...props, show: true },
-      component: (instanceProps) => (
-        <ConfirmModal
-          {...instanceProps}
-          onClose={() => props.onClose()}
-          onConfirm={() => props.onConfirm()}
-        />
-      ),
-    });
-  };
+    if (!target) {
+        return null;
+    }
 
-  return {
-    showConfirmModal,
-    onClickConfirm,
-    onClickClose,
-  };
+    return createPortal(
+        <Modal show={props.show} onClose={onClose}>
+            <Modal.Header>{title}</Modal.Header>
+            <Modal.Body>
+                <div>{message}</div>
+            </Modal.Body>
+            <Modal.Footer>
+                {buttons && buttons}
+                {!buttons && (
+                    <>
+                        <Button isProcessing={props.busy} onClick={onConfirm}>
+                            {acceptText}
+                        </Button>
+                        <Button
+                            isProcessing={props.busy}
+                            color="gray"
+                            onClick={onClose}
+                        >
+                            {declineText}
+                        </Button>
+                    </>
+                )}
+            </Modal.Footer>
+        </Modal>,
+        target
+    );
 }

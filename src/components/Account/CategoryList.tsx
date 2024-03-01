@@ -13,8 +13,8 @@ import {
 import Link from "next/link";
 import { useCategoryTotals } from "@/hooks/useCategoryTotals";
 import { formatCurrency } from "@/methods/currency";
-import { useConfirmModal } from "../Control/ConfirmModal";
 import { useAccountContext } from "../Providers/AccountProvider";
+import ConfirmModal, { useConfirmModal } from "../Control/ConfirmModal";
 
 const Spinner = () => <FaCircleNotch className="animate-spin" />;
 
@@ -41,16 +41,15 @@ export default function CategoryList({
     const { currentYear } = useAccountContext();
 
     const categoryIds = useMemo(() => {
-        console.log("busting computed categories", categories.length);
         return categories.map((c) => c.id);
     }, [categories]);
-
-    console.log("categoryIds", categoryIds.length, "vs", categories.length);
 
     const { totals: categoryTotals } = useCategoryTotals(
         categoryIds,
         currentYear
     );
+
+    const confirmModal = useConfirmModal();
 
     const onHideCategoryModal = () => {
         setShowCategoryModal(false);
@@ -92,22 +91,16 @@ export default function CategoryList({
         setShowCategoryModal(true);
     };
 
-    const { showConfirmModal, onClickClose, onClickConfirm } =
-        useConfirmModal();
-
     const onClickDeleteCategory = async (category: Category) => {
-        showConfirmModal(`delete-cateogry-${category.id}`, {
-            show: true,
+        confirmModal.show({
             title: "Really delete category?",
             message: `Are you sure you want to delete category "${category.name}"?`,
-            accept: "Delete",
+            acceptText: "Delete",
             onConfirm: async () => {
-                onClickConfirm(`delete-cateogry-${category.id}`, async () => {
-                    await onDeleteCategoryWrapped(category.id);
-                });
+                await onDeleteCategoryWrapped(category.id);
             },
             onClose: async () => {
-                onClickClose(`delete-cateogry-${category.id}`, async () => {});
+                confirmModal.resetModal();
             },
         });
     };
@@ -263,6 +256,8 @@ export default function CategoryList({
                     </div>
                 ))}
             </div>
+
+            <ConfirmModal {...confirmModal.modalProps} />
         </div>
     );
 }

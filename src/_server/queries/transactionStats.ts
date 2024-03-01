@@ -28,12 +28,12 @@ export async function getAccountTransactionTotals(
             userId,
         },
         orderBy: {
-            createdAt: "asc",
+            date: "asc",
         },
     });
 
     if (firstTransaction) {
-        totals.startAt = firstTransaction.createdAt.toISOString();
+        totals.startAt = firstTransaction.date.toISOString();
     }
 
     const lastTransaction = await prisma.accountTransaction.findFirst({
@@ -42,12 +42,12 @@ export async function getAccountTransactionTotals(
             userId,
         },
         orderBy: {
-            createdAt: "desc",
+            date: "desc",
         },
     });
 
     if (lastTransaction) {
-        totals.endAt = lastTransaction.createdAt.toISOString();
+        totals.endAt = lastTransaction.date.toISOString();
     }
 
     return totals;

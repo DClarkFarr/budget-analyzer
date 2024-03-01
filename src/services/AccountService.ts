@@ -24,6 +24,13 @@ export default class AccountService {
             .get<Record<number, AccountTransactionsTotal>>("/account/stats")
             .then((res) => res.data);
     }
+
+    static getAccountStats(accountId: number) {
+        return webApi
+            .get<AccountTransactionsTotal>(`/account/${accountId}/stats`)
+            .then((res) => res.data);
+    }
+
     static get(accountId: number) {
         return webApi
             .get<Account>(`/account/${accountId}`)

@@ -44,10 +44,13 @@ export default function TransactionsByMonth({
         > = {};
 
         transactions.forEach((t) => {
-            const isIgnored = t.categories.every((c) => c.type === "ignore");
+            const isIgnored =
+                t.categories.length &&
+                t.categories.every((c) => c.type === "ignore");
             if (isIgnored) {
                 return;
             }
+
             const month = DateTime.fromISO(t.date).toFormat("yyyy-MM");
             if (!map[month]) {
                 map[month] = { incoming: 0, outgoing: 0, net: 0 };

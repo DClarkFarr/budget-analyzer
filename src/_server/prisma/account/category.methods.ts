@@ -12,11 +12,30 @@ export function toCategoryResponse(from: PrimsaCategory) {
     });
 }
 
-export async function getCategories(accountId: number) {
-    const cats = await prisma.category.findMany({
-        where: { accountId, deletedAt: null },
-        orderBy: { name: "asc" },
-    });
+export async function getCategories(
+    accountId: number,
+    options: { minDate?: string; maxDate?: string } = {}
+) {
+    const query = `
+      SELECT c.*
+      FROM Category c
+      WHERE c.deletedAt IS NULL
+      AND c.accountId = ?
+      ${options.minDate ? "AND (c.startAt IS NULL OR c.startAt >= ?)" : ""}
+      ${options.maxDate ? "AND (c.endAt IS NULL OR c.endAt <= ?)" : ""}
+    `;
+    const params: (string | number)[] = [accountId];
+    if (options.minDate) {
+        params.push(options.minDate);
+    }
+    if (options.maxDate) {
+        params.push(options.maxDate);
+    }
+
+    const cats = await prisma.$queryRawUnsafe<PrimsaCategory[]>(
+        query,
+        ...params
+    );
 
     return cats.map(toCategoryResponse);
 }

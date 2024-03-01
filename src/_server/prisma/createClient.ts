@@ -1,18 +1,33 @@
 import { PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
-const prismaClient = new PrismaClient({
-    log: [
-        {
-            emit: "event",
-            level: "query",
-        },
-    ],
-});
+let prismaClient = null as unknown as PrismaClient<
+    {
+        log: {
+            emit: "event";
+            level: "query";
+        }[];
+    },
+    "query",
+    DefaultArgs
+>;
 
-prismaClient.$on("query", async (e) => {
-    // console.log(`Logging Query: ${e.query} ${e.params}`);
-});
+if (!prismaClient) {
+    const pc = new PrismaClient({
+        log: [
+            {
+                emit: "event",
+                level: "query",
+            },
+        ],
+    });
+    pc.$on("query", async (e) => {
+        // console.log(`Logging Query: ${e.query} ${e.params}`);
+    });
 
-console.log("creating prisma client");
+    prismaClient = pc;
+}
+
+console.log("exporting prisma client");
 
 export { prismaClient };

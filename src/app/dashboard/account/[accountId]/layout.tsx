@@ -32,7 +32,7 @@ export default function AccountLayout({
                     urlYear <= state.endYear &&
                     urlYear !== state.currentYear
                 ) {
-                    router.push(`?year=${state.currentYear}`);
+                    setYear(urlYear);
                 } else if (urlYear !== state.currentYear) {
                     router.push(`?year=${state.currentYear}`);
                 }

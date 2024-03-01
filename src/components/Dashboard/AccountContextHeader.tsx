@@ -1,3 +1,4 @@
+import useQueryParams from "@/hooks/useQueryParams";
 import { useAccountContext } from "../Providers/AccountProvider";
 import DashboardNavTabs from "./DashboardNavTabs";
 import Link from "next/link";
@@ -5,9 +6,16 @@ import Link from "next/link";
 export function AccountContextHeader() {
     const { account, years, currentYear } = useAccountContext();
 
+    const { pushQuery } = useQueryParams();
     if (!account) {
         return null;
     }
+
+    const onSelectYear = <E extends React.MouseEvent>(e: E, year: number) => {
+        e.preventDefault();
+
+        pushQuery({ year });
+    };
     return (
         <div className="account-context-header">
             <div className="lg:flex gap-x-4">
@@ -42,13 +50,14 @@ export function AccountContextHeader() {
                         );
                     }
                     return (
-                        <Link
+                        <a
                             className={`px-1 ${cls}`}
                             key={y}
-                            href={`?year=${y}`}
+                            href="#"
+                            onClick={(e) => onSelectYear(e, y)}
                         >
                             {y}
-                        </Link>
+                        </a>
                     );
                 })}
             </div>

@@ -5,7 +5,9 @@ import { useAccountContext } from "@/components/Providers/AccountProvider";
 import useQueryParams from "@/hooks/useQueryParams";
 import AccountService from "@/services/AccountService";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+
+import { throttle } from "lodash-es";
 
 export default function AccountLayout({
     children,
@@ -40,6 +42,10 @@ export default function AccountLayout({
         }
     };
 
+    const throttleQueryAccount = useMemo(() => {
+        return throttle(setAccountToContext, 1000);
+    }, []);
+
     const currentYear = query.year || "";
 
     useEffect(() => {
@@ -50,9 +56,9 @@ export default function AccountLayout({
 
     useEffect(() => {
         if (params.accountId) {
-            setAccountToContext(parseFloat(params.accountId.toString()));
+            throttleQueryAccount(parseFloat(params.accountId.toString()));
         }
-    }, [params]);
+    }, [params.accountId]);
 
     return (
         <div className="account-layout">

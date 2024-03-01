@@ -1,24 +1,21 @@
-import DashboardNavTabs from "@/components/Dashboard/DashboardNavTabs";
 import UploadForm from "@/components/Statement/UploadForm";
 import { getSessionUser } from "@/server/actions/sessionActions";
 
 export default async function UploadStatementPage({
-  params,
+    params,
 }: {
-  params: { accountId: string };
+    params: { accountId: string };
 }) {
-  const user = (await getSessionUser())!;
+    const user = (await getSessionUser())!;
 
-  return (
-    <div className="upload">
-      <DashboardNavTabs accountId={parseInt(params.accountId)} />
+    return (
+        <div className="upload">
+            <h2 className="text-2xl mb-1">Upload Bank Statement</h2>
+            <p className="mb-4">
+                Duplicate records from previous entries will be skipped.
+            </p>
 
-      <h2 className="text-2xl mb-1">Upload Bank Statement</h2>
-      <p className="mb-4">
-        Duplicate records from previous entries will be skipped.
-      </p>
-
-      <UploadForm accountId={parseInt(params.accountId)} />
-    </div>
-  );
+            <UploadForm accountId={parseInt(params.accountId)} />
+        </div>
+    );
 }

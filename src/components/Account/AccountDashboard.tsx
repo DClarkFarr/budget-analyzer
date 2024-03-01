@@ -15,6 +15,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryFormState } from "@/types/Statement";
 import UncategorizedList from "./UncategorizedList";
 import DuplicateList from "./DuplicateList";
+import { useAccountContext } from "../Providers/AccountProvider";
 
 export default function AccountDashboard({
     user,
@@ -23,8 +24,11 @@ export default function AccountDashboard({
     user: User;
     accountId: number;
 }) {
-    const { account, transactions, isLoading, categories } = useAccountQuery(
+    const { account, currentYear } = useAccountContext();
+
+    const { transactions, isLoading, categories } = useAccountQuery(
         accountId,
+        currentYear,
         { withCategories: true }
     );
 
@@ -108,7 +112,6 @@ export default function AccountDashboard({
 
     return (
         <div className="account-dashboard">
-            <h1 className="text-2xl mb-2">Account Dashboard</h1>
             {isLoading && (
                 <div className="p-[100px] w-full flex justify-center items-center text-2xl text-gray-500 font-semibold">
                     Loading...
@@ -116,10 +119,6 @@ export default function AccountDashboard({
             )}
             {!isLoading && account && (
                 <>
-                    <p className="lead text-lg mb-4 text-gray-600">
-                        Account Name: {account.name}
-                    </p>
-
                     <TabsView
                         tabs={tabs}
                         onTabChange={onChangeTab}

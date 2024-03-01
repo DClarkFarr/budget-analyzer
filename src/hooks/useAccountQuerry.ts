@@ -8,12 +8,12 @@ import { useMemo } from "react";
 
 export default function useAccountQuery<WC extends boolean>(
     accountId: number,
-    options: { withCategories: WC } = {
+    year: number,
+    options: { withCategories: WC; year?: number } = {
         withCategories: false as WC,
     }
 ) {
     const [
-        { data: account, isLoading: accountLoading, isError: accountError },
         {
             data: transactions,
             isLoading: transactionsLoading,
@@ -27,33 +27,29 @@ export default function useAccountQuery<WC extends boolean>(
     ] = useQueries({
         queries: [
             {
-                queryKey: ["account", accountId],
-                queryFn: () => AccountService.get(accountId),
-                staleTime: Infinity,
-            },
-            {
-                queryKey: ["transactions", accountId],
+                queryKey: ["transactions", accountId, year],
                 queryFn: () =>
-                    AccountService.getTransactions<WC>(accountId, options),
+                    AccountService.getTransactions<WC>(accountId, {
+                        ...options,
+                        year,
+                    }),
                 staleTime: Infinity,
             },
             {
-                queryKey: ["categories", accountId],
-                queryFn: () => AccountService.getCategories(accountId),
+                queryKey: ["categories", accountId, year],
+                queryFn: () =>
+                    AccountService.getCategories(accountId, { year }),
                 staleTime: Infinity,
             },
         ],
     });
 
     const isLoading = useMemo(() => {
-        return accountLoading || transactionsLoading || categoriesLoading;
-    }, [accountLoading, transactionsLoading, categoriesLoading]);
+        return transactionsLoading || categoriesLoading;
+    }, [transactionsLoading, categoriesLoading]);
 
     return {
         isLoading,
-        account,
-        accountLoading,
-        accountError,
         transactions: transactions || [],
         transactionsLoading,
         transactionsError,

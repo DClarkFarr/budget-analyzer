@@ -6,27 +6,27 @@ import { Account } from "@/types/Account";
 import AccountService from "@/services/AccountService";
 
 interface AccountProviderState {
-    startYear: string;
-    endYear: string;
-    currentYear: string;
+    startYear: number;
+    endYear: number;
+    currentYear: number;
     account: Account | null;
-    years: string[];
+    years: number[];
 }
 
 interface AccountProviderContext extends AccountProviderState {
     setAccount: (account: Account | null) => Promise<AccountProviderState>;
-    setYear: (year: string) => void;
+    setYear: (year: number) => void;
 }
 
 type AccountReducerAction =
     | { type: "set"; payload: AccountProviderState }
-    | { type: "year"; payload: string }
+    | { type: "year"; payload: number }
     | { type: "clear" };
 
 const accountProviderInitialState: AccountProviderState = {
-    startYear: DateTime.now().startOf("year").toISO(),
-    endYear: DateTime.now().endOf("year").toISO(),
-    currentYear: DateTime.now().endOf("year").toISO(),
+    startYear: DateTime.now().year,
+    endYear: DateTime.now().year,
+    currentYear: DateTime.now().year,
     years: [],
     account: null,
 };
@@ -63,26 +63,30 @@ const getAccountState = async (
     account: Account
 ): Promise<AccountProviderState> => {
     const stats = await AccountService.getAccountStats(account.id);
-    const startYear = stats.startAt
-        ? DateTime.fromISO(stats.startAt)
-        : DateTime.now().startOf("year");
-    const endYear = stats.endAt
-        ? DateTime.fromISO(stats.endAt)
-        : DateTime.now().endOf("year");
+    const startYear = (
+        stats.startAt
+            ? DateTime.fromISO(stats.startAt)
+            : DateTime.now().startOf("year")
+    ).year;
+    const endYear = (
+        stats.endAt
+            ? DateTime.fromISO(stats.endAt)
+            : DateTime.now().endOf("year")
+    ).year;
 
     const years = [];
 
-    let year = DateTime.fromJSDate(startYear.toJSDate());
-    while (year.year <= endYear.year) {
-        years.push(year.toISO() || "");
-        year = year.plus({ years: 1 });
+    let year = startYear;
+
+    while (year <= endYear) {
+        years.push(year++);
     }
 
     return {
         account,
-        startYear: startYear.toISO() || "",
-        currentYear: endYear.toISO() || "",
-        endYear: endYear.toISO() || "",
+        startYear: startYear,
+        currentYear: endYear,
+        endYear: endYear,
         years,
     };
 };
@@ -105,7 +109,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         return payload;
     };
 
-    const setYear = (year: string) => {
+    const setYear = (year: number) => {
         dispatch({ type: "year", payload: year });
     };
 

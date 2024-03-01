@@ -39,12 +39,15 @@ export default class AccountService {
 
     static getTransactions<WC extends boolean>(
         accountId: number,
-        options: { withCategories: WC } = { withCategories: false as WC }
+        options: { withCategories: WC; year?: number } = {
+            withCategories: false as WC,
+        }
     ) {
         type Response = WC extends true
             ? WithCategories<Transaction>
             : Transaction;
 
+        console.log("options was", options);
         return webApi
             .get<Response[]>(`/account/${accountId}/transaction`, {
                 params: options,
@@ -68,9 +71,11 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
-    static getCategories(accountId: number) {
+    static getCategories(accountId: number, options: { year?: number }) {
         return webApi
-            .get<Category[]>(`/account/${accountId}/category`)
+            .get<Category[]>(`/account/${accountId}/category`, {
+                params: options,
+            })
             .then((res) => res.data);
     }
 

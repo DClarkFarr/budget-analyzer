@@ -1,14 +1,9 @@
 "use client";
 
+import { AccountContextHeader } from "@/components/Dashboard/AccountContextHeader";
 import { useAccountContext } from "@/components/Providers/AccountProvider";
 import AccountService from "@/services/AccountService";
-import { DateTime } from "luxon";
-import {
-    useParams,
-    usePathname,
-    useRouter,
-    useSearchParams,
-} from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AccountLayout({
@@ -31,30 +26,27 @@ export default function AccountLayout({
                 ? parseFloat(searchParams.get("year")!)
                 : null;
 
-            const maxYear = DateTime.fromISO(state.endYear).year;
-            const minYear = DateTime.fromISO(state.startYear).year;
-            const currentYear = DateTime.fromISO(state.currentYear).year;
-
             if (urlYear) {
                 if (
-                    urlYear >= minYear &&
-                    urlYear <= maxYear &&
-                    urlYear !== currentYear
+                    urlYear >= state.startYear &&
+                    urlYear <= state.endYear &&
+                    urlYear !== state.currentYear
                 ) {
-                    router.push(`?year=${currentYear}`);
-                } else if (urlYear !== currentYear) {
-                    router.push(`?year=${currentYear}`);
+                    router.push(`?year=${state.currentYear}`);
+                } else if (urlYear !== state.currentYear) {
+                    router.push(`?year=${state.currentYear}`);
                 }
             } else {
-                router.push(`?year=${currentYear}`);
+                router.push(`?year=${state.currentYear}`);
             }
         }
     };
 
     const currentYear = searchParams?.get("year")?.toString() || "";
+
     useEffect(() => {
         if (currentYear) {
-            setYear(currentYear);
+            setYear(parseFloat(currentYear));
         }
     }, [currentYear]);
 
@@ -66,7 +58,12 @@ export default function AccountLayout({
 
     return (
         <div className="account-layout">
-            {account && children}
+            {account && (
+                <>
+                    <AccountContextHeader />
+                    {children}
+                </>
+            )}
             {!account && <div>Loading Account</div>}
         </div>
     );

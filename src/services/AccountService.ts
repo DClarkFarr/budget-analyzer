@@ -107,7 +107,10 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
-    static getCategoriesTotals<K extends number>(categoryIds: K[]) {
+    static getCategoriesTotals<K extends number>(
+        categoryIds: K[],
+        year: number
+    ) {
         return webApi
             .get<{
                 [ID in K]: {
@@ -117,7 +120,7 @@ export default class AccountService {
                     count: number;
                 };
             }>(`/category/total`, {
-                params: { categoryIds: categoryIds.join(",") },
+                params: { categoryIds: categoryIds.join(","), year },
             })
             .then((res) => res.data);
     }

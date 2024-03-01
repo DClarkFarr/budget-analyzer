@@ -59,16 +59,16 @@ export default function useAccountQuery<WC extends boolean>(
     };
 }
 
-export const useDeleteCategoryMutation = (accountId: number) => {
+export const useDeleteCategoryMutation = (accountId: number, year: number) => {
     const queryClient = useQueryClient();
     const { mutateAsync, isSuccess } = useMutation({
-        mutationKey: ["categories", accountId],
+        mutationKey: ["categories", accountId, year],
         mutationFn: async (categoryId: number) => {
             return AccountService.deleteCategory(accountId, categoryId);
         },
         onSuccess: async (data, categoryId) => {
             queryClient.setQueryData(
-                ["categories", accountId],
+                ["categories", accountId, year],
                 (oldCats: Category[]) => {
                     const categories = (oldCats || []) as Category[];
                     return categories.filter((c) => c.id !== categoryId);
@@ -83,10 +83,10 @@ export const useDeleteCategoryMutation = (accountId: number) => {
     };
 };
 
-export const useUpdateCategoryMutation = (accountId: number) => {
+export const useUpdateCategoryMutation = (accountId: number, year: number) => {
     const queryClient = useQueryClient();
     const { mutateAsync, isSuccess } = useMutation({
-        mutationKey: ["categories", accountId],
+        mutationKey: ["categories", accountId, year],
         mutationFn: async ({
             categoryId,
             data,
@@ -98,7 +98,7 @@ export const useUpdateCategoryMutation = (accountId: number) => {
         },
         onSuccess: async (updated, data) => {
             queryClient.setQueryData(
-                ["categories", accountId],
+                ["categories", accountId, year],
                 (oldCats: Category[]) => {
                     const categories = (oldCats || []) as Category[];
                     return categories.map((c) =>
@@ -116,17 +116,17 @@ export const useUpdateCategoryMutation = (accountId: number) => {
     };
 };
 
-export const useCreateCategoryMutation = (accountId: number) => {
+export const useCreateCategoryMutation = (accountId: number, year: number) => {
     const queryClient = useQueryClient();
 
     const { mutateAsync, isSuccess, isIdle } = useMutation({
-        mutationKey: ["categories", accountId],
+        mutationKey: ["categories", accountId, year],
         mutationFn: async (data: CategoryFormState) => {
             return AccountService.createCategory(accountId, data);
         },
         onSuccess: (category) => {
             queryClient.setQueryData(
-                ["categories", accountId],
+                ["categories", accountId, year],
                 (oldCats: Category[]) => {
                     const categories = (oldCats || []) as Category[];
                     categories.push(category);

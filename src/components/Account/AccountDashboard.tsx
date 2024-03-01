@@ -32,9 +32,18 @@ export default function AccountDashboard({
         { withCategories: true }
     );
 
-    const { createCategory } = useCreateCategoryMutation(accountId);
-    const { deleteCategory } = useDeleteCategoryMutation(accountId);
-    const { updateCategory } = useUpdateCategoryMutation(accountId);
+    const { createCategory } = useCreateCategoryMutation(
+        accountId,
+        currentYear
+    );
+    const { deleteCategory } = useDeleteCategoryMutation(
+        accountId,
+        currentYear
+    );
+    const { updateCategory } = useUpdateCategoryMutation(
+        accountId,
+        currentYear
+    );
 
     const onCreateCategory = async (data: CategoryFormState) => {
         await createCategory(data);

@@ -41,8 +41,6 @@ export async function getAccountTransactions<
         orderBy: { date: "desc" },
     })) as unknown as Response[];
 
-    console.log("record", records[0]);
-
     return records
         .map((t) => {
             if (options.withCategories) {

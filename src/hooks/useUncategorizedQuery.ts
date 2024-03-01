@@ -1,7 +1,7 @@
 import AccountService from "@/services/AccountService";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export function useUncategorizedQuery(accountId: number) {
+export function useUncategorizedQuery(accountId: number, year: number) {
     const queryClient = useQueryClient();
 
     const {
@@ -9,13 +9,14 @@ export function useUncategorizedQuery(accountId: number) {
         isLoading,
         isSuccess,
     } = useQuery({
-        queryKey: ["uncategorized", accountId],
-        queryFn: () => AccountService.getUncategorizedTransactions(accountId),
+        queryKey: ["uncategorized", accountId, year],
+        queryFn: () =>
+            AccountService.getUncategorizedTransactions(accountId, { year }),
     });
 
     const revalidate = () =>
         queryClient.refetchQueries({
-            queryKey: ["uncategorized", accountId],
+            queryKey: ["uncategorized", accountId, year],
         });
 
     return {

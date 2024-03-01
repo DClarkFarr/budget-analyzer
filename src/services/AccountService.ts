@@ -54,18 +54,26 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
-    static getUncategorizedTransactions(accountId: number) {
+    static getUncategorizedTransactions(
+        accountId: number,
+        options: { year?: number } = {}
+    ) {
         return webApi
             .get<Transaction[]>(
-                `/account/${accountId}/transaction/uncategorized`
+                `/account/${accountId}/transaction/uncategorized`,
+                { params: options }
             )
             .then((res) => res.data);
     }
 
-    static getDuplicateTransactions(accountId: number) {
+    static getDuplicateTransactions(
+        accountId: number,
+        options: { year?: number } = {}
+    ) {
         return webApi
             .get<(Transaction & { categories: Category[] })[]>(
-                `/account/${accountId}/transaction/duplicate`
+                `/account/${accountId}/transaction/duplicate`,
+                { params: options }
             )
             .then((res) => res.data);
     }

@@ -6,13 +6,18 @@ import { Transaction } from "@/types/Account/Transaction";
 import { CategorySelector } from "../Control/CategorySelector";
 import { useEffect, useState } from "react";
 import { useMoveTransactionMutation } from "@/hooks/useDuplicateQuery";
+import { useAccountContext } from "../Providers/AccountProvider";
 
 export default function UncategorizedList({
     accountId,
 }: {
     accountId: number;
 }) {
-    const { transactions, isLoading } = useUncategorizedQuery(accountId);
+    const { currentYear } = useAccountContext();
+    const { transactions, isLoading } = useUncategorizedQuery(
+        accountId,
+        currentYear
+    );
 
     const transactionsToObject = (ts: Transaction[]) => {
         return ts.reduce((acc, t) => {
@@ -50,7 +55,10 @@ export default function UncategorizedList({
             }));
         };
 
-    const moveTransactionToCategory = useMoveTransactionMutation(accountId);
+    const moveTransactionToCategory = useMoveTransactionMutation(
+        accountId,
+        currentYear
+    );
 
     const onAssignTransaction = async (
         transactionId: number,
@@ -82,6 +90,7 @@ export default function UncategorizedList({
                 <div className="flex items-center gap-x-2">
                     <CategorySelector
                         accountId={accountId}
+                        year={currentYear}
                         onSelect={onSelectCategory(t.id)}
                     />
                     {!!transactionCategories[t.id] && (

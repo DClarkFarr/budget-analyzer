@@ -3,12 +3,14 @@ import { useMemo } from "react";
 import Select, { SingleValue } from "react-select";
 export function CategorySelector({
     accountId,
+    year,
     onSelect,
 }: {
     accountId: number;
+    year: number;
     onSelect: (categoryId: number | null) => void;
 }) {
-    const { categories, isLoading } = useCategoriesQuery(accountId);
+    const { categories, isLoading } = useCategoriesQuery(accountId, year);
 
     const options = useMemo(() => {
         return categories.map((category) => ({

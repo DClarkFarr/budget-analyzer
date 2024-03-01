@@ -1,12 +1,15 @@
 "use client";
 
+import { useAccountContext } from "../Providers/AccountProvider";
 import DuplicateTransactionsTable from "../Statement/DuplicateTransactionsTable";
 import TransactionsTable from "../Statement/TransactionsTable";
 import { useDuplicateQuery } from "@/hooks/useDuplicateQuery";
 
 export default function DuplicateList({ accountId }: { accountId: number }) {
+    const { currentYear } = useAccountContext();
+
     const { transactions, isLoading, moveTransactionToCategory } =
-        useDuplicateQuery(accountId);
+        useDuplicateQuery(accountId, currentYear);
 
     return (
         <>

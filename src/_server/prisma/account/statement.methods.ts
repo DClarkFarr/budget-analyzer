@@ -1,7 +1,15 @@
 import { ProcessedTransaction, Transaction } from "@/types/Account/Transaction";
 import { prisma } from "../client";
 import toApiResponse from "@/server/methods/response/toApiResponse";
-import { Category, CategoryTransactions } from "@prisma/client";
+import {
+    Category as PrismaCategory,
+    CategoryTransactions,
+} from "@prisma/client";
+import {
+    getCategoryRules,
+    ruleMatchesTransaction,
+} from "./categoryRule.methods";
+import { Category } from "@/types/Statement";
 
 export async function getAccountTransactions<
     IC extends boolean,
@@ -16,7 +24,7 @@ export async function getAccountTransactions<
     } = {}
 ) {
     type TransactionWithCategories = Transaction & {
-        categories: (CategoryTransactions & { category: Category[] })[];
+        categories: (CategoryTransactions & { category: PrismaCategory[] })[];
     };
 
     type Response = WC extends true
@@ -97,11 +105,11 @@ export async function getAccountDuplicateTransactions(accountId: number) {
     });
 
     return transactions.map((t) => {
-        return toApiResponse<Transaction & { categories: Category[] }>(
+        return toApiResponse<Transaction & { categories: PrismaCategory[] }>(
             {
                 ...t,
                 categories: t.categories.map((c) =>
-                    toApiResponse<Category>(c.category, {
+                    toApiResponse<PrismaCategory>(c.category, {
                         intKeys: ["id", "accountId", "userId"],
                         dateKeys: ["createdAt", "startAt", "endAt"],
                     })
@@ -113,6 +121,64 @@ export async function getAccountDuplicateTransactions(accountId: number) {
         );
     });
 }
+
+export function smartSortCategoriesForTransaction(
+    transaction: Transaction,
+    categories: Category[]
+) {
+    const cs = [...categories];
+    const typeMap = {
+        income: "incoming",
+        expense: "outgoing",
+    };
+    cs.sort((a, b) => {
+        if (a.type !== b.type) {
+            if (a.type === "ignore") {
+                return 1;
+            }
+            if (b.type === "ignore") {
+                return -1;
+            }
+
+            return transaction.expenseType === typeMap[a.type] ? -1 : 1;
+        }
+
+        return a.name.localeCompare(b.name);
+    });
+
+    return cs;
+}
+
+export async function mapCategoriesToTransactions(
+    transactions: Transaction[],
+    categories: Category[]
+) {
+    const categoriesWithRules = await Promise.all(
+        categories.map(async (c) => {
+            const rules = await getCategoryRules(c.id);
+
+            return { ...c, rules };
+        })
+    );
+
+    return transactions.map((t) => {
+        const matched = categoriesWithRules
+            .filter((c) => {
+                return c.rules.some((r) => {
+                    return ruleMatchesTransaction(r, t);
+                });
+            })
+            .map(({ rules, ...c }) => {
+                return c;
+            });
+
+        return {
+            ...t,
+            categories: smartSortCategoriesForTransaction(t, matched),
+        };
+    });
+}
+
 export async function getAccountUncategorizedTransactions(
     accountId: number,
     options: { maxDate?: string; minDate?: string } = {}
@@ -146,7 +212,7 @@ export async function getAccountUncategorizedTransactions(
     );
 
     return transactions.map((t) =>
-        toApiResponse(t, {
+        toApiResponse<Transaction>(t, {
             floatKeys: ["amount"],
         })
     );

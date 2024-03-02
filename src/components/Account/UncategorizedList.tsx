@@ -2,7 +2,7 @@
 
 import { useUncategorizedQuery } from "@/hooks/useUncategorizedQuery";
 import TransactionsTable from "../Statement/TransactionsTable";
-import { Transaction } from "@/types/Account/Transaction";
+import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { CategorySelector } from "../Control/CategorySelector";
 import { useEffect, useState } from "react";
 import { useMoveTransactionMutation } from "@/hooks/useDuplicateQuery";
@@ -86,32 +86,57 @@ export default function UncategorizedList({
         {
             key: "actions",
             heading: "Actions",
-            cell: (t: Transaction) => (
-                <div className="flex items-center gap-x-2">
-                    <CategorySelector
-                        accountId={accountId}
-                        year={currentYear}
-                        onSelect={onSelectCategory(t.id)}
-                    />
-                    {!!transactionCategories[t.id] && (
-                        <div>
-                            <button
-                                className="btn btn-sm btn-primary"
-                                onClick={() =>
-                                    onAssignTransaction(
-                                        t.id,
-                                        transactionCategories[t.id]!
-                                    )
-                                }
-                                disabled={!!assigningTransactions[t.id]}
-                            >
-                                {!!assigningTransactions[t.id]
-                                    ? "Assigning..."
-                                    : "Assign"}
-                            </button>
-                        </div>
-                    )}
-                </div>
+            cell: (t: WithCategories<Transaction>) => (
+                <>
+                    <div className="flex items-center gap-x-2 mb-2">
+                        <CategorySelector
+                            accountId={accountId}
+                            year={currentYear}
+                            onSelect={onSelectCategory(t.id)}
+                        />
+                        {!!transactionCategories[t.id] && (
+                            <div>
+                                <button
+                                    className="btn btn-sm btn-primary"
+                                    onClick={() =>
+                                        onAssignTransaction(
+                                            t.id,
+                                            transactionCategories[t.id]!
+                                        )
+                                    }
+                                    disabled={!!assigningTransactions[t.id]}
+                                >
+                                    {!!assigningTransactions[t.id]
+                                        ? "Assigning..."
+                                        : "Assign"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <div className="quick-categories flex flex-wrap gap-2">
+                        {t.categories.map((c) => {
+                            const typeClass = {
+                                income: "bg-emerald-600",
+                                expense: "bg-red-600",
+                                ignore: "bg-sky-600",
+                            }[c.type];
+                            return (
+                                <button
+                                    className={`btn btn-sm ${typeClass}`}
+                                    key={c.id}
+                                    onClick={() =>
+                                        onAssignTransaction(t.id, c.id)
+                                    }
+                                    disabled={!!assigningTransactions[t.id]}
+                                >
+                                    {!!assigningTransactions[t.id]
+                                        ? "Assigning..."
+                                        : c.name}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </>
             ),
         },
     ];
@@ -127,6 +152,8 @@ export default function UncategorizedList({
                 <div>
                     <TransactionsTable
                         transactions={transactions}
+                        withCategories={true}
+                        showCategories={false}
                         slots={tableSlots}
                         footer={
                             <>

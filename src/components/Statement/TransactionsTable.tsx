@@ -13,10 +13,10 @@ import "./TransactionsTable.scss";
 import { formatCurrency } from "@/methods/currency";
 import SearchInput from "../Control/SearchInput";
 
-type Slot = {
+type Slot<T extends Transaction> = {
     key: string;
     heading: string;
-    cell: (t: Transaction) => React.ReactNode;
+    cell: (t: T) => React.ReactNode;
 };
 
 export default function TransactionsTable<WC extends boolean | undefined>({
@@ -24,13 +24,15 @@ export default function TransactionsTable<WC extends boolean | undefined>({
     slots = [],
     transactions,
     withCategories = false,
+    showCategories = true,
 }: {
-    slots?: Slot[];
+    slots?: Slot<any>[];
     transactions: WC extends true
         ? WithCategories<Transaction>[]
         : Transaction[];
     footer?: React.ReactNode;
     withCategories?: WC;
+    showCategories?: boolean;
 }) {
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -209,7 +211,9 @@ export default function TransactionsTable<WC extends boolean | undefined>({
                                     {slots.map((s) => (
                                         <th key={s.key}>{s.heading}</th>
                                     ))}
-                                    {withCategories && <th>Categories</th>}
+                                    {withCategories && showCategories && (
+                                        <th>Categories</th>
+                                    )}
                                 </tr>
                                 {filteredTransactions.current.map((t) => (
                                     <tr
@@ -233,7 +237,7 @@ export default function TransactionsTable<WC extends boolean | undefined>({
                                         {slots.map((s) => (
                                             <td key={s.key}>{s.cell(t)}</td>
                                         ))}
-                                        {withCategories && (
+                                        {withCategories && showCategories && (
                                             <td>
                                                 <div className="min-w-[150px] flex gap-2 flex-wrap">
                                                     {(

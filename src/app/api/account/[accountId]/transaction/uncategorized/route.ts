@@ -4,7 +4,11 @@ import {
     startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
 import { getUserAccount } from "@/server/prisma/account.methods";
-import { getAccountUncategorizedTransactions } from "@/server/prisma/account/statement.methods";
+import { getCategories } from "@/server/prisma/account/category.methods";
+import {
+    getAccountUncategorizedTransactions,
+    mapCategoriesToTransactions,
+} from "@/server/prisma/account/statement.methods";
 import { DateTime } from "luxon";
 import { NextResponse } from "next/server";
 
@@ -43,7 +47,17 @@ export const GET = chainMiddleware(
                 }
             );
 
-            return NextResponse.json(transactions, { status: 200 });
+            const categories = await getCategories(accountId, {
+                minDate: minDate?.toISO() || undefined,
+                maxDate: maxDate?.toISO() || undefined,
+            });
+
+            const mappedTransactions = await mapCategoriesToTransactions(
+                transactions,
+                categories
+            );
+
+            return NextResponse.json(mappedTransactions, { status: 200 });
         } catch (err) {
             console.warn("caughter fetching uncategorized", err);
             return NextResponse.json(

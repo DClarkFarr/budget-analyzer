@@ -59,7 +59,7 @@ export default class AccountService {
         options: { year?: number } = {}
     ) {
         return webApi
-            .get<Transaction[]>(
+            .get<WithCategories<Transaction>[]>(
                 `/account/${accountId}/transaction/uncategorized`,
                 { params: options }
             )

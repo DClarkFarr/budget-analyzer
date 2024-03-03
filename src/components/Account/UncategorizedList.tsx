@@ -11,6 +11,7 @@ import { useAccountContext } from "../Providers/AccountProvider";
 import { Dropdown } from "flowbite-react";
 
 import "./UncategorizedList.scss";
+import { SidePanel, useSidePanel } from "../Modal/SidePanel";
 
 export default function UncategorizedList({
     accountId,
@@ -86,6 +87,16 @@ export default function UncategorizedList({
         }));
     };
 
+    const { props: categoryPanelProps, methods: categoryPanelMethods } =
+        useSidePanel({
+            id: "category-panel",
+            width: 800,
+        });
+
+    const onClickAddToCategory = () => {
+        categoryPanelMethods.open();
+    };
+
     const tableSlots = [
         {
             key: "categorize",
@@ -151,7 +162,12 @@ export default function UncategorizedList({
                     <div className="flex items-center gap-x-2 mb-2">
                         <div className="action-dropdown">
                             <Dropdown label="Group Actions">
-                                <Dropdown.Item as="div">Home</Dropdown.Item>
+                                <Dropdown.Item
+                                    as="div"
+                                    onClick={() => onClickAddToCategory()}
+                                >
+                                    Add To Category
+                                </Dropdown.Item>
                                 <Dropdown.Item
                                     as="a"
                                     href="https://flowbite.com/"
@@ -194,6 +210,10 @@ export default function UncategorizedList({
                     />
                 </div>
             )}
+
+            <SidePanel {...categoryPanelProps}>
+                <div>My custom stuff says hi</div>
+            </SidePanel>
         </>
     );
 }

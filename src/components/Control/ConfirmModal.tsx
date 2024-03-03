@@ -78,7 +78,7 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
     const { target } = useModalPortalContext();
 
-    if (!target) {
+    if (!target.current) {
         return null;
     }
 
@@ -106,6 +106,6 @@ export default function ConfirmModal({
                 )}
             </Modal.Footer>
         </Modal>,
-        target
+        target.current
     );
 }

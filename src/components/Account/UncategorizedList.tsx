@@ -8,6 +8,10 @@ import { useEffect, useState } from "react";
 import { useMoveTransactionMutation } from "@/hooks/useDuplicateQuery";
 import { useAccountContext } from "../Providers/AccountProvider";
 
+import { Dropdown } from "flowbite-react";
+
+import "./UncategorizedList.scss";
+
 export default function UncategorizedList({
     accountId,
 }: {
@@ -84,8 +88,8 @@ export default function UncategorizedList({
 
     const tableSlots = [
         {
-            key: "actions",
-            heading: "Actions",
+            key: "categorize",
+            heading: "Select Category",
             cell: (t: WithCategories<Transaction>) => (
                 <>
                     <div className="flex items-center gap-x-2 mb-2">
@@ -135,6 +139,28 @@ export default function UncategorizedList({
                                 </button>
                             );
                         })}
+                    </div>
+                </>
+            ),
+        },
+        {
+            key: "actions",
+            heading: "Actions",
+            cell: (t: WithCategories<Transaction>) => (
+                <>
+                    <div className="flex items-center gap-x-2 mb-2">
+                        <div className="action-dropdown">
+                            <Dropdown label="Group Actions">
+                                <Dropdown.Item as="div">Home</Dropdown.Item>
+                                <Dropdown.Item
+                                    as="a"
+                                    href="https://flowbite.com/"
+                                    target="_blank"
+                                >
+                                    External link
+                                </Dropdown.Item>
+                            </Dropdown>
+                        </div>
                     </div>
                 </>
             ),

@@ -14,10 +14,14 @@ export default function CategoryDashboard({
     category,
     account,
     accountTransactions,
+    search,
+    onChange,
 }: {
     category: Category;
     account: Account;
     accountTransactions: Transaction[];
+    search?: string;
+    onChange?: () => Promise<void>;
 }) {
     const {
         transactions,
@@ -60,12 +64,20 @@ export default function CategoryDashboard({
         setTimeout(() => {
             revalidateTransactions();
         }, 100);
+
+        if (typeof onChange === "function") {
+            await onChange();
+        }
     };
 
     const onUpdateRule =
         (ruleId: number) => async (data: CategoryRuleFormState) => {
             await updateRule(ruleId, data);
             revalidateTransactions();
+
+            if (typeof onChange === "function") {
+                await onChange();
+            }
         };
 
     const onDeleteRule = async (ruleId: number) => {
@@ -73,6 +85,10 @@ export default function CategoryDashboard({
         await deleteRule(ruleId);
         setDeletingRuleId(null);
         revalidateTransactions();
+
+        if (typeof onChange === "function") {
+            await onChange();
+        }
     };
 
     return (
@@ -170,6 +186,7 @@ export default function CategoryDashboard({
                             transactions={accountTransactions}
                             matchedTransactionsIds={transactionIds}
                             height={600}
+                            search={search}
                         />
                     </div>
                 )}

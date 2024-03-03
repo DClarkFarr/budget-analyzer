@@ -11,7 +11,7 @@ import TabsView, { Tab } from "../Control/TabsView";
 import StatementTransactionRange from "../Statement/StatementTransactionRange";
 import CategoryList from "./CategoryList";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { CategoryFormState } from "@/types/Statement";
 import UncategorizedList from "./UncategorizedList";
 import DuplicateList from "./DuplicateList";
@@ -103,7 +103,6 @@ export default function AccountDashboard({
         },
     ];
 
-    const router = useRouter();
     const [view, setView] = useState(
         "statement" as "statement" | "transactions" | "categories"
     );

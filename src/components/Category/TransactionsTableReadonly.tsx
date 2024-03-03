@@ -18,18 +18,21 @@ import "./TransactionsTableReadonly.scss";
 const bankMap = {
     wells_fargo: "Wells Fargo",
     venmo: "Venmo",
+    afcu: "AFCU",
 };
 
 export default function TransactionsTableReadonly({
     transactions,
     matchedTransactionsIds,
     height = 300,
+    search,
 }: {
     transactions: Transaction[];
     matchedTransactionsIds: number[];
     height?: number;
+    search?: string;
 }) {
-    const [searchText, setSearchText] = useState("");
+    const [searchText, setSearchText] = useState(search || "");
     const [hideIncoming, setHideIncoming] = useState(false);
     const [hideOutgoing, setHideOutgoing] = useState(false);
     const [, startTransition] = useTransition();
@@ -101,6 +104,10 @@ export default function TransactionsTableReadonly({
         hideIncoming,
         hideOutgoing,
     ]);
+
+    useEffect(() => {
+        setSearchText(search || "");
+    }, [search]);
 
     const toggleHideIncoming = () => {
         setHideIncoming(!hideIncoming);

@@ -12,17 +12,20 @@ import { Dropdown } from "flowbite-react";
 
 import "./UncategorizedList.scss";
 import { SidePanel, useSidePanel } from "../Modal/SidePanel";
+import CategoryDashboard from "../Category/CategoryDashboard";
+import { Category } from "@/types/Statement";
 
 export default function UncategorizedList({
     accountId,
 }: {
     accountId: number;
 }) {
-    const { currentYear } = useAccountContext();
-    const { transactions, isLoading } = useUncategorizedQuery(
-        accountId,
-        currentYear
-    );
+    const { account, currentYear } = useAccountContext();
+    const {
+        transactions,
+        isLoading,
+        revalidate: revalidateTransactions,
+    } = useUncategorizedQuery(accountId, currentYear);
 
     const transactionsToObject = (ts: Transaction[]) => {
         return ts.reduce((acc, t) => {
@@ -94,7 +97,7 @@ export default function UncategorizedList({
             heading: "Add transaction rule to category",
             onClose: async () => {
                 setCategoryPanelState({
-                    categoryId: null,
+                    category: null,
                     transaction: null,
                 });
             },
@@ -102,25 +105,33 @@ export default function UncategorizedList({
 
     const onClickAddToCategory = (t: Transaction) => {
         setCategoryPanelState({
-            categoryId: null,
+            category: null,
             transaction: t,
         });
         categoryPanelMethods.open();
     };
 
     const [categoryPanelState, setCategoryPanelState] = useState<{
-        categoryId: number | null;
+        category: Category | null;
         transaction: Transaction | null;
     }>({
-        categoryId: null,
+        category: null,
         transaction: null,
     });
 
-    const onSelectPanelCategory = (categoryId: number | null) => {
+    const onSelectPanelCategory = (
+        categoryId: number | null,
+        category: Category | null
+    ) => {
         setCategoryPanelState((old) => ({
             ...old,
-            categoryId,
+            category,
         }));
+    };
+
+    const onChangeCategoryRules = async () => {
+        revalidateTransactions();
+        categoryPanelMethods.close();
     };
 
     const tableSlots = [
@@ -246,14 +257,35 @@ export default function UncategorizedList({
                     />
                 </div>
                 <div className="mb-4">
-                    {!categoryPanelState.categoryId && (
+                    {!categoryPanelState.category && (
                         <div>
                             Select a category to assign the transaction to.
                         </div>
                     )}
-                    {categoryPanelState.categoryId && (
-                        <div>Show some stuff!</div>
-                    )}
+                    {categoryPanelState.category &&
+                        categoryPanelState.transaction && (
+                            <>
+                                <div className="div">
+                                    <h3 className="font-bold">Transaction</h3>
+                                    <div className="flex w-full p-2 text-[12px] bg-gray-200 mb-2">
+                                        {
+                                            categoryPanelState.transaction
+                                                .description
+                                        }
+                                    </div>
+                                </div>
+                                <CategoryDashboard
+                                    category={categoryPanelState.category}
+                                    account={account!}
+                                    accountTransactions={transactions}
+                                    onChange={onChangeCategoryRules}
+                                    search={
+                                        categoryPanelState.transaction
+                                            .description
+                                    }
+                                />
+                            </>
+                        )}
                 </div>
             </SidePanel>
         </>

@@ -1,4 +1,5 @@
 import useCategoriesQuery from "@/hooks/useCategoriesQuery";
+import { Category } from "@/types/Statement";
 import { useMemo } from "react";
 import Select, { SingleValue } from "react-select";
 export function CategorySelector({
@@ -8,7 +9,7 @@ export function CategorySelector({
 }: {
     accountId: number;
     year: number;
-    onSelect: (categoryId: number | null) => void;
+    onSelect: (categoryId: number | null, category: Category | null) => void;
 }) {
     const { categories, isLoading } = useCategoriesQuery(accountId, year);
 
@@ -29,7 +30,8 @@ export function CategorySelector({
             label: string;
         }>
     ) => {
-        onSelect(newValue?.value || null);
+        const found = categories.find((c) => c.id === newValue?.value)!;
+        onSelect(newValue?.value || null, found);
     };
 
     return (

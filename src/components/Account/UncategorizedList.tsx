@@ -91,10 +91,36 @@ export default function UncategorizedList({
         useSidePanel({
             id: "category-panel",
             width: 800,
+            heading: "Add transaction rule to category",
+            onClose: async () => {
+                setCategoryPanelState({
+                    categoryId: null,
+                    transaction: null,
+                });
+            },
         });
 
-    const onClickAddToCategory = () => {
+    const onClickAddToCategory = (t: Transaction) => {
+        setCategoryPanelState({
+            categoryId: null,
+            transaction: t,
+        });
         categoryPanelMethods.open();
+    };
+
+    const [categoryPanelState, setCategoryPanelState] = useState<{
+        categoryId: number | null;
+        transaction: Transaction | null;
+    }>({
+        categoryId: null,
+        transaction: null,
+    });
+
+    const onSelectPanelCategory = (categoryId: number | null) => {
+        setCategoryPanelState((old) => ({
+            ...old,
+            categoryId,
+        }));
     };
 
     const tableSlots = [
@@ -164,7 +190,7 @@ export default function UncategorizedList({
                             <Dropdown label="Group Actions">
                                 <Dropdown.Item
                                     as="div"
-                                    onClick={() => onClickAddToCategory()}
+                                    onClick={() => onClickAddToCategory(t)}
                                 >
                                     Add To Category
                                 </Dropdown.Item>
@@ -212,7 +238,23 @@ export default function UncategorizedList({
             )}
 
             <SidePanel {...categoryPanelProps}>
-                <div>My custom stuff says hi</div>
+                <div className="w-full mb-4">
+                    <CategorySelector
+                        accountId={accountId}
+                        year={currentYear}
+                        onSelect={onSelectPanelCategory}
+                    />
+                </div>
+                <div className="mb-4">
+                    {!categoryPanelState.categoryId && (
+                        <div>
+                            Select a category to assign the transaction to.
+                        </div>
+                    )}
+                    {categoryPanelState.categoryId && (
+                        <div>Show some stuff!</div>
+                    )}
+                </div>
             </SidePanel>
         </>
     );

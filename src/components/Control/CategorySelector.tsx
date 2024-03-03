@@ -34,11 +34,11 @@ export function CategorySelector({
 
     return (
         <Select
-            className="w-[200px]"
+            className="w-[250px]"
             options={options}
             isClearable
             isSearchable
-            placeholder="Select a category..."
+            placeholder="Select category..."
             onChange={onChange}
         />
     );

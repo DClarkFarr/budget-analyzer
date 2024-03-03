@@ -25,6 +25,8 @@ export interface SidePanelState {
     align?: "left" | "right";
     width?: number;
     transitionDuration?: number;
+    onOpen?: () => Promise<void>;
+    onClose?: () => Promise<void>;
 }
 
 export interface SidePanelProps extends SidePanelState {
@@ -78,11 +80,19 @@ export function useSidePanel(props: Omit<SidePanelState, "children">): {
         registerModal(id);
 
         setIsOpen(true);
+
+        if (state.onOpen) {
+            await state.onOpen();
+        }
     };
 
     const onClose = async () => {
         context.unregisterModal(state.id);
         setIsOpen(false);
+
+        if (state.onClose) {
+            await state.onClose();
+        }
     };
 
     const open = (extra: Partial<SidePanelState> = {}) => {
@@ -179,15 +189,12 @@ export function SidePanel({
                 </div>
 
                 {heading && (
-                    <div className="side-panel__heading p-4 border-b border-b-2 border-gray-500">
+                    <div className="side-panel__heading p-4 text-lg mb-4 font-semibold border-b border-b-2 border-gray-500">
                         {heading}
                     </div>
                 )}
 
-                <div className="side-panel__body p-4">
-                    modal content here
-                    {isOpen && children}
-                </div>
+                <div className="side-panel__body p-4">{isOpen && children}</div>
             </div>
         </div>,
         target.current

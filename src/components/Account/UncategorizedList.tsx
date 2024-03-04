@@ -27,6 +27,10 @@ export default function UncategorizedList({
         revalidate: revalidateTransactions,
     } = useUncategorizedQuery(accountId, currentYear);
 
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+        null
+    );
+
     const transactionsToObject = (ts: Transaction[]) => {
         return ts.reduce((acc, t) => {
             acc[t.id] = null;
@@ -134,6 +138,10 @@ export default function UncategorizedList({
         categoryPanelMethods.close();
     };
 
+    const onFilterByCategory = (category: Category | null) => {
+        setSelectedCategory(category);
+    };
+
     const tableSlots = [
         {
             key: "categorize",
@@ -205,13 +213,20 @@ export default function UncategorizedList({
                                 >
                                     Add To Category
                                 </Dropdown.Item>
-                                <Dropdown.Item
-                                    as="a"
-                                    href="https://flowbite.com/"
-                                    target="_blank"
-                                >
-                                    External link
-                                </Dropdown.Item>
+                                {t?.categories?.length > 0 &&
+                                    t.categories.map((c) => {
+                                        return (
+                                            <Dropdown.Item
+                                                as="div"
+                                                key={c.id}
+                                                onClick={() =>
+                                                    onFilterByCategory(c)
+                                                }
+                                            >
+                                                Filter by &quot;{c.name}&quot;
+                                            </Dropdown.Item>
+                                        );
+                                    })}
                             </Dropdown>
                         </div>
                     </div>
@@ -231,9 +246,11 @@ export default function UncategorizedList({
                 <div>
                     <TransactionsTable
                         transactions={transactions}
+                        selectedCategory={selectedCategory}
                         withCategories={true}
                         showCategories={false}
                         slots={tableSlots}
+                        onSelectCategory={setSelectedCategory}
                         footer={
                             <>
                                 {!isLoading && transactions.length === 0 && (

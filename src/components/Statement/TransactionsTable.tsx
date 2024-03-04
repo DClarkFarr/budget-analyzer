@@ -12,6 +12,8 @@ import {
 import "./TransactionsTable.scss";
 import { formatCurrency } from "@/methods/currency";
 import SearchInput from "../Control/SearchInput";
+import { Category } from "@/types/Statement";
+import Select, { SingleValue } from "react-select";
 
 type Slot<T extends Transaction> = {
     key: string;
@@ -25,6 +27,8 @@ export default function TransactionsTable<WC extends boolean | undefined>({
     transactions,
     withCategories = false,
     showCategories = true,
+    selectedCategory,
+    onSelectCategory,
 }: {
     slots?: Slot<any>[];
     transactions: WC extends true
@@ -33,6 +37,8 @@ export default function TransactionsTable<WC extends boolean | undefined>({
     footer?: React.ReactNode;
     withCategories?: WC;
     showCategories?: boolean;
+    selectedCategory?: Category | null;
+    onSelectCategory?: (category: Category | null) => void;
 }) {
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -77,6 +83,9 @@ export default function TransactionsTable<WC extends boolean | undefined>({
     const [searchText, setSearchText] = useState("");
     const [hideIncoming, setHideIncoming] = useState(false);
     const [hideOutgoing, setHideOutgoing] = useState(false);
+    const [searchCategory, setSearchCategory] = useState<Category | null>(
+        selectedCategory || null
+    );
     const [, startTransition] = useTransition();
 
     const onChangeSearch = (text: string) => {
@@ -96,7 +105,18 @@ export default function TransactionsTable<WC extends boolean | undefined>({
                 const outgoingMatches =
                     !hideOutgoing || t.expenseType === "incoming";
 
-                return textMatches && incomingMatches && outgoingMatches;
+                const categoryMatches =
+                    !searchCategory ||
+                    ((t as WithCategories<Transaction>).categories || []).some(
+                        (c) => c.id === searchCategory.id
+                    );
+
+                return (
+                    textMatches &&
+                    incomingMatches &&
+                    outgoingMatches &&
+                    categoryMatches
+                );
             }
         ));
     }, [
@@ -105,6 +125,7 @@ export default function TransactionsTable<WC extends boolean | undefined>({
         searchText,
         hideIncoming,
         hideOutgoing,
+        searchCategory,
     ]);
 
     useEffect(() => {
@@ -115,7 +136,13 @@ export default function TransactionsTable<WC extends boolean | undefined>({
         startTransition(() => {
             filterTransactions();
         });
-    }, [filterTransactions, searchText, hideIncoming, hideOutgoing]);
+    }, [
+        filterTransactions,
+        searchText,
+        hideIncoming,
+        hideOutgoing,
+        searchCategory,
+    ]);
 
     const totals = useMemo(() => {
         return filteredTransactions.current.reduce(
@@ -128,12 +155,44 @@ export default function TransactionsTable<WC extends boolean | undefined>({
         );
     }, [filteredTransactions.current]);
 
+    const categories = useMemo(() => {
+        if (!withCategories) return [];
+
+        const catMap = new Map<number, Category>();
+
+        (transactions as WithCategories<Transaction>[]).forEach((t) => {
+            t.categories.forEach((c) => {
+                if (!catMap.has(c.id)) {
+                    catMap.set(c.id, c);
+                }
+            });
+        });
+
+        return Array.from(catMap.values());
+    }, [transactions.length]);
+
     const toggleHideIncoming = () => {
         setHideIncoming(!hideIncoming);
     };
     const toggleHideOutgoing = () => {
         setHideOutgoing(!hideOutgoing);
     };
+
+    const onChangeCategorySelection = (newValue: SingleValue<Category>) => {
+        setSearchCategory(newValue || null);
+        if (
+            typeof onSelectCategory === "function" &&
+            newValue?.id !== selectedCategory?.id
+        ) {
+            onSelectCategory(newValue);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedCategory?.id !== searchCategory?.id) {
+            setSearchCategory(selectedCategory || null);
+        }
+    }, [selectedCategory]);
 
     return (
         <>
@@ -196,6 +255,21 @@ export default function TransactionsTable<WC extends boolean | undefined>({
                             {formatCurrency(totals.net)} Net
                         </span>
                     </div>
+                </div>
+            </div>
+            <div className="flex items-center gap-x-4 mb-4">
+                <div>
+                    <Select
+                        className="w-[250px]"
+                        options={categories}
+                        getOptionLabel={(c) => c.name}
+                        getOptionValue={(c) => c.id.toString()}
+                        value={searchCategory}
+                        isClearable
+                        isSearchable
+                        placeholder="Select category..."
+                        onChange={onChangeCategorySelection}
+                    />
                 </div>
             </div>
             <div className="transactions">

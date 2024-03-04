@@ -1,18 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
-let prismaClient = null as unknown as PrismaClient<
-    {
-        log: {
-            emit: "event";
-            level: "query";
-        }[];
-    },
-    "query",
-    DefaultArgs
->;
-
-if (!prismaClient) {
+const prismaClientSingleton = () => {
+    console.log("creating prisma client");
     const pc = new PrismaClient({
         log: [
             {
@@ -25,9 +15,17 @@ if (!prismaClient) {
         // console.log(`Logging Query: ${e.query} ${e.params}`);
     });
 
-    prismaClient = pc;
+    return pc;
+};
+
+declare global {
+    var prismaClient: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-console.log("exporting prisma client");
+const prismaClient = globalThis.prismaClient ?? prismaClientSingleton();
 
 export { prismaClient };
+
+if (process.env.NODE_ENV !== "production") {
+    globalThis.prismaClient = prismaClient;
+}

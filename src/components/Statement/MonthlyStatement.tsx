@@ -112,6 +112,20 @@ export default function MonthlyStatement({
                         date={date}
                     />
                 </div>
+                <div className="mb-4">
+                    <CategoryTransactionTotals
+                        type="income"
+                        groups={groupedByType.income}
+                        date={date}
+                    />
+                </div>
+                <div className="mb-4">
+                    <CategoryTransactionTotals
+                        type="ignore"
+                        groups={groupedByType.ignore}
+                        date={date}
+                    />
+                </div>
             </div>
         </div>
     );

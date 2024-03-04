@@ -1,19 +1,25 @@
 "use client";
 
 import useQueryParams from "@/hooks/useQueryParams";
+import { Transaction, WithCategories } from "@/types/Account/Transaction";
+import { Category, CategoryTypes } from "@/types/Statement";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
+import CategoryTransactionTotals from "./CategoryTransactionTotals";
 
 export default function MonthlyStatement({
     accountId,
     year,
     month,
+    transactions,
 }: {
     accountId: number;
     year: number;
     month: number;
+    transactions: WithCategories<Transaction>[];
 }) {
     const { redirect } = useQueryParams();
+
     const months = useMemo(() => {
         return Array.from({ length: 12 }, (_, i) => i + 1).map((i) => {
             return {
@@ -22,6 +28,45 @@ export default function MonthlyStatement({
             };
         });
     }, []);
+
+    const date = useMemo(() => {
+        return DateTime.fromObject({ year, month });
+    }, [year, month]);
+
+    const groupedByType = useMemo(() => {
+        const typesMap: Record<
+            Category["type"],
+            { category: Category; transactions: Transaction[] }[]
+        > = {
+            [CategoryTypes.expense]: [],
+            [CategoryTypes.income]: [],
+            [CategoryTypes.ignore]: [],
+        };
+
+        const catMap = new Map<
+            number,
+            { category: Category; transactions: Transaction[] }
+        >();
+
+        transactions.forEach((t) => {
+            t.categories.forEach((c) => {
+                if (catMap.has(c.id)) {
+                    catMap.get(c.id)?.transactions.push(t);
+                } else {
+                    catMap.set(c.id, {
+                        category: c,
+                        transactions: [t],
+                    });
+                }
+            });
+        });
+
+        catMap.forEach((val) => {
+            typesMap[val.category.type].push(val);
+        });
+
+        return typesMap;
+    }, [transactions]);
 
     const onSelectMonth = (e: React.MouseEvent, monthId: number) => {
         e.preventDefault();
@@ -59,7 +104,15 @@ export default function MonthlyStatement({
                     );
                 })}
             </div>
-            <div>Stuff!</div>
+            <div>
+                <div className="mb-4">
+                    <CategoryTransactionTotals
+                        type="expense"
+                        groups={groupedByType.expense}
+                        date={date}
+                    />
+                </div>
+            </div>
         </div>
     );
 }

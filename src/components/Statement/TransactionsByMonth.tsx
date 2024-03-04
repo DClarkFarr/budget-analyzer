@@ -1,16 +1,22 @@
 import { formatCurrency } from "@/methods/currency";
+import { Account } from "@/types/Account";
 import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { DateTime } from "luxon";
+import Link from "next/link";
 import { useMemo } from "react";
 
 export default function TransactionsByMonth({
     startDate,
     endDate,
     transactions,
+    year,
+    account,
 }: {
     startDate: string;
     endDate: string;
     transactions: WithCategories<Transaction>[];
+    year: number;
+    account: Account;
 }) {
     const monthsToShow = useMemo(() => {
         const months: DateTime[] = [];
@@ -89,19 +95,19 @@ export default function TransactionsByMonth({
                         <div className="card__header px-4 py-2 border-b border-gray-400 text-center font-bold">
                             {m.toFormat("LLL yyyy")}
                         </div>
-                        <div className="card__body p-4">
-                            <div className="text-emerald-600">
+                        <div className="card__body">
+                            <div className="text-gray-600 pt-4 px-2">
                                 {formatCurrency(
                                     transactionsByMonth[formattedMonth].incoming
                                 )}
                             </div>
-                            <div className="text-red-600">
+                            <div className="text-red-600 px-2">
                                 {formatCurrency(
                                     transactionsByMonth[formattedMonth].outgoing
                                 )}
                             </div>
                             <div
-                                className={`pt-4 font-semibold ${
+                                className={`pt-2 px-2 pb-4 font-semibold ${
                                     transactionsByMonth[formattedMonth].net > 0
                                         ? "text-emerald-600"
                                         : "text-red-600"
@@ -110,6 +116,14 @@ export default function TransactionsByMonth({
                                 {formatCurrency(
                                     transactionsByMonth[formattedMonth].net
                                 )}
+                            </div>
+                            <div className="border-t border-gray-500 py-4 px-2">
+                                <Link
+                                    className="text-sky-600 hover:underline"
+                                    href={`/dashboard/account/${account.id}/statement/${year}/${m.month}`}
+                                >
+                                    View Statement
+                                </Link>
                             </div>
                         </div>
                     </div>

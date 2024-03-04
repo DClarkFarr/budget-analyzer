@@ -67,7 +67,13 @@ export default function AccountDashboard({
         {
             label: "Totals",
             key: "totals",
-            pane: <StatementTransactionRange transactions={transactions} />,
+            pane: (
+                <StatementTransactionRange
+                    transactions={transactions}
+                    account={account!}
+                    year={currentYear}
+                />
+            ),
         },
         {
             label: "Transactions",

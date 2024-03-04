@@ -9,6 +9,7 @@ import useCategoryRules from "@/hooks/useCategoryRules";
 import { useMemo, useState } from "react";
 import TransactionsTableReadonly from "./TransactionsTableReadonly";
 import { formatCurrency } from "@/methods/currency";
+import { useAccountContext } from "../Providers/AccountProvider";
 
 export default function CategoryDashboard({
     category,
@@ -23,11 +24,13 @@ export default function CategoryDashboard({
     search?: string;
     onChange?: () => Promise<void>;
 }) {
+    const { currentYear } = useAccountContext();
+
     const {
         transactions,
         isLoading,
         revalidate: revalidateTransactions,
-    } = useCategoryTransactions(category.id);
+    } = useCategoryTransactions(category.id, currentYear);
 
     const [deletingRuleId, setDeletingRuleId] = useState<number | null>(null);
 

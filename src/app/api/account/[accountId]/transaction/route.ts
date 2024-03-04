@@ -33,6 +33,7 @@ export const GET = chainMiddleware(
             const minDate = year
                 ? DateTime.fromObject({ year, month: 1, day: 1 })
                 : undefined;
+
             const maxDate = minDate ? minDate.endOf("year") : undefined;
 
             const transactions = await getAccountTransactions(accountId, {

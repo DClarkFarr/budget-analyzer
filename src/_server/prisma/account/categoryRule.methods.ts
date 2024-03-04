@@ -11,16 +11,24 @@ import UserError from "@/server/exceptions/UserException";
 import { getCategory } from "./category.methods";
 import { Transaction } from "@/types/Account/Transaction";
 import { AccountTransaction, CategoryTransactions } from "@prisma/client";
+import { getMaxDate, getMinDate } from "@/server/methods/date";
 
-export async function getCategoryTransactions(categoryId: number) {
+export async function getCategoryTransactions(
+    categoryId: number,
+    options: { minDate?: string; maxDate?: string } = {}
+) {
     const category = (await getCategory(categoryId))!;
 
     const params: (string | number)[] = [categoryId];
-    if (category.startAt) {
-        params.push(category.startAt);
+
+    let startAt = getMaxDate(category.startAt || undefined, options.minDate);
+    let endAt = getMinDate(category.endAt || undefined, options.maxDate);
+
+    if (startAt) {
+        params.push(startAt as unknown as string);
     }
-    if (category.endAt) {
-        params.push(category.endAt);
+    if (endAt) {
+        params.push(endAt as unknown as string);
     }
 
     const query = `
@@ -30,8 +38,8 @@ export async function getCategoryTransactions(categoryId: number) {
       JOIN CategoryTransactions ct ON ct.transactionId = t.id
       WHERE ct.categoryId = ?
       AND ct.ignoredAt IS NULL
-      ${category.startAt ? "AND t.date >= ? " : ""}
-      ${category.endAt ? "AND t.date <= ? " : ""}
+      ${startAt ? "AND t.date >= ? " : ""}
+      ${endAt ? "AND t.date <= ? " : ""}
       AND EXISTS(
         SELECT c.id FROM Category c
         WHERE c.id = ct.categoryId

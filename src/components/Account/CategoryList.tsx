@@ -20,11 +20,13 @@ const Spinner = () => <FaCircleNotch className="animate-spin" />;
 
 export default function CategoryList({
     categories,
+    year,
     onCreateCategory,
     onDeleteCategory,
     onUpdateCategory,
 }: {
     categories: Category[];
+    year?: number;
     onCreateCategory: (data: CategoryFormState) => Promise<void>;
     onDeleteCategory: (categoryId: number) => Promise<void>;
     onUpdateCategory: (
@@ -223,7 +225,7 @@ export default function CategoryList({
                             <div className="flex gap-x-2">
                                 <div>
                                     <Link
-                                        href={`/dashboard/account/${category.accountId}/category/${category.id}`}
+                                        href={`/dashboard/account/${category.accountId}/category/${category.id}?year=${year}`}
                                         className="btn btn-sm bg-slate-200 text-slate-800 flex items-center gap-x-1"
                                     >
                                         <FaRegListAlt /> <span>View</span>

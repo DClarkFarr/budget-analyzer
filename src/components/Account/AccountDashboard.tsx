@@ -88,6 +88,7 @@ export default function AccountDashboard({
                     onCreateCategory={onCreateCategory}
                     onDeleteCategory={onDeleteCategory}
                     onUpdateCategory={onCategoryUpdate}
+                    year={currentYear}
                 />
             ),
         },

@@ -108,9 +108,14 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
-    static getCategoryTransactions(categoryId: number) {
+    static getCategoryTransactions(
+        categoryId: number,
+        options: { year?: number } = {}
+    ) {
         return webApi
-            .get<Transaction[]>(`/category/${categoryId}/transaction`)
+            .get<Transaction[]>(`/category/${categoryId}/transaction`, {
+                params: options,
+            })
             .then((res) => res.data);
     }
 

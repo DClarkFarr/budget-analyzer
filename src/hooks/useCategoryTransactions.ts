@@ -1,7 +1,10 @@
 import AccountService from "@/services/AccountService";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function useCategoryTransactions(categoryId: number) {
+export default function useCategoryTransactions(
+    categoryId: number,
+    year: number
+) {
     const queryClient = useQueryClient();
 
     const {
@@ -9,8 +12,9 @@ export default function useCategoryTransactions(categoryId: number) {
         isLoading,
         isSuccess,
     } = useQuery({
-        queryKey: ["category", "transactions", categoryId],
-        queryFn: () => AccountService.getCategoryTransactions(categoryId),
+        queryKey: ["category", "transactions", categoryId, year],
+        queryFn: () =>
+            AccountService.getCategoryTransactions(categoryId, { year }),
     });
 
     return {
@@ -19,7 +23,7 @@ export default function useCategoryTransactions(categoryId: number) {
         isSuccess,
         revalidate: () =>
             queryClient.refetchQueries({
-                queryKey: ["category", "transactions", categoryId],
+                queryKey: ["category", "transactions", categoryId, year],
                 exact: true,
             }),
     };

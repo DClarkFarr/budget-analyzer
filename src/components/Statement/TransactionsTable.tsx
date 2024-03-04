@@ -29,6 +29,7 @@ export default function TransactionsTable<WC extends boolean | undefined>({
     showCategories = true,
     selectedCategory,
     onSelectCategory,
+    controls,
 }: {
     slots?: Slot<any>[];
     transactions: WC extends true
@@ -39,6 +40,7 @@ export default function TransactionsTable<WC extends boolean | undefined>({
     showCategories?: boolean;
     selectedCategory?: Category | null;
     onSelectCategory?: (category: Category | null) => void;
+    controls?: React.ReactNode;
 }) {
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -168,7 +170,9 @@ export default function TransactionsTable<WC extends boolean | undefined>({
             });
         });
 
-        return Array.from(catMap.values());
+        return Array.from(catMap.values()).sort((a, b) =>
+            a.name.localeCompare(b.name)
+        );
     }, [transactions.length]);
 
     const toggleHideIncoming = () => {
@@ -271,6 +275,7 @@ export default function TransactionsTable<WC extends boolean | undefined>({
                         onChange={onChangeCategorySelection}
                     />
                 </div>
+                {controls}
             </div>
             <div className="transactions">
                 <div ref={wrapper} className="transactions__wrapper">

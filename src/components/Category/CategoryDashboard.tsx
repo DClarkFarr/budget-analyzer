@@ -61,19 +61,18 @@ export default function CategoryDashboard({
         await createRule(data);
         reset();
 
-        setTimeout(() => {
-            revalidateTransactions();
+        setTimeout(async () => {
+            await revalidateTransactions();
+            if (typeof onChange === "function") {
+                await onChange();
+            }
         }, 100);
-
-        if (typeof onChange === "function") {
-            await onChange();
-        }
     };
 
     const onUpdateRule =
         (ruleId: number) => async (data: CategoryRuleFormState) => {
             await updateRule(ruleId, data);
-            revalidateTransactions();
+            await revalidateTransactions();
 
             if (typeof onChange === "function") {
                 await onChange();
@@ -84,7 +83,7 @@ export default function CategoryDashboard({
         setDeletingRuleId(ruleId);
         await deleteRule(ruleId);
         setDeletingRuleId(null);
-        revalidateTransactions();
+        await revalidateTransactions();
 
         if (typeof onChange === "function") {
             await onChange();

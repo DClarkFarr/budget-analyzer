@@ -4,7 +4,7 @@ import { useUncategorizedQuery } from "@/hooks/useUncategorizedQuery";
 import TransactionsTable from "../Statement/TransactionsTable";
 import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { CategorySelector } from "../Control/CategorySelector";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useMoveTransactionMutation } from "@/hooks/useDuplicateQuery";
 import { useAccountContext } from "../Providers/AccountProvider";
 
@@ -14,6 +14,7 @@ import "./UncategorizedList.scss";
 import { SidePanel, useSidePanel } from "../Modal/SidePanel";
 import CategoryDashboard from "../Category/CategoryDashboard";
 import { Category } from "@/types/Statement";
+import AccountService from "@/services/AccountService";
 
 export default function UncategorizedList({
     accountId,
@@ -30,6 +31,10 @@ export default function UncategorizedList({
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(
         null
     );
+
+    const [isSyncingCategories, setSyncingCategories] = useState(false);
+
+    const [, transition] = useTransition();
 
     const transactionsToObject = (ts: Transaction[]) => {
         return ts.reduce((acc, t) => {
@@ -140,6 +145,20 @@ export default function UncategorizedList({
 
     const onFilterByCategory = (category: Category | null) => {
         setSelectedCategory(category);
+    };
+
+    const onClickApplyToCategory = async (category: Category) => {
+        setSyncingCategories(true);
+
+        transition(async () => {
+            await AccountService.syncCategoryTransactions(category.id);
+
+            requestAnimationFrame(() => {
+                revalidateTransactions();
+                setSyncingCategories(false);
+                setSelectedCategory(null);
+            });
+        });
     };
 
     const tableSlots = [
@@ -260,6 +279,23 @@ export default function UncategorizedList({
                                     </div>
                                 )}
                             </>
+                        }
+                        controls={
+                            selectedCategory && (
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() =>
+                                        onClickApplyToCategory(
+                                            selectedCategory!
+                                        )
+                                    }
+                                    disabled={isSyncingCategories}
+                                >
+                                    {isSyncingCategories
+                                        ? "Syncing"
+                                        : "Apply category to visible"}
+                                </button>
+                            )
                         }
                     />
                 </div>

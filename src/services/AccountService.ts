@@ -114,6 +114,13 @@ export default class AccountService {
             .then((res) => res.data);
     }
 
+    static syncCategoryTransactions(categoryId: number) {
+        return webApi
+            .post(`/category/${categoryId}/transaction/sync`)
+            .then((res) => res.data)
+            .then(() => {});
+    }
+
     static getCategoriesTotals<K extends number>(
         categoryIds: K[],
         year: number

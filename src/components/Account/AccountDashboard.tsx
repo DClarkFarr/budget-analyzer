@@ -65,8 +65,8 @@ export default function AccountDashboard({
 
     const tabs: Tab[] = [
         {
-            label: "Range",
-            key: "statement",
+            label: "Totals",
+            key: "totals",
             pane: <StatementTransactionRange transactions={transactions} />,
         },
         {
@@ -105,7 +105,7 @@ export default function AccountDashboard({
     ];
 
     const [view, setView] = useState(
-        "statement" as "statement" | "transactions" | "categories"
+        "totals" as "totals" | "transactions" | "categories"
     );
 
     const search = useSearchParams();
@@ -113,12 +113,12 @@ export default function AccountDashboard({
     useEffect(() => {
         const initialView = search.get("view");
         if (initialView) {
-            setView(initialView as "statement" | "transactions" | "categories");
+            setView(initialView as "totals" | "transactions" | "categories");
         }
     }, []);
 
     const onChangeTab = (view: string) => {
-        setView(view as "statement" | "transactions" | "categories");
+        setView(view as "totals" | "transactions" | "categories");
         pushQuery({ view });
     };
 

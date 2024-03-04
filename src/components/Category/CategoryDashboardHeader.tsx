@@ -6,8 +6,9 @@ import Link from "next/link";
 import Select, { SingleValue } from "react-select";
 import { useRouter } from "next/navigation";
 import useAccountCategories from "@/hooks/useAccountCategories";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccountContext } from "../Providers/AccountProvider";
+import useQueryParams from "@/hooks/useQueryParams";
 
 export default function CategoryDashboardHeader({
     account,
@@ -26,22 +27,32 @@ export default function CategoryDashboardHeader({
     // https://github.com/JedWatson/react-select/issues/5459 is fixed.
     useEffect(() => setIsMounted(true), []);
 
-    const router = useRouter();
+    const { buildUrl, redirect } = useQueryParams();
 
     const onSelectCategory = (newValue: SingleValue<Category>) => {
         if (newValue) {
-            router.push(
+            redirect(
                 `/dashboard/account/${account.id}/category/${newValue.id}`
             );
         }
     };
+
+    const toCategoriesUrl = useMemo(() => {
+        return buildUrl({
+            path: `/dashboard/account/${account.id}`,
+            params: {
+                view: "categories",
+                year: currentYear,
+            },
+        });
+    }, [account.id, currentYear]);
 
     return (
         <div className="flex items-center gap-x-2 mb-4">
             <div>
                 <span className="pr-1">Account:</span>
                 <Link
-                    href={`/dashboard/account/${account.id}?view=categories`}
+                    href={toCategoriesUrl}
                     className="text-sky-600 hover:underline"
                 >
                     {account.name}

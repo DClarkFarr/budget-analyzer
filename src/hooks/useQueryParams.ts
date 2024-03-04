@@ -27,20 +27,31 @@ export default function useQueryParams() {
     };
 
     const pushQuery = (params: Record<string, string | number | boolean>) => {
-        const toSet = buildParams(params);
+        router.push(buildUrl({ params }));
+    };
 
-        router.push(pathname + (toSet.size > 0 ? "?" + toSet.toString() : ""));
+    const buildUrl = ({
+        path,
+        params,
+    }: {
+        path?: string;
+        params?: Record<string, string | number | boolean>;
+    }) => {
+        const q = buildParams(params || {});
+        const p = path || pathname;
+
+        return p + (q.size > 0 ? "?" + q.toString() : "");
     };
 
     const redirect = (
         path: string,
         params: Record<string, string | number | boolean> = {}
     ) => {
-        const toSet = buildParams(params);
-        router.push(path + (toSet.size > 0 ? "?" + toSet.toString() : ""));
+        router.push(buildUrl({ path, params }));
     };
 
     return {
+        buildUrl,
         pushQuery,
         redirect,
         query,

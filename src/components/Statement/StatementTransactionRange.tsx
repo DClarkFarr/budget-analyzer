@@ -53,7 +53,9 @@ export default function StatementTransactionRange({
 
     return (
         <div>
-            <h3 className="text-lg">Transactions by Month</h3>
+            <h3 className="text-lg font-semibold mb-2">
+                Transactions by Month
+            </h3>
             <div className="months flex flex-wrap gap-2 mb-8">
                 {transactionsByMonth.map((month) => (
                     <div
@@ -69,6 +71,8 @@ export default function StatementTransactionRange({
                     </div>
                 ))}
             </div>
+
+            <h3 className="text-lg font-semibold mb-2">Totals by Month</h3>
 
             <TransactionsByMonth
                 startDate={dates.start}

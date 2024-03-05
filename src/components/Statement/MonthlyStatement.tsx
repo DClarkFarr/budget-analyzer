@@ -4,7 +4,7 @@ import useQueryParams from "@/hooks/useQueryParams";
 import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import { Category, CategoryTypes } from "@/types/Statement";
 import { DateTime } from "luxon";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import CategoryTransactionTotals from "./CategoryTransactionTotals";
 
 export default function MonthlyStatement({
@@ -18,7 +18,7 @@ export default function MonthlyStatement({
     month: number;
     transactions: WithCategories<Transaction>[];
 }) {
-    const { redirect } = useQueryParams();
+    const { redirect, query } = useQueryParams();
 
     const months = useMemo(() => {
         return Array.from({ length: 12 }, (_, i) => i + 1).map((i) => {
@@ -72,9 +72,22 @@ export default function MonthlyStatement({
         e.preventDefault();
 
         redirect(
-            `/dashboard/account/${accountId}/statement/${year}/${monthId}`
+            `/dashboard/account/${accountId}/statement/${year}/${monthId}`,
+            { year }
         );
     };
+
+    useEffect(() => {
+        if (query.year !== String(year)) {
+            redirect(
+                `/dashboard/account/${accountId}/statement/${query.year}/${month}`,
+                {
+                    year: query.year,
+                }
+            );
+        }
+    }, [year, query.year]);
+
     return (
         <div className="statement -mt-5">
             <div className="mb-6 flex flex-wrap lg:flex-nowrap gap-3">

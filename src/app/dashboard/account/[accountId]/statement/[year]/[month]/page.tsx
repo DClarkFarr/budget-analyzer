@@ -1,9 +1,7 @@
 import MonthlyStatement from "@/components/Statement/MonthlyStatement";
 import { getAccountTransactions } from "@/server/prisma/account/statement.methods";
 import { Transaction, WithCategories } from "@/types/Account/Transaction";
-import { Category, CategoryTypes } from "@/types/Statement";
 import { DateTime } from "luxon";
-import { useMemo } from "react";
 
 export default async function MonthlyStatementPage({
     params: { accountId, year, month },

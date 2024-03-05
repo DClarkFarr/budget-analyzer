@@ -21,7 +21,7 @@ export default function useQueryParams() {
     const buildParams = (params: Record<string, string | number | boolean>) => {
         const newParams = new URLSearchParams(searchParams);
         for (const key in params) {
-            newParams.set(key, params[key].toString());
+            newParams.set(key, String(params[key]));
         }
         return newParams;
     };

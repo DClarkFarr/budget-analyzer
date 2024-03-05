@@ -32,7 +32,7 @@ export default class AfcuUploader extends UploadDriver {
             "description",
             "debit",
             "credit",
-        ] as const);
+        ]);
 
         if (rows.length && rows[0].date === "Date") {
             rows.shift();

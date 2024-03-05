@@ -3,53 +3,53 @@ import { parse } from "csv-parse";
 import crypto from "crypto";
 
 type ArrToObject<T extends string[]> = {
-  [K in T[number]]: string;
+    [K in T[number]]: string;
 };
 export default abstract class UploadDriver {
-  accountId: number;
-  file: File;
-  transactions: ProcessedTransaction[] = [];
+    accountId: number;
+    file: File;
+    transactions: ProcessedTransaction[] = [];
 
-  constructor(accountId: number, file: File) {
-    this.accountId = accountId;
-    this.file = file;
-  }
-  async getTransactions(): Promise<ProcessedTransaction[]> {
-    if (!this.transactions.length) {
-      await this.processTransactions();
+    constructor(accountId: number, file: File) {
+        this.accountId = accountId;
+        this.file = file;
+    }
+    async getTransactions(): Promise<ProcessedTransaction[]> {
+        if (!this.transactions.length) {
+            await this.processTransactions();
+        }
+
+        this.fileIsValidOrThrow();
+
+        return this.transactions;
     }
 
-    this.fileIsValidOrThrow();
+    abstract processTransactions(): Promise<void>;
 
-    return this.transactions;
-  }
+    abstract fileIsValidOrThrow(): void;
 
-  abstract processTransactions(): Promise<void>;
+    strToHash(str: string) {
+        return crypto.createHash("md5").update(str).digest("hex");
+    }
 
-  abstract fileIsValidOrThrow(): void;
+    async fileToCsv<C extends string[]>(columns: C) {
+        const bytes = await this.file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
-  strToHash(str: string) {
-    return crypto.createHash("md5").update(str).digest("hex");
-  }
-
-  async fileToCsv<C extends string[]>(columns: C) {
-    const bytes = await this.file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    return new Promise<ArrToObject<C>[]>((resolve, reject) => {
-      parse(
-        buffer,
-        {
-          delimiter: ",",
-          columns,
-        },
-        (error, result: ArrToObject<C>[]) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve(result);
-        }
-      );
-    });
-  }
+        return new Promise<ArrToObject<C>[]>((resolve, reject) => {
+            parse(
+                buffer,
+                {
+                    delimiter: ",",
+                    columns,
+                },
+                (error, result: ArrToObject<C>[]) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    resolve(result);
+                }
+            );
+        });
+    }
 }

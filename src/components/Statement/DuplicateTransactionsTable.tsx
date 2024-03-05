@@ -17,6 +17,7 @@ import { Category } from "@/types/Statement";
 const bankMap = {
     wells_fargo: "Wells Fargo",
     venmo: "Venmo",
+    afcu: "AFCU",
 };
 
 export default function DuplicateTransactionsTable({

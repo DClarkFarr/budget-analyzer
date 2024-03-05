@@ -25,7 +25,7 @@ const fileKeys = [
     "empty_11",
     "empty_12",
     "empty_13",
-] as const;
+];
 
 type FileKeys = (typeof fileKeys)[number];
 

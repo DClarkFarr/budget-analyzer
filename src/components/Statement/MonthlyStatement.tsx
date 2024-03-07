@@ -78,7 +78,7 @@ export default function MonthlyStatement({
     };
 
     useEffect(() => {
-        if (query.year !== String(year)) {
+        if (query.year !== String(year) && !!query.year) {
             redirect(
                 `/dashboard/account/${accountId}/statement/${query.year}/${month}`,
                 {

@@ -3,12 +3,13 @@ import { CategoryType } from "@/types/Statement";
 
 export function sumCategoryTypeTransactions(
     type: CategoryType,
-    transactions: Transaction[]
+    transactions: Transaction[],
+    ignoreIgnored = true
 ) {
     const totals = { incoming: 0, outgoing: 0, net: 0 };
 
     transactions.forEach((t) => {
-        if (type === "ignore") {
+        if (type === "ignore" && ignoreIgnored) {
             return;
         }
 

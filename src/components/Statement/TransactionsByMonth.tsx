@@ -120,7 +120,7 @@ export default function TransactionsByMonth({
                             <div className="border-t border-gray-500 py-4 px-2">
                                 <Link
                                     className="text-sky-600 hover:underline"
-                                    href={`/dashboard/account/${account.id}/statement/${year}/${m.month}`}
+                                    href={`/dashboard/account/${account.id}/statement/${year}/${m.month}?year=${year}`}
                                 >
                                     View Statement
                                 </Link>

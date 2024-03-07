@@ -17,7 +17,7 @@ const CategoryDropdown = ({
     const [open, setOpen] = useState(false);
 
     const totals = useMemo(() => {
-        return sumCategoryTypeTransactions(category.type, transactions);
+        return sumCategoryTypeTransactions(category.type, transactions, false);
     }, [transactions]);
 
     return (
@@ -66,14 +66,15 @@ export default function CategoryTransactionTotals({
     groups: { category: Category; transactions: Transaction[] }[];
     date: DateTime;
 }) {
-    const typeName = { expense: "Expense", income: "Income", ignore: "other" }[
+    const typeName = { expense: "Expense", income: "Income", ignore: "Other" }[
         type
     ];
 
     const total = useMemo(() => {
         return groups.reduce((acc, group) => {
             return (
-                acc + sumCategoryTypeTransactions(type, group.transactions).net
+                acc +
+                sumCategoryTypeTransactions(type, group.transactions, false).net
             );
         }, 0);
     }, [groups]);

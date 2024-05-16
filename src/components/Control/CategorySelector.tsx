@@ -5,10 +5,12 @@ import Select, { SingleValue } from "react-select";
 export function CategorySelector({
     accountId,
     year,
+    selectedId,
     onSelect,
 }: {
     accountId: number;
     year: number;
+    selectedId?: number;
     onSelect: (categoryId: number | null, category: Category | null) => void;
 }) {
     const { categories, isLoading } = useCategoriesQuery(accountId, year);
@@ -38,6 +40,7 @@ export function CategorySelector({
         <Select
             className="w-[250px]"
             options={options}
+            defaultValue={options.find((o) => o.value === selectedId)}
             isClearable
             isSearchable
             placeholder="Select category..."

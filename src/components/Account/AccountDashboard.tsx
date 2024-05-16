@@ -6,7 +6,6 @@ import useAccountQuery, {
     useUpdateCategoryMutation,
 } from "@/hooks/useAccountQuerry";
 import { User } from "@/types/User";
-import TransactionsTable from "../Statement/TransactionsTable";
 import TabsView, { Tab } from "../Control/TabsView";
 import StatementTransactionRange from "../Statement/StatementTransactionRange";
 import CategoryList from "./CategoryList";
@@ -14,9 +13,11 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CategoryFormState } from "@/types/Statement";
 import UncategorizedList from "./UncategorizedList";
+import CategorizedList from "./CategorizedList";
 import DuplicateList from "./DuplicateList";
 import { useAccountContext } from "../Providers/AccountProvider";
 import useQueryParams from "@/hooks/useQueryParams";
+import { Transaction } from "@/types/Account/Transaction";
 
 export default function AccountDashboard({
     user,
@@ -79,9 +80,9 @@ export default function AccountDashboard({
             label: "Transactions",
             key: "transactions",
             pane: (
-                <TransactionsTable
+                <CategorizedList
+                    accountId={accountId}
                     transactions={transactions}
-                    withCategories={true}
                 />
             ),
         },

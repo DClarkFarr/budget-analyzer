@@ -77,10 +77,15 @@ export default class VenmoUploader extends UploadDriver {
             const amount = Math.abs(
                 parseFloat(row.amount.replace(/^[\+\- $]*/, ""))
             );
+            const amountParsed = parseFloat(row.amount.replace(/[$,\s]/g, ""));
 
             return {
                 amount,
-                expenseType: row.type === "Payment" ? "outgoing" : "incoming",
+                expenseType:
+                    ["Payment", "Charge"].includes(row.type) ||
+                    amountParsed <= 0
+                        ? "outgoing"
+                        : "incoming",
                 bankType: "venmo",
                 description: `From: ${row.from}, To: ${row.to}, Note: ${note}, Source: ${row.fundingSource}`,
                 date: DateTime.fromISO(row.date).toISO()!,

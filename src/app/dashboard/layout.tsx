@@ -3,15 +3,18 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayoutWrapper({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  const user = await getSessionUser();
+    let user = null;
+    try {
+        user = await getSessionUser();
+    } catch {}
 
-  if (!user?.id) {
-    return redirect("/login?not=authorized");
-  }
+    if (!user?.id) {
+        return redirect("/login?not=authorized");
+    }
 
-  return <DashboardLayout user={user}>{children}</DashboardLayout>;
+    return <DashboardLayout user={user}>{children}</DashboardLayout>;
 }

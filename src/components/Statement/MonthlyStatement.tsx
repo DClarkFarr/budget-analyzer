@@ -48,6 +48,17 @@ export default function MonthlyStatement({
             { category: Category; transactions: Transaction[] }
         >();
 
+        const uncatetegorized: Category = {
+            id: 0,
+            name: "Uncategorized",
+            type: CategoryTypes.ignore,
+            accountId,
+            userId: 0,
+            startAt: DateTime.now().startOf("year").toString(),
+            endAt: DateTime.now().endOf("year").toString(),
+            createdAt: DateTime.now().toString(),
+        };
+
         transactions.forEach((t) => {
             t.categories.forEach((c) => {
                 if (catMap.has(c.id)) {
@@ -59,6 +70,17 @@ export default function MonthlyStatement({
                     });
                 }
             });
+
+            if (!t.categories.length) {
+                if (typesMap[CategoryTypes.ignore].length) {
+                    typesMap[CategoryTypes.ignore][0].transactions.push(t);
+                } else {
+                    typesMap[CategoryTypes.ignore].push({
+                        category: uncatetegorized,
+                        transactions: [t],
+                    });
+                }
+            }
         });
 
         catMap.forEach((val) => {

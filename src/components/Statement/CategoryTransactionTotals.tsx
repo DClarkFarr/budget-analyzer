@@ -46,7 +46,13 @@ const CategoryDropdown = ({
                                         )}
                                     </td>
                                     <td>{t.description}</td>
-                                    <td>{formatCurrency(t.amount)}</td>
+                                    <td>
+                                        {formatCurrency(
+                                            t.expenseType === "incoming"
+                                                ? t.amount
+                                                : t.amount * -1
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

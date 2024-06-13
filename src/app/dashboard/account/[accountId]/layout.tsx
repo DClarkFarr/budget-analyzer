@@ -4,7 +4,7 @@ import { AccountContextHeader } from "@/components/Dashboard/AccountContextHeade
 import { useAccountContext } from "@/components/Providers/AccountProvider";
 import useQueryParams from "@/hooks/useQueryParams";
 import AccountService from "@/services/AccountService";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 import { throttle } from "lodash-es";
@@ -16,8 +16,9 @@ export default function AccountLayout({
 }) {
     const params = useParams();
     const { query, pushQuery } = useQueryParams();
+    const pathname = usePathname();
 
-    const { setAccount, setYear, account } = useAccountContext();
+    const { setAccount, setYear, setShowHeader, account } = useAccountContext();
 
     const setAccountToContext = async (accountId: number) => {
         if (account?.id !== accountId) {
@@ -59,6 +60,18 @@ export default function AccountLayout({
             throttleQueryAccount(parseFloat(params.accountId.toString()));
         }
     }, [params.accountId]);
+
+    const basePath = useMemo(
+        () => `/dashboard/account/${params.accountId}`,
+        [params.accountId]
+    );
+
+    useEffect(() => {
+        const noHeaderPages = ["/search"].map((page) => `${basePath}${page}`);
+        const noHeader = noHeaderPages.includes(pathname);
+
+        setShowHeader(!noHeader);
+    }, [pathname, basePath]);
 
     return (
         <div className="account-layout">

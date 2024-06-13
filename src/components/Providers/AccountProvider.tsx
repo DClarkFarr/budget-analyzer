@@ -11,17 +11,20 @@ interface AccountProviderState {
     currentYear: number;
     account: Account | null;
     years: number[];
+    showHeader: boolean;
 }
 
 interface AccountProviderContext extends AccountProviderState {
     setAccount: (account: Account | null) => Promise<AccountProviderState>;
     setYear: (year: number) => void;
+    setShowHeader: (show: boolean) => void;
 }
 
 type AccountReducerAction =
-    | { type: "set"; payload: AccountProviderState }
+    | { type: "set"; payload: Omit<AccountProviderState, "showHeader"> }
     | { type: "year"; payload: number }
-    | { type: "clear" };
+    | { type: "clear" }
+    | { type: "showHeader"; payload: boolean };
 
 const accountProviderInitialState: AccountProviderState = {
     startYear: DateTime.now().year,
@@ -29,6 +32,7 @@ const accountProviderInitialState: AccountProviderState = {
     currentYear: DateTime.now().year,
     years: [],
     account: null,
+    showHeader: true,
 };
 
 function accountProviderReducer(
@@ -42,6 +46,8 @@ function accountProviderReducer(
             return { ...state, currentYear: action.payload };
         case "clear":
             return { ...state, ...accountProviderInitialState };
+        case "showHeader":
+            return { ...state, showHeader: action.payload };
     }
 }
 
@@ -49,6 +55,7 @@ const AccountContext = createContext<AccountProviderContext>({
     ...accountProviderInitialState,
     setAccount: async () => ({ ...accountProviderInitialState }),
     setYear: () => {},
+    setShowHeader: () => {},
 });
 
 export { AccountContext };
@@ -61,7 +68,7 @@ export function useAccountContext() {
 
 const getAccountState = async (
     account: Account
-): Promise<AccountProviderState> => {
+): Promise<Omit<AccountProviderState, "showHeader">> => {
     const stats = await AccountService.getAccountStats(account.id);
     const startYear = (
         stats.startAt
@@ -98,9 +105,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     );
 
     const setAccount = async (account: Account | null) => {
-        let payload = { ...accountProviderInitialState };
+        let payload = { ...state };
         if (account) {
-            payload = await getAccountState(account);
+            payload = { ...payload, ...(await getAccountState(account)) };
             dispatch({ type: "set", payload });
         } else {
             dispatch({ type: "clear" });
@@ -113,8 +120,14 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "year", payload: year });
     };
 
+    const setShowHeader = (show: boolean) => {
+        dispatch({ type: "showHeader", payload: show });
+    };
+
     return (
-        <AccountContext.Provider value={{ ...state, setAccount, setYear }}>
+        <AccountContext.Provider
+            value={{ ...state, setAccount, setYear, setShowHeader }}
+        >
             {children}
         </AccountContext.Provider>
     );

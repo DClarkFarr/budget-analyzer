@@ -4,7 +4,7 @@ import DashboardNavTabs from "./DashboardNavTabs";
 import Link from "next/link";
 
 export function AccountContextHeader() {
-    const { account, years, currentYear } = useAccountContext();
+    const { account, years, currentYear, showHeader } = useAccountContext();
 
     const { pushQuery } = useQueryParams();
     if (!account) {
@@ -34,33 +34,35 @@ export function AccountContextHeader() {
                 </div>
             </div>
 
-            <div className="mb-6 flex flex-wrap lg:flex-nowrap gap-3">
-                <div className="font-semibold">Select Year</div>
-                {years.map((y) => {
-                    const isMatch = currentYear === y;
-                    const cls = isMatch
-                        ? "text-sky-700 font-semibold"
-                        : "text-gray-700";
+            {showHeader && (
+                <div className="mb-6 flex flex-wrap lg:flex-nowrap gap-3">
+                    <div className="font-semibold">Select Year</div>
+                    {years.map((y) => {
+                        const isMatch = currentYear === y;
+                        const cls = isMatch
+                            ? "text-sky-700 font-semibold"
+                            : "text-gray-700";
 
-                    if (isMatch) {
+                        if (isMatch) {
+                            return (
+                                <span className={`px-1 ${cls}`} key={y}>
+                                    {y}
+                                </span>
+                            );
+                        }
                         return (
-                            <span className={`px-1 ${cls}`} key={y}>
+                            <a
+                                className={`px-1 ${cls}`}
+                                key={y}
+                                href="#"
+                                onClick={(e) => onSelectYear(e, y)}
+                            >
                                 {y}
-                            </span>
+                            </a>
                         );
-                    }
-                    return (
-                        <a
-                            className={`px-1 ${cls}`}
-                            key={y}
-                            href="#"
-                            onClick={(e) => onSelectYear(e, y)}
-                        >
-                            {y}
-                        </a>
-                    );
-                })}
-            </div>
+                    })}
+                </div>
+            )}
         </div>
     );
 }

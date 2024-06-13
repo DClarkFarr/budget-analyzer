@@ -66,6 +66,12 @@ export default function AccountDashboard({
 
     const tabs: Tab[] = [
         {
+            label: "Search",
+            key: "search",
+            href: `/dashboard/account/${accountId}/search`,
+            type: "link",
+        },
+        {
             label: "Totals",
             key: "totals",
             pane: (
@@ -75,6 +81,7 @@ export default function AccountDashboard({
                     year={currentYear}
                 />
             ),
+            type: "pane",
         },
         {
             label: "Transactions",
@@ -85,6 +92,7 @@ export default function AccountDashboard({
                     transactions={transactions}
                 />
             ),
+            type: "pane",
         },
         {
             label: "Categories",
@@ -98,16 +106,19 @@ export default function AccountDashboard({
                     year={currentYear}
                 />
             ),
+            type: "pane",
         },
         {
             label: "Uncategorized Transactions",
             key: "uncategorized",
             pane: <UncategorizedList accountId={accountId} />,
+            type: "pane",
         },
         {
             label: "Duplicate Transactions",
             key: "duplicates",
             pane: <DuplicateList accountId={accountId} />,
+            type: "pane",
         },
     ];
 

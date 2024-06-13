@@ -17,6 +17,7 @@ model User {
   transactions  AccountTransaction[]
   categories    Category[]
   categoryRules CategoryRule[]
+  searches      AccountSearch[]
 }
 
 model Account {
@@ -28,6 +29,7 @@ model Account {
   user         User                 @relation(fields: [userId], references: [id], onDelete: NoAction)
   transactions AccountTransaction[]
   categories   Category[]
+  searches     AccountSearch[]
 
   @@index([userId])
 }
@@ -99,6 +101,21 @@ model CategoryRule {
 
   @@index([userId])
   @@index([categoryId])
+}
+
+model AccountSearch {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  accountId Int
+  name      String
+  content   String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([userId])
+  @@index([accountId])
 }
 
 enum ROLES {

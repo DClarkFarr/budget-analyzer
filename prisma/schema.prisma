@@ -104,12 +104,15 @@ model CategoryRule {
 }
 
 model AccountSearch {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  accountId Int
-  name      String
-  content   String
-  createdAt DateTime @default(now())
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  accountId  Int
+  name       String
+  content    String
+  startAt    DateTime?
+  endAt      DateTime?
+  excludeIds String?   @default("[]")
+  createdAt  DateTime  @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   account Account @relation(fields: [accountId], references: [id])

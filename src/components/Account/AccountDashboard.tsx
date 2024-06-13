@@ -17,7 +17,6 @@ import CategorizedList from "./CategorizedList";
 import DuplicateList from "./DuplicateList";
 import { useAccountContext } from "../Providers/AccountProvider";
 import useQueryParams from "@/hooks/useQueryParams";
-import { Transaction } from "@/types/Account/Transaction";
 
 export default function AccountDashboard({
     user,

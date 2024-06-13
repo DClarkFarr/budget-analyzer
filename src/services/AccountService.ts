@@ -11,6 +11,7 @@ import {
     CategoryRule,
     CategoryRuleFormState,
 } from "@/types/Statement";
+import { AccountSearchSerialized } from "@/types/Account/Searches";
 
 export default class AccountService {
     static create(data: AccountFormState) {
@@ -178,6 +179,12 @@ export default class AccountService {
     ) {
         return webApi
             .post(`/category/${categoryId}/transaction`, { transactionId })
+            .then((res) => res.data);
+    }
+
+    static getSearches(accountId: number) {
+        return webApi
+            .get<AccountSearchSerialized[]>(`/account/${accountId}/searches`)
             .then((res) => res.data);
     }
 }

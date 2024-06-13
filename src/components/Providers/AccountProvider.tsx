@@ -39,16 +39,23 @@ function accountProviderReducer(
     state: AccountProviderState,
     action: AccountReducerAction
 ): AccountProviderState {
+    let toSet = null;
     switch (action.type) {
         case "set":
-            return { ...state, ...action.payload };
+            toSet = { ...state, ...action.payload };
+            break;
         case "year":
-            return { ...state, currentYear: action.payload };
+            toSet = { ...state, currentYear: action.payload };
+            break;
         case "clear":
-            return { ...state, ...accountProviderInitialState };
+            toSet = { ...state, ...accountProviderInitialState };
+            break;
         case "showHeader":
-            return { ...state, showHeader: action.payload };
+            toSet = { ...state, showHeader: action.payload };
+            break;
     }
+
+    return toSet;
 }
 
 const AccountContext = createContext<AccountProviderContext>({
@@ -106,9 +113,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
     const setAccount = async (account: Account | null) => {
         let payload = { ...state };
+
         if (account) {
-            payload = { ...payload, ...(await getAccountState(account)) };
-            dispatch({ type: "set", payload });
+            const toSet = await getAccountState(account);
+            payload = { ...payload, ...toSet };
+
+            dispatch({ type: "set", payload: toSet });
         } else {
             dispatch({ type: "clear" });
         }

@@ -18,7 +18,8 @@ export default function AccountLayout({
     const { query, pushQuery } = useQueryParams();
     const pathname = usePathname();
 
-    const { setAccount, setYear, setShowHeader, account } = useAccountContext();
+    const { setAccount, setYear, setShowHeader, account, showHeader } =
+        useAccountContext();
 
     const setAccountToContext = async (accountId: number) => {
         if (account?.id !== accountId) {
@@ -66,12 +67,20 @@ export default function AccountLayout({
         [params.accountId]
     );
 
-    useEffect(() => {
+    const hideShowHeader = () => {
         const noHeaderPages = ["/search"].map((page) => `${basePath}${page}`);
         const noHeader = noHeaderPages.includes(pathname);
 
         setShowHeader(!noHeader);
+    };
+
+    useEffect(() => {
+        hideShowHeader();
     }, [pathname, basePath]);
+
+    useEffect(() => {
+        hideShowHeader();
+    }, []);
 
     return (
         <div className="account-layout">

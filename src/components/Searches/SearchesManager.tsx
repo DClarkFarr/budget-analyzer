@@ -96,6 +96,7 @@ export default function SearchesManager({ accountId }: { accountId: number }) {
                 <div className="grow w-100 content p-4 min-h-[500px]">
                     {selectedSearch && (
                         <SearchItemManager
+                            key={selectedSearch.id}
                             categories={categories}
                             item={selectedSearch}
                             update={handleUpdateSearch}

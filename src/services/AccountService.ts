@@ -187,4 +187,12 @@ export default class AccountService {
             .get<AccountSearchSerialized[]>(`/account/${accountId}/searches`)
             .then((res) => res.data);
     }
+
+    static createSearch(accountId: number, name: string) {
+        return webApi
+            .post<AccountSearchSerialized>(`/account/${accountId}/searches`, {
+                name,
+            })
+            .then((res) => res.data);
+    }
 }

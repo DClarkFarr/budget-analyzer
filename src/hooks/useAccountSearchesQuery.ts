@@ -1,5 +1,6 @@
 import AccountService from "@/services/AccountService";
-import { useQuery } from "@tanstack/react-query";
+import { AccountSearchSerialized } from "@/types/Account/Searches";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function useAccountSearchesQuery({
     accountId,
@@ -18,10 +19,29 @@ export default function useAccountSearchesQuery({
         staleTime: Infinity,
     });
 
+    const queryClient = useQueryClient();
+
+    const createMutation = useMutation({
+        mutationKey: ["accountSearches", accountId],
+        mutationFn: ({ name }: { name: string }) =>
+            AccountService.createSearch(accountId, name),
+
+        onSuccess(created) {
+            queryClient.setQueryData<AccountSearchSerialized[]>(
+                ["accountSearches", accountId],
+                (old) => [...(old || []), created]
+            );
+        },
+    });
+
+    const createSearch = async (name: string) =>
+        createMutation.mutateAsync({ name });
+
     return {
         searches: searches || [],
         isLoading,
         isSuccess,
+        createSearch,
         refetch,
     };
 }

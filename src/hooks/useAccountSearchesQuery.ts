@@ -34,14 +34,40 @@ export default function useAccountSearchesQuery({
         },
     });
 
+    type SearchData = Parameters<typeof AccountService.updateSearchValues>[2];
+
+    const updateMutation = useMutation({
+        mutationKey: ["accountSearches", accountId],
+        mutationFn: ({
+            searchId,
+            data,
+        }: {
+            searchId: number;
+            data: SearchData;
+        }) => AccountService.updateSearchValues(accountId, searchId, data),
+        onSuccess(updated) {
+            queryClient.setQueryData<AccountSearchSerialized[]>(
+                ["accountSearches", accountId],
+                (old) =>
+                    (old || []).map((search) =>
+                        search.id === updated.id ? updated : search
+                    )
+            );
+        },
+    });
+
     const createSearch = async (name: string) =>
         createMutation.mutateAsync({ name });
+
+    const updateSearch = async (searchId: number, data: SearchData) =>
+        updateMutation.mutateAsync({ searchId, data });
 
     return {
         searches: searches || [],
         isLoading,
         isSuccess,
         createSearch,
+        updateSearch,
         refetch,
     };
 }

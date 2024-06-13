@@ -195,4 +195,22 @@ export default class AccountService {
             })
             .then((res) => res.data);
     }
+
+    static updateSearchValues(
+        accountId: number,
+        searchId: number,
+        data: Partial<
+            Pick<
+                AccountSearchSerialized,
+                "content" | "startAt" | "endAt" | "excludeIds"
+            >
+        >
+    ) {
+        return webApi
+            .put<AccountSearchSerialized>(
+                `/account/${accountId}/searches/${searchId}`,
+                data
+            )
+            .then((res) => res.data);
+    }
 }

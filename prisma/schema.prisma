@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,35 +8,102 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  role     ROLES  @default(user)
-  name     String
-  password String
-
+  id            Int                  @id @default(autoincrement())
+  email         String               @unique
+  role          ROLES                @default(user)
+  name          String
+  password      String
   accounts      Account[]
   transactions  AccountTransaction[]
   categories    Category[]
   categoryRules CategoryRule[]
 }
 
-enum ROLES {
-  admin
-  user
-}
-
 model Account {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  name      String
-  color     String
-  createdAt DateTime @default(now())
-
-  user         User                 @relation(fields: [userId], references: [id])
+  id           Int                  @id @default(autoincrement())
+  userId       Int
+  name         String
+  createdAt    DateTime             @default(now())
+  color        String
+  user         User                 @relation(fields: [userId], references: [id], onDelete: NoAction)
   transactions AccountTransaction[]
   categories   Category[]
 
   @@index([userId])
+}
+
+model AccountTransaction {
+  id          Int                    @id @default(autoincrement())
+  accountId   Int
+  userId      Int
+  expenseType TRANSACTION_TYPE
+  bankType    BANK_TYPE
+  amount      Decimal                @db.Decimal(10, 2)
+  description String
+  createdAt   DateTime               @default(now())
+  hash        String                 @unique
+  date        DateTime
+  account     Account                @relation(fields: [accountId], references: [id], onDelete: NoAction)
+  user        User                   @relation(fields: [userId], references: [id], onDelete: NoAction)
+  categories  CategoryTransactions[]
+
+  @@index([accountId])
+  @@index([userId])
+  @@index([accountId, userId])
+}
+
+model Category {
+  id           Int                    @id @default(autoincrement())
+  accountId    Int
+  userId       Int
+  name         String
+  type         CATEGORY_TYPE
+  createdAt    DateTime               @default(now())
+  endAt        DateTime?
+  startAt      DateTime?
+  deletedAt    DateTime?
+  account      Account                @relation(fields: [accountId], references: [id], onDelete: NoAction)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: NoAction)
+  rules        CategoryRule[]
+  transactions CategoryTransactions[]
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+model CategoryTransactions {
+  id            Int                @id @default(autoincrement())
+  categoryId    Int
+  transactionId Int
+  createdAt     DateTime           @default(now())
+  ignoredAt     DateTime?
+  setAt         DateTime?
+  category      Category           @relation(fields: [categoryId], references: [id], onDelete: NoAction)
+  transaction   AccountTransaction @relation(fields: [transactionId], references: [id], onDelete: NoAction)
+
+  @@unique([categoryId, transactionId], name: "category_transaction")
+  @@index([categoryId])
+  @@index([transactionId])
+}
+
+model CategoryRule {
+  id              Int               @id @default(autoincrement())
+  categoryId      Int
+  userId          Int
+  name            String
+  rule            String
+  createdAt       DateTime          @default(now())
+  transactionType TRANSACTION_TYPE?
+  category        Category          @relation(fields: [categoryId], references: [id], onDelete: NoAction)
+  user            User              @relation(fields: [userId], references: [id], onDelete: NoAction)
+
+  @@index([userId])
+  @@index([categoryId])
+}
+
+enum ROLES {
+  admin
+  user
 }
 
 enum TRANSACTION_TYPE {
@@ -53,81 +117,8 @@ enum BANK_TYPE {
   afcu
 }
 
-model AccountTransaction {
-  id          Int              @id @default(autoincrement())
-  accountId   Int
-  userId      Int
-  expenseType TRANSACTION_TYPE
-  bankType    BANK_TYPE
-  amount      Decimal          @db.Decimal(10, 2)
-  description String
-  date        DateTime
-  createdAt   DateTime         @default(now())
-  hash        String           @unique
-
-  account    Account                @relation(fields: [accountId], references: [id])
-  user       User                   @relation(fields: [userId], references: [id])
-  categories CategoryTransactions[]
-
-  @@index([accountId])
-  @@index([userId])
-  @@index([accountId, userId])
-}
-
 enum CATEGORY_TYPE {
   income
   expense
   ignore
-}
-
-model Category {
-  id        Int           @id @default(autoincrement())
-  accountId Int
-  userId    Int
-  name      String
-  type      CATEGORY_TYPE
-  startAt   DateTime?
-  endAt     DateTime?
-  createdAt DateTime      @default(now())
-  deletedAt DateTime?
-
-  user         User                   @relation(fields: [userId], references: [id])
-  account      Account                @relation(fields: [accountId], references: [id])
-  transactions CategoryTransactions[]
-  rules        CategoryRule[]
-
-  @@index([userId])
-  @@index([accountId])
-}
-
-model CategoryTransactions {
-  id            Int       @id @default(autoincrement())
-  categoryId    Int
-  transactionId Int
-  createdAt     DateTime  @default(now())
-  ignoredAt     DateTime?
-  setAt         DateTime?
-
-  category    Category           @relation(fields: [categoryId], references: [id])
-  transaction AccountTransaction @relation(fields: [transactionId], references: [id])
-
-  @@unique([categoryId, transactionId], name: "category_transaction")
-  @@index([categoryId])
-  @@index([transactionId])
-}
-
-model CategoryRule {
-  id              Int               @id @default(autoincrement())
-  categoryId      Int
-  userId          Int
-  name            String
-  rule            String
-  transactionType TRANSACTION_TYPE?
-  createdAt       DateTime          @default(now())
-
-  user     User     @relation(fields: [userId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
-
-  @@index([userId])
-  @@index([categoryId])
 }

@@ -1,4 +1,4 @@
-import { Transaction } from "@/types/Account/Transaction";
+import { Transaction, WithFoundIndexes } from "@/types/Account/Transaction";
 import { CategoryType } from "@/types/Statement";
 
 export function sumCategoryTypeTransactions(
@@ -14,6 +14,27 @@ export function sumCategoryTypeTransactions(
         }
 
         if (t.expenseType === "incoming") {
+            totals.incoming += t.amount;
+        } else {
+            totals.outgoing += t.amount;
+        }
+    });
+
+    totals.net = totals.incoming - totals.outgoing;
+
+    return totals;
+}
+
+export function sumSearchTransactions(
+    transactions: WithFoundIndexes<Transaction>[],
+    visibleFilters: number[]
+) {
+    const totals = { incoming: 0, outgoing: 0, ignored: 0, net: 0 };
+
+    transactions.forEach((t) => {
+        if (!visibleFilters.some((fi) => t.foundbyFilters.includes(fi))) {
+            totals.ignored += t.amount;
+        } else if (t.expenseType === "incoming") {
             totals.incoming += t.amount;
         } else {
             totals.outgoing += t.amount;

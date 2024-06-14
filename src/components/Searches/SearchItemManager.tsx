@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import FormError from "../Form/FormError";
 import { Category } from "@/types/Statement";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaCheck, FaSquare } from "react-icons/fa";
 import { debounce, throttle } from "lodash-es";
 import Select, { SingleValue } from "react-select";
 import useAccountSearchQuery from "@/hooks/useAccountSearchQuery";
@@ -19,16 +19,28 @@ function BaseGroup({
     index,
     contentGroup,
     children,
+    selected,
+    onToggle,
     onClickDelete,
 }: {
     index: number;
-    onClickDelete: (index: number) => void;
     contentGroup: AccountSearchContentItem;
     children: React.ReactNode;
+    selected: boolean;
+    onToggle: (index: number, show: boolean) => void;
+    onClickDelete: (index: number) => void;
 }) {
     return (
         <div className={`group group--${contentGroup.type} p-2 bg-stone-300`}>
             <div className="w-full flex gap-x-4 items-center">
+                <div className="shrink">
+                    <button
+                        className="btn btn-sm bg-stone-600"
+                        onClick={() => onToggle(index, !selected)}
+                    >
+                        {selected ? <FaCheck /> : <FaSquare />}
+                    </button>
+                </div>
                 <div className="shrink">
                     <label className="text-uppercase whitespace-nowrap">
                         {contentGroup.type}
@@ -51,11 +63,15 @@ function BaseGroup({
 function TextGroup({
     index,
     contentGroup,
+    selected,
+    onToggle,
     onDelete,
     onUpdate,
 }: {
     index: number;
     contentGroup: AccountSearchContentItem;
+    selected: boolean;
+    onToggle: (index: number, show: boolean) => void;
     onDelete: (index: number) => void;
     onUpdate: (index: number, value: string) => void;
 }) {
@@ -81,6 +97,8 @@ function TextGroup({
             index={index}
             contentGroup={contentGroup}
             onClickDelete={onDelete}
+            selected={selected}
+            onToggle={onToggle}
         >
             <input
                 type="text"
@@ -96,12 +114,16 @@ function CategoryGroup({
     index,
     contentGroup,
     categories,
+    selected,
+    onToggle,
     onDelete,
     onUpdate,
 }: {
     index: number;
     contentGroup: AccountSearchContentItem;
     categories: Category[];
+    selected: boolean;
+    onToggle: (index: number, show: boolean) => void;
     onDelete: (index: number) => void;
     onUpdate: (index: number, value: string) => void;
 }) {
@@ -129,6 +151,8 @@ function CategoryGroup({
         <BaseGroup
             index={index}
             contentGroup={contentGroup}
+            selected={selected}
+            onToggle={onToggle}
             onClickDelete={onDelete}
         >
             <Select
@@ -157,7 +181,6 @@ export default function SearchItemManager({
     const {
         transactions,
         isLoading,
-        isSuccess,
         refetch: refetchQuery,
     } = useAccountSearchQuery({ accountId: item.accountId, searchId: item.id });
 
@@ -172,6 +195,23 @@ export default function SearchItemManager({
 
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
+
+    const [unselectedFilters, setSelectedFilters] = useState<number[]>([]);
+
+    const visibleFilters = useMemo(() => {
+        return transactions.reduce((acc, t) => {
+            t.foundbyFilters.forEach((index) => {
+                if (
+                    !acc.includes(index) &&
+                    !unselectedFilters.includes(index)
+                ) {
+                    acc.push(index);
+                }
+            });
+
+            return acc;
+        }, [] as number[]);
+    }, [transactions, unselectedFilters]);
 
     const throttledReSearch = useMemo(() => {
         return throttle(() => refetchQuery(), 500);
@@ -243,6 +283,14 @@ export default function SearchItemManager({
         handleUpdate({ content });
     };
 
+    const onToggleFilter = (index: number, show: boolean) => {
+        if (show) {
+            setSelectedFilters(unselectedFilters.filter((f) => f !== index));
+        } else if (!unselectedFilters.includes(index)) {
+            setSelectedFilters([...unselectedFilters, index]);
+        }
+    };
+
     return (
         <div>
             <h3 className="text-lg mb-3 font-semibold">{item.name}</h3>
@@ -311,8 +359,10 @@ export default function SearchItemManager({
                                     <CategoryGroup
                                         key={i}
                                         index={i}
+                                        selected={visibleFilters.includes(i)}
                                         contentGroup={c}
                                         categories={categories}
+                                        onToggle={onToggleFilter}
                                         onDelete={onDeleteGroup}
                                         onUpdate={onUpdateGroup}
                                     />
@@ -324,6 +374,8 @@ export default function SearchItemManager({
                                     key={i}
                                     index={i}
                                     contentGroup={c}
+                                    selected={visibleFilters.includes(i)}
+                                    onToggle={onToggleFilter}
                                     onDelete={onDeleteGroup}
                                     onUpdate={onUpdateGroup}
                                 />
@@ -335,7 +387,10 @@ export default function SearchItemManager({
 
             {!isLoading && transactions.length > 0 && (
                 <>
-                    <TransactionSearchTable transactions={transactions} />
+                    <TransactionSearchTable
+                        visibleFilters={visibleFilters}
+                        transactions={transactions}
+                    />
                 </>
             )}
         </div>

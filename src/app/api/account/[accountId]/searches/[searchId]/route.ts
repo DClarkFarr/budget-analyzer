@@ -3,13 +3,49 @@ import {
     hasUserMiddleware,
     startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
-import { updateAccountSearch } from "@/server/prisma/account/searches.methods";
+import {
+    updateAccountSearch,
+    queryAccountSearch,
+} from "@/server/prisma/account/searches.methods";
 import { AccountSearchSerialized } from "@/types/Account/Searches";
 import { DateTime } from "luxon";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Query search
+ */
+export const GET = chainMiddleware(
+    [startSessionMiddleware(), hasUserMiddleware()],
+    async (
+        req,
+        { params }: { params: { accountId: string; searchId: string } }
+    ) => {
+        try {
+            const transactions = await queryAccountSearch(
+                parseInt(params.accountId),
+                parseInt(params.searchId)
+            );
+
+            return NextResponse.json(transactions);
+        } catch (err) {
+            if (err instanceof Error) {
+                console.warn("caught error getting account", err);
+                return NextResponse.json(
+                    { message: err?.message },
+                    { status: 400 }
+                );
+            }
+        }
+
+        return NextResponse.json({ message: "Unknown error" }, { status: 500 });
+    }
+);
+
+/**
+ * Update search
+ */
 export const PUT = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware()],
     async (

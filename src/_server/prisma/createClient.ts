@@ -11,9 +11,9 @@ const prismaClientSingleton = () => {
             },
         ],
     });
-    pc.$on("query", async (e) => {
-        // console.log(`Logging Query: ${e.query} ${e.params}`);
-    });
+    // pc.$on("query", async (e) => {
+    //     console.log(`Logging Query: ${e.query} ${e.params}`);
+    // });
 
     return pc;
 };

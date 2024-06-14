@@ -33,3 +33,7 @@ export type AccountTransactionsTotal = {
 export type WithCategories<T extends Transaction> = T & {
     categories: Category[];
 };
+
+export type WithFoundIndexes<T extends Transaction> = T & {
+    foundbyFilters: number[];
+};

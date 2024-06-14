@@ -4,6 +4,7 @@ import {
     AccountTransactionsTotal,
     Transaction,
     WithCategories,
+    WithFoundIndexes,
 } from "@/types/Account/Transaction";
 import {
     Category,
@@ -210,6 +211,13 @@ export default class AccountService {
             .put<AccountSearchSerialized>(
                 `/account/${accountId}/searches/${searchId}`,
                 data
+            )
+            .then((res) => res.data);
+    }
+    static querySearch(accountId: number, searchId: number) {
+        return webApi
+            .get<WithFoundIndexes<WithCategories<Transaction>>[]>(
+                `/account/${accountId}/searches/${searchId}`
             )
             .then((res) => res.data);
     }

@@ -8,8 +8,10 @@ import { useEffect, useMemo, useState } from "react";
 import FormError from "../Form/FormError";
 import { Category } from "@/types/Statement";
 import { FaTimes } from "react-icons/fa";
-import { debounce } from "lodash-es";
+import { debounce, throttle } from "lodash-es";
 import Select, { SingleValue } from "react-select";
+import useAccountSearchQuery from "@/hooks/useAccountSearchQuery";
+import TransactionSearchTable from "../Statement/TransactionSearchTable";
 
 type SearchData = Parameters<typeof AccountService.updateSearchValues>[2];
 
@@ -154,6 +156,13 @@ export default function SearchItemManager({
     categories: Category[];
     update: (searchId: number, data: SearchData) => Promise<string | null>;
 }) {
+    const {
+        transactions,
+        isLoading,
+        isSuccess,
+        refetch: refetchQuery,
+    } = useAccountSearchQuery({ accountId: item.accountId, searchId: item.id });
+
     const [startAt, setStartAt] = useState<string>(
         item.startAt
             ? DateTime.fromISO(item.startAt).toFormat("yyyy-MM-dd")
@@ -165,6 +174,10 @@ export default function SearchItemManager({
 
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
+
+    const throttledReSearch = useMemo(() => {
+        return throttle(() => refetchQuery(), 500);
+    }, []);
 
     const onChangeDate = async (key: "startAt" | "endAt", value: string) => {
         const d = DateTime.fromSQL(value);
@@ -179,6 +192,8 @@ export default function SearchItemManager({
         }
 
         handleUpdate({ [key]: d.toISO() });
+
+        throttledReSearch();
     };
 
     const handleUpdate = async (data: SearchData) => {
@@ -197,6 +212,7 @@ export default function SearchItemManager({
         }
 
         setIsSaving(false);
+        throttledReSearch();
     };
 
     const onAddTextFilter = () => {
@@ -317,6 +333,12 @@ export default function SearchItemManager({
                         })}
                     </div>
                 </div>
+            )}
+
+            {!isLoading && transactions.length && (
+                <>
+                    <TransactionSearchTable transactions={transactions} />
+                </>
             )}
         </div>
     );

@@ -61,8 +61,6 @@ function TextGroup({
 }) {
     const [text, setText] = useState(contentGroup.value);
 
-    console.log("rendering with text", text);
-
     const handleTextChange = (value: string) => {
         setText(value);
     };
@@ -335,7 +333,7 @@ export default function SearchItemManager({
                 </div>
             )}
 
-            {!isLoading && transactions.length && (
+            {!isLoading && transactions.length > 0 && (
                 <>
                     <TransactionSearchTable transactions={transactions} />
                 </>

@@ -52,9 +52,37 @@ export default function TransactionSearchTable({
             };
         });
     }, [transactions, visibleFilters]);
+
+    const trandTotals = sumSearchTransactions(
+        transactions,
+        visibleFilters,
+        excludedTransactionIds
+    );
+
     return (
         <div className="search-transactions">
-            <h3 className="text-xl font-semibold mb-4">Search Results</h3>
+            <div className="flex gap-x-4">
+                <div>
+                    <h3 className="text-xl font-semibold mb-4">
+                        Search Results
+                    </h3>
+                </div>
+
+                <div className="text-emerald-600">
+                    In: {formatCurrency(trandTotals.incoming)}
+                </div>
+                <div className="text-red-600">
+                    Out: {formatCurrency(trandTotals.outgoing)}
+                </div>
+                <div className="font-semibold">
+                    Net: {formatCurrency(trandTotals.net)}
+                </div>
+                {trandTotals.ignored > 0 && (
+                    <div className="text-gray-600">
+                        Ignored: {formatCurrency(trandTotals.ignored)}
+                    </div>
+                )}
+            </div>
             <div className="divide-y divide-gray-400">
                 {monthlyTransactions.map(({ month, transactions }) => {
                     const totals = sumSearchTransactions(

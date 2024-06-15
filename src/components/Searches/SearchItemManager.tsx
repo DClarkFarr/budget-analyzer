@@ -1,8 +1,4 @@
-import AccountService from "@/services/AccountService";
-import {
-    AccountSearchContentItem,
-    AccountSearchSerialized,
-} from "@/types/Account/Searches";
+import { SearchContentItem, SearchSerialized } from "@/types/Searches";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import FormError from "../Form/FormError";
@@ -10,10 +6,11 @@ import { Category } from "@/types/Statement";
 import { FaTimes, FaCheck, FaSquare } from "react-icons/fa";
 import { debounce, throttle } from "lodash-es";
 import Select, { SingleValue } from "react-select";
-import useAccountSearchQuery from "@/hooks/useAccountSearchQuery";
+import useSearchQuery from "@/hooks/useSearchQuery";
 import TransactionSearchTable from "../Statement/TransactionSearchTable";
+import SearchService from "@/services/SearchService";
 
-type SearchData = Parameters<typeof AccountService.updateSearchValues>[2];
+type SearchData = Parameters<typeof SearchService.updateSearchValues>[1];
 
 function BaseGroup({
     index,
@@ -24,7 +21,7 @@ function BaseGroup({
     onClickDelete,
 }: {
     index: number;
-    contentGroup: AccountSearchContentItem;
+    contentGroup: SearchContentItem;
     children: React.ReactNode;
     selected: boolean;
     onToggle: (index: number, show: boolean) => void;
@@ -69,7 +66,7 @@ function TextGroup({
     onUpdate,
 }: {
     index: number;
-    contentGroup: AccountSearchContentItem;
+    contentGroup: SearchContentItem;
     selected: boolean;
     onToggle: (index: number, show: boolean) => void;
     onDelete: (index: number) => void;
@@ -120,7 +117,7 @@ function CategoryGroup({
     onUpdate,
 }: {
     index: number;
-    contentGroup: AccountSearchContentItem;
+    contentGroup: SearchContentItem;
     categories: Category[];
     selected: boolean;
     onToggle: (index: number, show: boolean) => void;
@@ -179,7 +176,7 @@ export default function SearchItemManager({
     update,
     categories,
 }: {
-    item: AccountSearchSerialized;
+    item: SearchSerialized;
     categories: Category[];
     update: (searchId: number, data: SearchData) => Promise<string | null>;
 }) {
@@ -187,7 +184,7 @@ export default function SearchItemManager({
         transactions,
         isLoading,
         refetch: refetchQuery,
-    } = useAccountSearchQuery({ accountId: item.accountId, searchId: item.id });
+    } = useSearchQuery({ searchId: item.id });
 
     const [startAt, setStartAt] = useState<string>(
         item.startAt

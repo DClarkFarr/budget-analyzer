@@ -1,20 +1,16 @@
-import AccountService from "@/services/AccountService";
-import { AccountSearchSerialized } from "@/types/Account/Searches";
+import SearchService from "@/services/SearchService";
+import { SearchSerialized } from "@/types/Searches";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function useAccountSearchesQuery({
-    accountId,
-}: {
-    accountId: number;
-}) {
+export default function useSearchesQuery() {
     const {
         data: searches,
         isLoading,
         isSuccess,
         refetch,
     } = useQuery({
-        queryKey: ["accountSearches", accountId],
-        queryFn: () => AccountService.getSearches(accountId),
+        queryKey: ["accountSearches"],
+        queryFn: () => SearchService.getSearches(),
         retry: 0,
         staleTime: Infinity,
     });
@@ -22,32 +18,32 @@ export default function useAccountSearchesQuery({
     const queryClient = useQueryClient();
 
     const createMutation = useMutation({
-        mutationKey: ["accountSearches", accountId],
+        mutationKey: ["accountSearches"],
         mutationFn: ({ name }: { name: string }) =>
-            AccountService.createSearch(accountId, name),
+            SearchService.createSearch(name),
 
         onSuccess(created) {
-            queryClient.setQueryData<AccountSearchSerialized[]>(
-                ["accountSearches", accountId],
+            queryClient.setQueryData<SearchSerialized[]>(
+                ["accountSearches"],
                 (old) => [...(old || []), created]
             );
         },
     });
 
-    type SearchData = Parameters<typeof AccountService.updateSearchValues>[2];
+    type SearchData = Parameters<typeof SearchService.updateSearchValues>[1];
 
     const updateMutation = useMutation({
-        mutationKey: ["accountSearches", accountId],
+        mutationKey: ["accountSearches"],
         mutationFn: ({
             searchId,
             data,
         }: {
             searchId: number;
             data: SearchData;
-        }) => AccountService.updateSearchValues(accountId, searchId, data),
+        }) => SearchService.updateSearchValues(searchId, data),
         onSuccess(updated) {
-            queryClient.setQueryData<AccountSearchSerialized[]>(
-                ["accountSearches", accountId],
+            queryClient.setQueryData<SearchSerialized[]>(
+                ["accountSearches"],
                 (old) =>
                     (old || []).map((search) =>
                         search.id === updated.id ? updated : search

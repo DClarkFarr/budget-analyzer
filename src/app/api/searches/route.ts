@@ -3,11 +3,7 @@ import {
     hasUserMiddleware,
     startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
-import {
-    createAccountSearch,
-    getAccountSearches,
-} from "@/server/prisma/account/searches.methods";
-import { DateTime } from "luxon";
+import { createSearch, getSearches } from "@/server/prisma/searches.methods";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +13,9 @@ export const dynamic = "force-dynamic";
  */
 export const GET = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware()],
-    async (req, { params }: { params: { accountId: string } }) => {
+    async (req) => {
         try {
-            const searches = await getAccountSearches(
-                parseInt(params.accountId, 10)
-            );
+            const searches = await getSearches(req.session.user.id);
 
             return NextResponse.json(searches);
         } catch (err) {
@@ -43,7 +37,7 @@ export const GET = chainMiddleware(
  */
 export const POST = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware()],
-    async (req, { params }: { params: { accountId: string } }) => {
+    async (req) => {
         const body = (await req.json()) as { name?: string };
 
         try {
@@ -54,11 +48,7 @@ export const POST = chainMiddleware(
                 );
             }
 
-            const search = await createAccountSearch(
-                parseInt(params.accountId, 10),
-                req.session.user.id,
-                body.name
-            );
+            const search = await createSearch(req.session.user.id, body.name);
 
             return NextResponse.json(search);
         } catch (err) {

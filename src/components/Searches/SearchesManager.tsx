@@ -1,26 +1,25 @@
 "use client";
 
-import useAccountSearchesQuery from "@/hooks/useAccountSearchesQuery";
+import useSearchesQuery from "@/hooks/useSearchesQuery";
 import CreateSearchForm from "../Control/CreateSearchForm";
 import SearchListItem from "./SearchListItem";
-import { AccountSearchSerialized } from "@/types/Account/Searches";
+import { SearchSerialized } from "@/types/Searches";
 import useQueryParams from "@/hooks/useQueryParams";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SearchItemManager from "./SearchItemManager";
 import useCategoriesQuery from "@/hooks/useCategoriesQuery";
+import { Category } from "@/types/Statement";
 
-export default function SearchesManager({ accountId }: { accountId: number }) {
+export default function SearchesManager() {
     const { searches, isLoading, createSearch, updateSearch } =
-        useAccountSearchesQuery({
-            accountId,
-        });
+        useSearchesQuery();
 
     const [selectedSearchId, setSelectedSearchId] = useState<number | null>(
         null
     );
 
-    const { categories } = useCategoriesQuery(accountId, null);
+    const categories: Category[] = []; // to DO;
 
     const { pushQuery } = useQueryParams();
     const searchParams = useSearchParams();
@@ -47,7 +46,7 @@ export default function SearchesManager({ accountId }: { accountId: number }) {
         return null;
     };
 
-    const onSelectSearch = (item: AccountSearchSerialized) => {
+    const onSelectSearch = (item: SearchSerialized) => {
         pushQuery({ searchId: item.id });
         setSelectedSearchId(item.id);
     };
@@ -56,7 +55,7 @@ export default function SearchesManager({ accountId }: { accountId: number }) {
         searchId: number,
         data: Partial<
             Pick<
-                AccountSearchSerialized,
+                SearchSerialized,
                 "startAt" | "endAt" | "content" | "excludeIds"
             >
         >

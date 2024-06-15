@@ -3,11 +3,8 @@ import {
     hasUserMiddleware,
     startSessionMiddleware,
 } from "@/server/middleware/sessionMiddleware";
-import {
-    updateAccountSearch,
-    queryAccountSearch,
-} from "@/server/prisma/account/searches.methods";
-import { AccountSearchSerialized } from "@/types/Account/Searches";
+import { updateSearch, querySearch } from "@/server/prisma/searches.methods";
+import { SearchSerialized } from "@/types/Searches";
 import { DateTime } from "luxon";
 import { NextResponse } from "next/server";
 
@@ -18,13 +15,10 @@ export const dynamic = "force-dynamic";
  */
 export const GET = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware()],
-    async (
-        req,
-        { params }: { params: { accountId: string; searchId: string } }
-    ) => {
+    async (req, { params }: { params: { searchId: string } }) => {
         try {
-            const transactions = await queryAccountSearch(
-                parseInt(params.accountId),
+            const transactions = await querySearch(
+                req.session.user.id,
                 parseInt(params.searchId)
             );
 
@@ -48,19 +42,16 @@ export const GET = chainMiddleware(
  */
 export const PUT = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware()],
-    async (
-        req,
-        { params }: { params: { accountId: string; searchId: string } }
-    ) => {
+    async (req, { params }: { params: { searchId: string } }) => {
         const body = (await req.json()) as {
             startAt?: string;
             endAt?: string;
-            content?: AccountSearchSerialized["content"];
-            excludeIds?: AccountSearchSerialized["excludeIds"];
+            content?: SearchSerialized["content"];
+            excludeIds?: SearchSerialized["excludeIds"];
         };
 
         try {
-            let toSet: Partial<AccountSearchSerialized> = {};
+            let toSet: Partial<SearchSerialized> = {};
 
             if (body.startAt && DateTime.fromSQL(body.startAt).isValid) {
                 return NextResponse.json(
@@ -89,8 +80,8 @@ export const PUT = chainMiddleware(
                 toSet.excludeIds = body.excludeIds;
             }
 
-            const updated = await updateAccountSearch(
-                parseInt(params.accountId, 10),
+            const updated = await updateSearch(
+                req.session.user.id,
                 parseInt(params.searchId, 10),
                 toSet
             );

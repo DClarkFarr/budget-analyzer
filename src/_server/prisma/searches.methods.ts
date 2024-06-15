@@ -1,13 +1,10 @@
 import {
-    AccountSearchContentItem,
-    AccountSearchRaw,
-    AccountSearchSerialized,
-} from "@/types/Account/Searches";
-import { prisma } from "../client";
-import {
-    AccountSearch as AccountSearchDb,
-    AccountTransaction,
-} from "@prisma/client";
+    SearchContentItem,
+    SearchRaw,
+    SearchSerialized,
+} from "@/types/Searches";
+import { prisma } from "./client";
+import { Search as SearchDb, AccountTransaction } from "@prisma/client";
 import { Transaction, WithCategories } from "@/types/Account/Transaction";
 import {
     AccountTransaction as PrismaTransaction,
@@ -16,7 +13,7 @@ import {
 import toApiResponse from "@/server/methods/response/toApiResponse";
 import { Category } from "@/types/Statement";
 
-function mapRawToSerialized(search: AccountSearchDb): AccountSearchSerialized {
+function mapRawToSerialized(search: SearchDb): SearchSerialized {
     return {
         ...search,
         content: JSON.parse(search.content),
@@ -26,10 +23,10 @@ function mapRawToSerialized(search: AccountSearchDb): AccountSearchSerialized {
         endAt: search.endAt?.toISOString() || null,
     };
 }
-export async function getAccountSearches(accountId: number) {
-    const rows = await prisma.accountSearch.findMany({
+export async function getSearches(userId: number) {
+    const rows = await prisma.search.findMany({
         where: {
-            accountId,
+            userId,
         },
         orderBy: { createdAt: "asc" },
     });
@@ -37,15 +34,13 @@ export async function getAccountSearches(accountId: number) {
     return rows.map(mapRawToSerialized);
 }
 
-export async function createAccountSearch(
-    accountId: number,
+export async function createSearch(
     userId: number,
     name: string,
     content: string | any[] = []
 ) {
-    const created = await prisma.accountSearch.create({
+    const created = await prisma.search.create({
         data: {
-            accountId,
             userId,
             name,
             content:
@@ -56,20 +51,17 @@ export async function createAccountSearch(
     return mapRawToSerialized(created);
 }
 
-export async function updateAccountSearch(
-    accountId: number,
+export async function updateSearch(
+    userId: number,
     searchId: number,
     data: Partial<
-        Pick<
-            AccountSearchSerialized,
-            "startAt" | "endAt" | "content" | "excludeIds"
-        >
+        Pick<SearchSerialized, "startAt" | "endAt" | "content" | "excludeIds">
     >
 ) {
-    const updated = await prisma.accountSearch.update({
+    const updated = await prisma.search.update({
         where: {
             id: searchId,
-            accountId: accountId,
+            userId,
         },
         data: {
             ...data,
@@ -104,11 +96,11 @@ function mapTransaction(
     );
 }
 
-export async function queryAccountSearch(accountId: number, searchId: number) {
-    const searchRaw = await prisma.accountSearch.findFirst({
+export async function querySearch(userId: number, searchId: number) {
+    const searchRaw = await prisma.search.findFirst({
         where: {
             id: searchId,
-            accountId,
+            userId,
         },
     });
 
@@ -145,7 +137,7 @@ export async function queryAccountSearch(accountId: number, searchId: number) {
         if (filter.type === "category") {
             const foundTransactions = await prisma.accountTransaction.findMany({
                 where: {
-                    accountId: accountId,
+                    userId,
                     date: {
                         gte: search.startAt || undefined,
                         lte: search.endAt || undefined,
@@ -182,7 +174,7 @@ export async function queryAccountSearch(accountId: number, searchId: number) {
             const query = `
               SELECT t.*
               FROM AccountTransaction t
-              WHERE t.accountId = ?
+              WHERE t.userId = ?
               AND (
                 t.description LIKE ?
                 OR t.description REGEXP ?
@@ -191,7 +183,7 @@ export async function queryAccountSearch(accountId: number, searchId: number) {
               ${search.endAt ? "AND (t.date <= ?)" : ""}
           `;
             const params: (string | number)[] = [
-                accountId,
+                userId,
                 `%${filter.value}%`,
                 filter.value,
             ];

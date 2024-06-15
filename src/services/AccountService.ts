@@ -4,7 +4,6 @@ import {
     AccountTransactionsTotal,
     Transaction,
     WithCategories,
-    WithFoundIndexes,
 } from "@/types/Account/Transaction";
 import {
     Category,
@@ -12,7 +11,7 @@ import {
     CategoryRule,
     CategoryRuleFormState,
 } from "@/types/Statement";
-import { AccountSearchSerialized } from "@/types/Account/Searches";
+import { SearchSerialized } from "@/types/Searches";
 
 export default class AccountService {
     static create(data: AccountFormState) {
@@ -180,45 +179,6 @@ export default class AccountService {
     ) {
         return webApi
             .post(`/category/${categoryId}/transaction`, { transactionId })
-            .then((res) => res.data);
-    }
-
-    static getSearches(accountId: number) {
-        return webApi
-            .get<AccountSearchSerialized[]>(`/account/${accountId}/searches`)
-            .then((res) => res.data);
-    }
-
-    static createSearch(accountId: number, name: string) {
-        return webApi
-            .post<AccountSearchSerialized>(`/account/${accountId}/searches`, {
-                name,
-            })
-            .then((res) => res.data);
-    }
-
-    static updateSearchValues(
-        accountId: number,
-        searchId: number,
-        data: Partial<
-            Pick<
-                AccountSearchSerialized,
-                "content" | "startAt" | "endAt" | "excludeIds"
-            >
-        >
-    ) {
-        return webApi
-            .put<AccountSearchSerialized>(
-                `/account/${accountId}/searches/${searchId}`,
-                data
-            )
-            .then((res) => res.data);
-    }
-    static querySearch(accountId: number, searchId: number) {
-        return webApi
-            .get<WithFoundIndexes<WithCategories<Transaction>>[]>(
-                `/account/${accountId}/searches/${searchId}`
-            )
             .then((res) => res.data);
     }
 }

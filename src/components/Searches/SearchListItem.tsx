@@ -1,4 +1,4 @@
-import { AccountSearchSerialized } from "@/types/Account/Searches";
+import { SearchSerialized } from "@/types/Searches";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
 import { FaArrowRight } from "react-icons/fa";
@@ -8,8 +8,8 @@ export default function SearchListItem({
     active,
     onClick,
 }: {
-    item: AccountSearchSerialized;
-    onClick: (item: AccountSearchSerialized) => void;
+    item: SearchSerialized;
+    onClick: (item: SearchSerialized) => void;
     active?: boolean;
 }) {
     const activeState = useMemo(() => {

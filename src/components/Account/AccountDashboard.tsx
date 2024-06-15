@@ -65,12 +65,6 @@ export default function AccountDashboard({
 
     const tabs: Tab[] = [
         {
-            label: "Search",
-            key: "search",
-            href: `/dashboard/account/${accountId}/search`,
-            type: "link",
-        },
-        {
             label: "Totals",
             key: "totals",
             pane: (

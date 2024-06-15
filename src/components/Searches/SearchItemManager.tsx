@@ -2,10 +2,15 @@ import { SearchContentItem, SearchSerialized } from "@/types/Searches";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import FormError from "../Form/FormError";
-import { Category } from "@/types/Statement";
+import { Category, WithAccountJoin } from "@/types/Statement";
 import { FaTimes, FaCheck, FaSquare } from "react-icons/fa";
 import { debounce, throttle } from "lodash-es";
-import Select, { SingleValue } from "react-select";
+import Select, {
+    OptionProps,
+    SingleValue,
+    SingleValueProps,
+    components,
+} from "react-select";
 import useSearchQuery from "@/hooks/useSearchQuery";
 import TransactionSearchTable from "../Statement/TransactionSearchTable";
 import SearchService from "@/services/SearchService";
@@ -118,16 +123,20 @@ function CategoryGroup({
 }: {
     index: number;
     contentGroup: SearchContentItem;
-    categories: Category[];
+    categories: WithAccountJoin<Category>[];
     selected: boolean;
     onToggle: (index: number, show: boolean) => void;
     onDelete: (index: number) => void;
     onUpdate: (index: number, value: string) => void;
 }) {
-    const [category, setCategory] = useState<Category | null>(null);
+    const [category, setCategory] = useState<WithAccountJoin<Category> | null>(
+        null
+    );
     const [categoryLoaded, setCategoryLoaded] = useState(false);
 
-    const onSelectCategory = (newValue: SingleValue<Category>) => {
+    const onSelectCategory = (
+        newValue: SingleValue<WithAccountJoin<Category>>
+    ) => {
         if (newValue) {
             setCategory(newValue);
         }
@@ -149,6 +158,37 @@ function CategoryGroup({
         setCategory(c || null);
     }, [categories, category]);
 
+    const CustomSingleValue = ({
+        children,
+        ...props
+    }: SingleValueProps<WithAccountJoin<Category>>) => (
+        <components.SingleValue {...props}>
+            <div
+                className="option px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                {...props.innerProps}
+            >
+                <div className="option__heading text-xs">
+                    {props.data.accountName}
+                </div>
+                <div className="option__label">{children}</div>
+            </div>
+        </components.SingleValue>
+    );
+
+    const CustomOption = ({
+        children,
+        ...props
+    }: OptionProps<WithAccountJoin<Category>>) => (
+        <components.Option {...props}>
+            <div className="option" {...props.innerProps}>
+                <div className="option__heading text-xs">
+                    {props.data.accountName}
+                </div>
+                <div className="option__label">{children}</div>
+            </div>
+        </components.Option>
+    );
+
     return (
         <BaseGroup
             index={index}
@@ -163,15 +203,12 @@ function CategoryGroup({
                 getOptionLabel={(option) => option.name}
                 getOptionValue={(option) => option.id.toString()}
                 value={category}
+                isMulti={false}
                 isSearchable
                 placeholder="Select a category..."
                 components={{
-                    Option: ({ innerProps, isDisabled }) =>
-                        !isDisabled ? (
-                            <div {...innerProps}>
-                                {/* your component internals */}
-                            </div>
-                        ) : null,
+                    SingleValue: CustomSingleValue,
+                    Option: CustomOption,
                 }}
                 onChange={onSelectCategory}
             />
@@ -185,7 +222,7 @@ export default function SearchItemManager({
     categories,
 }: {
     item: SearchSerialized;
-    categories: Category[];
+    categories: WithAccountJoin<Category>[];
     update: (searchId: number, data: SearchData) => Promise<string | null>;
 }) {
     const {

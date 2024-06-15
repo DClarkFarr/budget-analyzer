@@ -12,7 +12,10 @@ export const GET = chainMiddleware(
     [startSessionMiddleware(), hasUserMiddleware()],
     async (req) => {
         try {
-            const categories = await getUserCategories(req.session.user.id);
+            const categories = await getUserCategories(
+                req.session.user.id,
+                true
+            );
 
             return NextResponse.json(categories);
         } catch (err) {

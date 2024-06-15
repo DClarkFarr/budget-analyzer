@@ -53,10 +53,14 @@ export const loginUser = async (email: string, password: string) => {
     return existing as User;
 };
 
-export const getUserCategories = async (userId: number) => {
+export const getUserCategories = async (
+    userId: number,
+    withTransactions: boolean | null = null
+) => {
     const rows = await prisma.category.findMany({
         where: {
             userId,
+            transactions: withTransactions ? { some: {} } : undefined,
         },
         include: {
             account: true,

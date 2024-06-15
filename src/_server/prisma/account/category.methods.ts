@@ -23,6 +23,7 @@ export async function getCategories(
       AND c.accountId = ?
       ${options.minDate ? "AND (c.startAt IS NULL OR c.startAt >= ?)" : ""}
       ${options.maxDate ? "AND (c.endAt IS NULL OR c.endAt <= ?)" : ""}
+      ORDER BY c.name ASC
     `;
     const params: (string | number)[] = [accountId];
     if (options.minDate) {

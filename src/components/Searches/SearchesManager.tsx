@@ -8,8 +8,8 @@ import useQueryParams from "@/hooks/useQueryParams";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SearchItemManager from "./SearchItemManager";
-import useCategoriesQuery from "@/hooks/useCategoriesQuery";
 import { Category } from "@/types/Statement";
+import useUserCategoriesQuery from "@/hooks/useUserCategoriesQuery";
 
 export default function SearchesManager() {
     const { searches, isLoading, createSearch, updateSearch } =
@@ -19,7 +19,7 @@ export default function SearchesManager() {
         null
     );
 
-    const categories: Category[] = []; // to DO;
+    const { categories } = useUserCategoriesQuery();
 
     const { pushQuery } = useQueryParams();
     const searchParams = useSearchParams();

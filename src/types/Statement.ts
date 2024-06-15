@@ -37,6 +37,11 @@ export type Category = {
     createdAt: string;
 };
 
+export type WithAccountJoin<C extends Category> = C & {
+    accountId: number;
+    accountName: string;
+};
+
 export type CategoryRule = {
     id: number;
     categoryId: number;

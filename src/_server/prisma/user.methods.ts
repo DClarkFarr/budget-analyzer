@@ -1,6 +1,7 @@
 import { validateEmail } from "@/server/methods/validate";
 import { prisma } from "@/server/prisma/client";
 import { User } from "@/types/User";
+import { toCategoryResponse } from "./account/category.methods";
 
 export const findUserById = async (id: number) => {
     const user = await prisma.user.findUnique({ where: { id } });
@@ -50,4 +51,25 @@ export const loginUser = async (email: string, password: string) => {
     }
 
     return existing as User;
+};
+
+export const getUserCategories = async (userId: number) => {
+    const rows = await prisma.category.findMany({
+        where: {
+            userId,
+        },
+        include: {
+            account: true,
+        },
+        orderBy: { name: "asc" },
+    });
+
+    return rows.map((r) => {
+        const { account, ...rest } = r;
+
+        return {
+            ...toCategoryResponse(rest),
+            accountName: account?.name || "",
+        };
+    });
 };

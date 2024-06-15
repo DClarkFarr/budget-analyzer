@@ -5,8 +5,15 @@ import {
     WithCategories,
     WithFoundIndexes,
 } from "@/types/Account/Transaction";
+import { Category, WithAccountJoin } from "@/types/Statement";
 
 export default class SearchService {
+    static getCategories() {
+        return webApi
+            .get<WithAccountJoin<Category>[]>("/category")
+            .then((res) => res.data);
+    }
+
     static getSearches() {
         return webApi
             .get<SearchSerialized[]>(`/searches`)

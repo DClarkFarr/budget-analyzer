@@ -165,6 +165,14 @@ function CategoryGroup({
                 value={category}
                 isSearchable
                 placeholder="Select a category..."
+                components={{
+                    Option: ({ innerProps, isDisabled }) =>
+                        !isDisabled ? (
+                            <div {...innerProps}>
+                                {/* your component internals */}
+                            </div>
+                        ) : null,
+                }}
                 onChange={onSelectCategory}
             />
         </BaseGroup>

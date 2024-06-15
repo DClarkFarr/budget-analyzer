@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import TransactionsByMonth from "./TransactionsByMonth";
 import { Account } from "@/types/Account";
+import TransactionsByCategory from "./TransactionTotalsByCategory";
 
 export default function StatementTransactionRange({
     transactions,
@@ -82,6 +83,16 @@ export default function StatementTransactionRange({
             <TransactionsByMonth
                 startDate={dates.start}
                 endDate={dates.end}
+                transactions={transactions}
+                account={account}
+                year={year}
+            />
+
+            <h3 className="text-lg font-semibold mb-2 mt-8">
+                Yearly Category Totals
+            </h3>
+
+            <TransactionsByCategory
                 transactions={transactions}
                 account={account}
                 year={year}

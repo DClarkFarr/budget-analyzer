@@ -6,14 +6,12 @@ export function sumCategoryTypeTransactions(
     transactions: Transaction[],
     ignoreIgnored = true
 ) {
-    const totals = { incoming: 0, outgoing: 0, net: 0 };
+    const totals = { incoming: 0, outgoing: 0, net: 0, ignored: 0 };
 
     transactions.forEach((t) => {
         if (type === "ignore" && ignoreIgnored) {
-            return;
-        }
-
-        if (t.expenseType === "incoming") {
+            totals.ignored += t.amount;
+        } else if (t.expenseType === "incoming") {
             totals.incoming += t.amount;
         } else {
             totals.outgoing += t.amount;

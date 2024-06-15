@@ -27,12 +27,16 @@ export function sumCategoryTypeTransactions(
 
 export function sumSearchTransactions(
     transactions: WithFoundIndexes<Transaction>[],
-    visibleFilters: number[]
+    visibleFilters: number[],
+    excludedTransactionIds: number[]
 ) {
     const totals = { incoming: 0, outgoing: 0, ignored: 0, net: 0 };
 
     transactions.forEach((t) => {
-        if (!visibleFilters.some((fi) => t.foundbyFilters.includes(fi))) {
+        if (
+            !visibleFilters.some((fi) => t.foundbyFilters.includes(fi)) ||
+            excludedTransactionIds.includes(t.id)
+        ) {
             totals.ignored += t.amount;
         } else if (t.expenseType === "incoming") {
             totals.incoming += t.amount;

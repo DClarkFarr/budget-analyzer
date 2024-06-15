@@ -35,7 +35,7 @@ export default function TransactionsByMonth({
             c++;
 
             if (c > 100) {
-                console.log("you are stupid");
+                console.warn("you are stupid");
                 break;
             }
         }

@@ -8,13 +8,18 @@ import { useMemo } from "react";
 import PaneDropdown from "../Control/PaneDropdown";
 import { sumSearchTransactions } from "@/methods/statement";
 import { formatCurrency } from "@/methods/currency";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function TransactionSearchTable({
     visibleFilters,
+    excludedTransactionIds,
     transactions,
+    onToggleExcluded,
 }: {
     visibleFilters: number[];
+    excludedTransactionIds: number[];
     transactions: WithFoundIndexes<WithCategories<Transaction>>[];
+    onToggleExcluded: (transactionId: number, exclude: boolean) => void;
 }) {
     const isTransactionVisible = (
         t: WithFoundIndexes<Transaction>,
@@ -54,8 +59,10 @@ export default function TransactionSearchTable({
                 {monthlyTransactions.map(({ month, transactions }) => {
                     const totals = sumSearchTransactions(
                         transactions,
-                        visibleFilters
+                        visibleFilters,
+                        excludedTransactionIds
                     );
+
                     const Heading = () => (
                         <>
                             <div className="font-semibold">
@@ -67,6 +74,11 @@ export default function TransactionSearchTable({
                             <div className="text-red-600">
                                 Out: {formatCurrency(totals.outgoing)}
                             </div>
+                            {totals.ignored > 0 && (
+                                <div className="text-gray-600">
+                                    Ignored: {formatCurrency(totals.ignored)}
+                                </div>
+                            )}
                             <div className="ml-auto font-semibold">
                                 {formatCurrency(totals.net)}
                             </div>
@@ -80,30 +92,71 @@ export default function TransactionSearchTable({
                                         <th className="w-[85px]">Date</th>
                                         <th>Description</th>
                                         <th className="text-right">Amount</th>
+                                        <th></th>
                                     </tr>
-                                    {transactions.map((t) => (
-                                        <tr
-                                            className={`type-${t.expenseType}`}
-                                            key={t.id}
-                                        >
-                                            <td className="whitespace-nowrap">
-                                                {DateTime.fromISO(
-                                                    t.date
-                                                ).toFormat("DD")}
-                                            </td>
+                                    {transactions.map((t) => {
+                                        const isExcluded =
+                                            excludedTransactionIds.includes(
+                                                t.id
+                                            );
+                                        return (
+                                            <tr
+                                                className={`type-${
+                                                    t.expenseType
+                                                } ${
+                                                    isExcluded
+                                                        ? "excluded bg-red-400 opacity-50"
+                                                        : ""
+                                                }`}
+                                                key={t.id}
+                                            >
+                                                <td className="whitespace-nowrap">
+                                                    {DateTime.fromISO(
+                                                        t.date
+                                                    ).toFormat("DD")}
+                                                </td>
 
-                                            <td>{t.description}</td>
-                                            <td>
-                                                {formatCurrency(
-                                                    t.amount *
-                                                        (t.expenseType ===
-                                                        "incoming"
-                                                            ? 1
-                                                            : -1)
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                <td>{t.description}</td>
+                                                <td>
+                                                    {formatCurrency(
+                                                        t.amount *
+                                                            (t.expenseType ===
+                                                            "incoming"
+                                                                ? 1
+                                                                : -1)
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {isExcluded && (
+                                                        <button
+                                                            className="btn btn-sm bg-red-700"
+                                                            onClick={() =>
+                                                                onToggleExcluded(
+                                                                    t.id,
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
+                                                            <FaEyeSlash />
+                                                        </button>
+                                                    )}
+                                                    {!isExcluded && (
+                                                        <button
+                                                            className="btn btn-sm bg-sky-700"
+                                                            onClick={() =>
+                                                                onToggleExcluded(
+                                                                    t.id,
+                                                                    true
+                                                                )
+                                                            }
+                                                        >
+                                                            <FaEye />
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </PaneDropdown>

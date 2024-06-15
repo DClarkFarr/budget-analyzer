@@ -88,7 +88,7 @@ function TextGroup({
     }, []);
 
     useEffect(() => {
-        if (text.length > 1) {
+        if (text.length > 1 && text !== contentGroup.value) {
             throttledUpdate(text);
         }
     }, [text]);
@@ -128,6 +128,7 @@ function CategoryGroup({
     onUpdate: (index: number, value: string) => void;
 }) {
     const [category, setCategory] = useState<Category | null>(null);
+    const [categoryLoaded, setCategoryLoaded] = useState(false);
 
     const onSelectCategory = (newValue: SingleValue<Category>) => {
         if (newValue) {
@@ -137,7 +138,11 @@ function CategoryGroup({
 
     useEffect(() => {
         if (category) {
-            onUpdate(index, category ? String(category.id) : "");
+            if (!categoryLoaded) {
+                setCategoryLoaded(true);
+            } else {
+                onUpdate(index, category ? String(category.id) : "");
+            }
         }
     }, [category]);
 
@@ -291,6 +296,16 @@ export default function SearchItemManager({
         }
     };
 
+    const onToggleSelectedTransaction = (id: number, excluded: boolean) => {
+        if (excluded && !item.excludeIds.includes(id)) {
+            const excludeIds = [...item.excludeIds, id];
+            handleUpdate({ excludeIds });
+        } else if (!excluded && item.excludeIds.includes(id)) {
+            const excludeIds = item.excludeIds.filter((i) => i !== id);
+            handleUpdate({ excludeIds });
+        }
+    };
+
     return (
         <div>
             <h3 className="text-lg mb-3 font-semibold">{item.name}</h3>
@@ -388,8 +403,10 @@ export default function SearchItemManager({
             {!isLoading && transactions.length > 0 && (
                 <>
                     <TransactionSearchTable
+                        excludedTransactionIds={item.excludeIds}
                         visibleFilters={visibleFilters}
                         transactions={transactions}
+                        onToggleExcluded={onToggleSelectedTransaction}
                     />
                 </>
             )}

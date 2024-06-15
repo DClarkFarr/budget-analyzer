@@ -80,9 +80,7 @@ export default function SearchesManager({ accountId }: { accountId: number }) {
             </div>
             <div className="flex w-100 align-stretch">
                 <div className="shrink sidebar w-[350px] bg-gray-100 p-4 divide-y">
-                    {isLoading ? (
-                        <div>Loading Searches...</div>
-                    ) : (
+                    {!isLoading &&
                         searches.map((search) => (
                             <SearchListItem
                                 key={search.id}
@@ -90,8 +88,7 @@ export default function SearchesManager({ accountId }: { accountId: number }) {
                                 active={search.id === selectedSearchId}
                                 onClick={onSelectSearch}
                             />
-                        ))
-                    )}
+                        ))}
                 </div>
                 <div className="grow w-100 content p-4 min-h-[500px]">
                     {selectedSearch && (

@@ -73,8 +73,10 @@ export async function updateAccountSearch(
         },
         data: {
             ...data,
-            content: JSON.stringify(data.content),
-            excludeIds: JSON.stringify(data.excludeIds || []),
+            content: data.content ? JSON.stringify(data.content) : undefined,
+            excludeIds: data.excludeIds
+                ? JSON.stringify(data.excludeIds || [])
+                : undefined,
         },
     });
 

@@ -41,7 +41,6 @@ export default function TabsView({
     const handleTabChange = (tabName: string) => {
         const targetTab = tabs.find((tab) => tab.key === tabName)!;
 
-        console.log("target tab was", targetTab);
         if (targetTab.type === "pane") {
             if (typeof onTabChange === "function") {
                 onTabChange(tabName);

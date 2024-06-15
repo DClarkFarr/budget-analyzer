@@ -167,7 +167,6 @@ export async function syncCategoryRuleTransactions(
         }
 
         if (pivots.wasSet) {
-            // console.log("transaction was set", t);
             // do nothing
         } else {
             if (pivots.wasIgnored.length) {
@@ -199,7 +198,6 @@ export async function syncCategoryRuleTransactions(
                  * Remove
                  */
 
-                console.log("removing", ...pivots.wasMatched.map((c) => c.id));
                 toRemove.push(...pivots.wasMatched.map((c) => c.id));
             }
         }

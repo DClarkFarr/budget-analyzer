@@ -66,7 +66,7 @@ export default function TransactionSearchTable({
                     const Heading = () => (
                         <>
                             <div className="font-semibold">
-                                {DateTime.fromISO(month).toFormat("DD")}
+                                {DateTime.fromISO(month).toFormat("MMM yyyy")}
                             </div>
                             <div className="text-emerald-600">
                                 In: {formatCurrency(totals.incoming)}
@@ -86,10 +86,11 @@ export default function TransactionSearchTable({
                     );
                     return (
                         <PaneDropdown heading={<Heading />} key={month}>
-                            <table className="transactions__table table table--striped w-full table--sm">
+                            <table className="transactions__table table table--striped text-sm w-full table--sm">
                                 <tbody>
                                     <tr>
-                                        <th className="w-[85px]">Date</th>
+                                        <th>Account</th>
+                                        <th className="w-[50px]">Day</th>
                                         <th>Description</th>
                                         <th className="text-right">Amount</th>
                                         <th></th>
@@ -110,10 +111,15 @@ export default function TransactionSearchTable({
                                                 }`}
                                                 key={t.id}
                                             >
+                                                <td>
+                                                    {t.categories
+                                                        .map((c) => c.name)
+                                                        .join(", ")}
+                                                </td>
                                                 <td className="whitespace-nowrap">
                                                     {DateTime.fromISO(
                                                         t.date
-                                                    ).toFormat("DD")}
+                                                    ).toFormat("dd")}
                                                 </td>
 
                                                 <td>{t.description}</td>
